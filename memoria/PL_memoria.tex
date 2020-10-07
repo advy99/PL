@@ -13,6 +13,10 @@
 \usepackage{float}
 \usepackage{chngpage}
 
+%Para poder hacer diagramas BNF en LaTeX
+\usepackage{backnaur}
+\usepackage{syntax}
+
 \usepackage{amsfonts}
 
 \usepackage{subcaption}
@@ -107,7 +111,7 @@
 \title{Práctica 1. Grupo Viernes 3.\\
   \hspace{0.05cm} }
 \author{Antonio David Villegas Yeguas\\
-		Juan Emilio Martinez\\
+		Juan Emilio Martinez Manjon\\
 		Alejandro Manzanares Lemus\\
 		Najib}
 \date{\today}
@@ -195,6 +199,21 @@ El lenguaje asignado (BAAAC) añade también las siguientes características:
 \newpage
 
 \section{Descripción de formal de la sintaxis del lenguaje usando BNF.}
+
+\vspace{5 mm}
+
+La sintaxis usando BNF y añadiendo las consideraciones correspondiente al lenguaje \textbf{BAAAC} sería:
+
+\begin{bnf*}
+	\bnfprod{Programa}
+		{\bnfpn{Cabecera\_programa} \bnfsp \bnfpn{bloque}}\\
+	\bnfprod{bloque}
+		{\bnfpn{Inicio\_de\_bloque} \\ 			
+		\hspace{2mm}	 \bnfpn{hola}}\\
+	\bnfprod{item}
+		{\bnftd{description of item}}
+\end{bnf*}
+
 
 \section{Definición de la semántica en lenguaje natural.}
 
