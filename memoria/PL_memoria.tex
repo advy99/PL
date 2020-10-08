@@ -188,10 +188,66 @@ La sintaxis usando BNF y añadiendo las consideraciones correspondiente al lengu
 	\bnfprod{Programa}
 		{\bnfpn{Cabecera\_programa} \bnfsp \bnfpn{bloque}}\\
 	\bnfprod{bloque}
-		{\bnfpn{Inicio\_de\_bloque} \\ 			
-		\hspace{2mm}	 \bnfpn{hola}}\\
-	\bnfprod{item}
-		{\bnftd{description of item}}
+		{\bnfpn{Inicio\_de\_bloque}} \\ 			
+		 \bnfmore{\bnfpn{Declar\_de\_variables\_locales}} \\	
+		 \bnfmore{\bnfpn{Declar\_de\_subprogs}} \\		
+		 \bnfmore{\bnfpn{Sentencias}} \\	
+		 \bnfmore{\bnfpn{Fin\_de\_bloque}} \\		 		 			 		
+	\bnfprod{Declar\_de\_subprogs}
+		{\bnfpn{Declar\_de\_subprogs} \bnfsp \bnfpn{Declar\_subprog}}\\
+	\bnfprod{Declar\_subprog}
+		{\bnfpn{Cabecera\_subprograma} \bnfsp \bnfpn{bloque}}\\
+	\bnfprod{Declar\_de\_variables\_locales}
+		{\bnfpn{Marca\_ini\_declar\_variables}}\\
+		 \bnfmore{\bnfpn{Variables\_locales}} \\	
+		 \bnfmore{\bnfpn{Marca\_fin\_declar\_variables}} \\		
+	\bnfprod{Cabecera\_programa}
+		{\bnfpn{Cabecera\_tipo\_C}}\\	
+	\bnfprod{Inicio\_de\_bloque}
+		{\bnfpn{Llaves\_abren}}\\	
+	\bnfprod{Fin\_de\_bloque}
+		{\bnfpn{Llaves\_cierran}}\\	
+	\bnfprod{Variables\_locales}
+		{\bnfpn{Variables\_locales} \bnfsp \bnfpn{Cuerpo\_declar\_variables}}\\	
+		\bnfmore{\bnfpn{Cuerpo\_declar\_variables}} \\	
+	\bnfprod{Cuerpo\_declar\_variables}
+		{\bnfpn{Declar\_variables\_en\_C}}\\
+	\bnfprod{Cabecera\_subprog}
+		{\bnfpn{Cabecera\_funcion\_C}}\\	
+	\bnfprod{Sentencias}
+		{\bnfpn{Sentencias} \bnfsp \bnfpn{Sentencia}}\\	
+		 \bnfmore{\bnfpn{Sentencia}} \\	
+	\bnfprod{Sentencia}
+		{\bnfpn{bloque}}\\	
+		 \bnfmore{\bnfpn{sentencia\_asignacion}} \\	
+		 \bnfmore{\bnfpn{sentencia\_if}} \\	
+		 \bnfmore{\bnfpn{sentencia\_while}} \\	
+		 \bnfmore{\bnfpn{sentencia\_entrada}} \\	
+		 \bnfmore{\bnfpn{sentencia\_salida}} \\
+		 \bnfmore{\bnfpn{sentencia\_return}} \\	
+		 \bnfmore{\bnfpn{sentencia\_while}} \\	
+		 \bnfmore{\bnfpn{sentencia\_repeat\_until}} \\
+	\bnfprod{sentencia\_asignacion}
+		{\bnfpn{operando} \bnfsp = \bnfsp \bnfpn{operando}}\\	
+	\bnfprod{sentencia\_if}
+		{if \bnfsp \bnfpn{condicion} \bnfsp \bnfpn{Inicio\_de\_bloque}}\\	
+		 \bnfmore{\bnfpn{Cuerpo\_de\_bloque}} \\
+		 \bnfmore{\bnfpn{Fin\_de\_bloque}} \\
+	\bnfprod{sentencia\_while}
+		{while \bnfsp \bnfpn{condicion} \bnfsp \bnfpn{Inicio\_de\_bloque}}\\	
+		 \bnfmore{\bnfpn{Cuerpo\_de\_bloque}} \\
+		 \bnfmore{\bnfpn{Fin\_de\_bloque}} \\
+	\bnfprod{sentencia\_entrada}
+		{\bnfpn{nomb\_entrada} \bnfsp \bnfpn{lista\_variables}}\\	
+	\bnfprod{sentencia\_salida}
+		{\bnfpn{nomb\_salida} \bnfsp \bnfpn{lista\_expresiones\_o\_cadena}}\\
+	\bnfprod{expresion}
+		{(\bnfpn{expresion})}\\	
+		 \bnfmore{\bnfpn{op\_unario} \bnfsp \bnfpn{expresion}} \\
+		 \bnfmore{\bnfpn{expresion} \bnfsp \bnfpn{op\_binario} \bnfsp \bnfpn{expresion}} \\
+		 \bnfmore{\bnfpn{identificador}} \\
+		 \bnfmore{\bnfpn{constante}} \\
+		 \bnfmore{\bnfpn{funcion}} \\
 \end{bnf*}
 
 
