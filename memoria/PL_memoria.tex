@@ -249,16 +249,16 @@ La sintaxis usando BNF y añadiendo las consideraciones correspondiente al lengu
 		\bnfmore{\bnfpn{Sentencia}}\\
 	\bnfprod{Sentencia}
 		{\bnfpn{bloque}}\\
-		\bnfmore{\bnfpn{sentencia\_asignacion}}\\
-		\bnfmore{\bnfpn{sentencia\_if}}\\
-		\bnfmore{\bnfpn{sentencia\_while}}\\
-		\bnfmore{\bnfpn{sentencia\_entrada}}\\
-		\bnfmore{\bnfpn{sentencia\_salida}}\\
-		\bnfmore{\bnfpn{sentencia\_return}}\\
-		\bnfmore{\bnfpn{sentencia\_while}}\\
-		\bnfmore{\bnfpn{sentencia\_repeat\_until}}\\
+		\bnfmore{| \bnfsp \bnfpn{sentencia\_asignacion}}\\
+		\bnfmore{| \bnfsp \bnfpn{sentencia\_if}}\\
+		\bnfmore{| \bnfsp \bnfpn{sentencia\_while}}\\
+		\bnfmore{| \bnfsp \bnfpn{sentencia\_entrada}}\\
+		\bnfmore{| \bnfsp \bnfpn{sentencia\_salida}}\\
+		\bnfmore{| \bnfsp \bnfpn{sentencia\_return}}\\
+		\bnfmore{| \bnfsp \bnfpn{sentencia\_while}}\\
+		\bnfmore{| \bnfsp \bnfpn{sentencia\_repeat\_until}}\\
 	\bnfprod{sentencia\_asignacion}
-		{\bnfpn{operando} \bnfsp = \bnfsp \bnfpn{operando}}\\
+		{\bnfpn{expresion} \bnfsp = \bnfsp \bnfpn{expresion}}\\
 	\bnfprod{sentencia\_if}
 		{si \bnfsp \bnfpn{condicion} \bnfsp \bnfpn{Inicio\_de\_bloque}}\\
 		\bnfmore{\bnfpn{Cuerpo\_de\_bloque}}\\
@@ -273,11 +273,18 @@ La sintaxis usando BNF y añadiendo las consideraciones correspondiente al lengu
 		{\bnfpn{nomb\_salida} \bnfsp \bnfpn{lista\_expresiones\_o\_cadena}}\\
 	\bnfprod{expresion}
 		{(\bnfpn{expresion})}\\
-		\bnfmore{\bnfpn{op\_unario} \bnfsp \bnfpn{expresion}}\\
-		\bnfmore{\bnfpn{expresion} \bnfsp \bnfpn{op\_binario} \bnfsp \bnfpn{expresion}}\\
-		\bnfmore{\bnfpn{identificador}}\\
-		\bnfmore{\bnfpn{constante}}\\
-		\bnfmore{\bnfpn{funcion}}\\
+		\bnfmore{| \bnfsp \bnfpn{op\_unario} \bnfsp \bnfpn{expresion}}\\
+		\bnfmore{| \bnfsp \bnfpn{expresion} \bnfsp \bnfpn{op\_binario} \bnfsp \bnfpn{expresion}}\\
+		\bnfmore{| \bnfsp \bnfpn{identificador}}\\
+		\bnfmore{| \bnfsp \bnfpn{constante}}\\
+		\bnfmore{| \bnfsp \bnfpn{funcion}}\\
+	\bnfprod{entero}
+		{\bnfpn{entero} \bnfpn{digito} }\\
+		\bnfmore{| \bnfsp \bnfpn{digito}}\\
+	\bnfprod{booleano}
+		{\bnfpn{ verdadero | falso }}\\
+	\bnfprod{digito}
+		{\bnfpn{ 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 }}\\
 \end{bnf*}
 
 
