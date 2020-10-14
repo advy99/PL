@@ -237,14 +237,14 @@ La sintaxis usando BNF y añadiendo las consideraciones correspondiente al lengu
     \bnfmore{| \bnfsp \bnfpn{identificador} [''='' \bnfpn{expresion}]}\\
 	\bnfprod{Declar\_de\_subprogs}
     {\bnfpn{Declar\_de\_subprogs} \bnfsp \bnfpn{Declar\_subprog}}\\
-    \bnfmore{| \bnfsp \bnfes}\\
+    \bnfmore{| \bnfsp \epsilon}\\
   \bnfprod{Declar\_subprog}
     {\bnfpn{Cabecera\_subprograma} \bnfsp \bnfpn{bloque}}\\
   \bnfprod{Cabecera\_subprograma}
     {\bnfpn{tipo} \bnfsp \bnfpn{identificador} \bnfsp ''(''\bnfpn{parametros}'')''}\\
   \bnfprod{parametros}
     {\bnfpn{parametros} \bnfsp ['',''] \bnfsp \bnfpn{parametro}}\\
-    \bnfmore{| \bnfsp \bnfes}\\
+    \bnfmore{| \bnfsp \epsilon}\\
   \bnfprod{parametro}
     {\bnfpn{tipo} \bnfsp \bnfpn{identificador}}\\
   \bnfprod{tipo}
@@ -303,7 +303,7 @@ La sintaxis usando BNF y añadiendo las consideraciones correspondiente al lengu
     {''''''\bnfpn{secuencia\_caract}''''''}\\
   \bnfprod{secuencia\_caract}
     {\bnfpn{secuencia\_caract} \bnfsp \bnfpn{caracter}}\\
-    \bnfmore{| \bnfsp \bnfes}\\
+    \bnfmore{| \bnfsp \epsilon}\\
 	\bnfprod{expresion}
 		{''(''\bnfpn{expresion}'')''}\\
 		\bnfmore{| \bnfsp \bnfpn{op\_unario} \bnfsp \bnfpn{expresion}}\\
@@ -335,7 +335,7 @@ La sintaxis usando BNF y añadiendo las consideraciones correspondiente al lengu
     { \bnfpn{identificador} \bnfsp ''('' \bnfsp \bnfpn{lista\_const} \bnfsp '')''}\\
   \bnfprod{lista_const}
     { \bnfpn{lista_const} [,] \bnfpn{constante}}\\
-    \bnfmore{| \bnfsp \bnfes}\\
+    \bnfmore{| \bnfsp \epsilon}\\
   \bnfprod{identificador}
 		{ \bnfpn{letra} \bnfsp \bnfpn{resto\_identificador}}\\
   \bnfprod{resto\_identificador}
@@ -354,7 +354,7 @@ La sintaxis usando BNF y añadiendo las consideraciones correspondiente al lengu
     {''['' \bnfpn{contenido\_lista} '']''}\\
   \bnfprod{contenido\_lista}
     {\bnfpn{contenido\_lista} [,] \bnfpn{constante\_basica}}\\
-    \bnfmore{| \bnfsp \bnfes}\\
+    \bnfmore{| \bnfsp \epsilon}\\
 	\bnfprod{entero}
     {\bnfpn{entero} \bnfpn{digito}}\\
     \bnfmore{| \bnfsp \bnfpn{digito}}\\
