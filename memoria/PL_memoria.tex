@@ -275,9 +275,15 @@ La sintaxis usando BNF y añadiendo las consideraciones correspondiente al lengu
 		{(\bnfpn{expresion})}\\
 		\bnfmore{| \bnfsp \bnfpn{op\_unario} \bnfsp \bnfpn{expresion}}\\
 		\bnfmore{| \bnfsp \bnfpn{expresion} \bnfsp \bnfpn{op\_binario} \bnfsp \bnfpn{expresion}}\\
+		\bnfmore{| \bnfsp \bnfpn{op\_unario\_booleano} \bnfsp \bnfpn{booleano}}\\
+		\bnfmore{| \bnfsp \bnfpn{booleano} \bnfsp \bnfpn{op\_binario\_booleano} \bnfsp \bnfpn{booleano}}\\
 		\bnfmore{| \bnfsp \bnfpn{identificador}}\\
 		\bnfmore{| \bnfsp \bnfpn{constante}}\\
 		\bnfmore{| \bnfsp \bnfpn{funcion}}\\
+	\bnfprod{identificador}
+		{ \bnfpn{entero} \bnfsp | \bnfsp \bnfpn{real} \bnfsp | \bnfsp \bnfpn{caracter}} \\
+	\bnfprod{real}
+		{\bnfpn{entero}.\bnfpn{entero}}\\
 	\bnfprod{entero}
 		{\bnfpn{entero} \bnfpn{digito} }\\
 		\bnfmore{| \bnfsp \bnfpn{digito}}\\
@@ -285,6 +291,23 @@ La sintaxis usando BNF y añadiendo las consideraciones correspondiente al lengu
 		{\bnfpn{ verdadero | falso }}\\
 	\bnfprod{digito}
 		{\bnfpn{ 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 }}\\
+	\bnfprod{caracter}
+        {\bnfpn{caracter}  \bnfpn{letra}}\\
+        \bnfmore{\bnfpn{letra}}\\
+	\bnfprod{letra}
+		{''a'' \bnfsp | \bnfsp ''b'' \bnfsp | \bnfsp ... \bnfsp | \bnfsp ''z''}\\
+		\bnfmore{ ''A'' \bnfsp | \bnfsp ''B'' \bnfsp | \bnfsp ... \bnfsp | \bnfsp ''Z'' }\\
+	\bnfprod{op\_binario}
+		{+ \bnfsp | \bnfsp - \bnfsp | \bnfsp * \bnfsp | \bnfsp /}\\
+		\bnfmore{| \bnfsp \&\& \bnfsp | \bnfsp \texttt{||} \bnfsp | \bnfsp \wedge  }\\
+		\bnfmore{| \bnfsp < \bnfsp | \bnfsp <= \bnfsp | \bnfsp > \bnfsp | \bnfsp >= \bnfsp | \bnfsp == \bnfsp | \bnfsp != \bnfsp }\\
+	\bnfprod{op\_binario\_booleano}
+		{ \&\& \bnfsp | \bnfsp \texttt{||} \bnfsp | \bnfsp \wedge  }\\
+		\bnfmore{| \bnfsp == \bnfsp | \bnfsp != \bnfsp }\\
+	\bnfprod{op\_unario}
+		{ + \bnfsp | \bnfsp - \bnfsp | \bnfsp !}\\
+	\bnfprod{op\_unario\_booleano}
+		{ \bnfsp !}\\
 \end{bnf*}
 
 
