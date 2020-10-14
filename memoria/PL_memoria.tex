@@ -281,7 +281,9 @@ La sintaxis usando BNF y añadiendo las consideraciones correspondiente al lengu
 		\bnfmore{| \bnfsp \bnfpn{constante}}\\
 		\bnfmore{| \bnfsp \bnfpn{funcion}}\\
 	\bnfprod{identificador}
-		{ \bnfpn{entero} \bnfsp | \bnfsp \bnfpn{real} \bnfsp | \bnfsp \bnfpn{caracter}} \\
+		{ \bnfpn{entero} \bnfsp | \bnfsp \bnfpn{real} \bnfsp | \bnfsp \bnfpn{caracter} | \bnfsp \bnfpn{booleano} \bnfsp | \bnfpn{lista}} \\
+	\bnfprod{constante}
+		{ \bnfpn{entero} \bnfsp | \bnfsp \bnfpn{real} \bnfsp | \bnfsp \bnfpn{caracter} | \bnfsp \bnfpn{booleano} \bnfsp | \bnfpn{lista}} \\
 	\bnfprod{real}
 		{\bnfpn{entero}.\bnfpn{entero}}\\
 	\bnfprod{entero}
