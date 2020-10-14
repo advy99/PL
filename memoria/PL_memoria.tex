@@ -208,7 +208,7 @@ La sintaxis usando BNF y añadiendo las consideraciones correspondiente al lengu
 	\bnfprod{Programa}
 		{\bnfpn{Cabecera\_programa} \bnfsp \bnfpn{bloque}}\\
 	\bnfprod{Cabecera\_programa}
-    	{"principal()"}\\
+    	{''principal()''}\\
   \bnfprod{bloque}
 		{\bnfpn{Inicio\_de\_bloque}}\\
 		\bnfmore{| \bnfsp \bnfpn{Declar\_de\_variables\_locales}}\\
@@ -216,45 +216,45 @@ La sintaxis usando BNF y añadiendo las consideraciones correspondiente al lengu
 		\bnfmore{| \bnfsp \bnfpn{Sentencias}}\\
 		\bnfmore{| \bnfsp \bnfpn{Fin\_de\_bloque}}\\
 	\bnfprod{Inicio\_de\_bloque}
-    	{"\{"}\\
+    	{''\{''}\\
 	\bnfprod{Fin\_de\_bloque}
-    	{"\}"}\\
+    	{''\}''}\\
   \bnfprod{Declar\_de\_variables\_locales}
 		{\bnfpn{Marca\_ini\_declar\_variables}}\\
 		\bnfmore{| \bnfsp \bnfpn{Variables\_locales}}\\
 		\bnfmore{| \bnfsp \bnfpn{Marca\_fin\_declar\_variables}}\\
 	\bnfprod{Marca\_ini\_declar\_variables}
-		{"ini\_declar\_var"}\\
+		{\bnfpn{ini\_declar\_var}}\\
 	\bnfprod{Marca\_fin\_declar\_variables}
-		{"fin\_declar\_var"}\\
+		{\bnfpn{fin\_declar\_var}}\\
 	\bnfprod{Variables\_locales}
 		{\bnfpn{Variables\_locales} \bnfsp \bnfpn{Cuerpo\_declar\_variables}}\\
 		\bnfmore{| \bnfsp \bnfpn{Cuerpo\_declar\_variables}}\\
 	\bnfprod{Cuerpo\_declar\_variables}
-		{\bnfpn{tipo} \bnfsp \bnfpn{ident\_variables} ";"}\\
-  \bnfprod{ident\_variables}
-    {\bnfpn{ident\_variables} \bnfsp "," \bnfsp \bnfpn{identificador} ["=" \bnfpn{expresion}]}\\
-    \bnfmore{| \bnfsp \bnfpn{identificador} ["=" \bnfpn{expresion}]}}\\
+		{\bnfpn{tipo} \bnfsp \bnfpn{ident\_variables} '';''}\\
+	\bnfprod{ident\_variables}
+    {\bnfpn{ident\_variables} \bnfsp '','' \bnfsp \bnfpn{identificador} [''='' \bnfpn{expresion}]}\\
+    \bnfmore{| \bnfsp \bnfpn{identificador} [''='' \bnfpn{expresion}]}\\
 	\bnfprod{Declar\_de\_subprogs}
     {\bnfpn{Declar\_de\_subprogs} \bnfsp \bnfpn{Declar\_subprog}}\\
     \bnfmore{| \bnfsp \bnfes}\\
   \bnfprod{Declar\_subprog}
     {\bnfpn{Cabecera\_subprograma} \bnfsp \bnfpn{bloque}}\\
   \bnfprod{Cabecera\_subprograma}
-    {\bnfpn{tipo} \bnfsp \bnfpn{identificador} \bnfsp "("\bnfpn{parametros}")"}\\
+    {\bnfpn{tipo} \bnfsp \bnfpn{identificador} \bnfsp ''(''\bnfpn{parametros}'')''}\\
   \bnfprod{parametros}
-    {\bnfpn{parametros} \bnfsp [","] \bnfsp \bnfpn{parametro}}\\
+    {\bnfpn{parametros} \bnfsp ['',''] \bnfsp \bnfpn{parametro}}\\
     \bnfmore{| \bnfsp \bnfes}\\
   \bnfprod{parametro}
     {\bnfpn{tipo} \bnfsp \bnfpn{identificador}}\\
   \bnfprod{tipo}
-    {\bnfpn{tipo\_basico}}\\
-    \bnfmore{| \bnfsp "lista de " \bnfsp \bnfpd{tipo\_basico}}\\
-  \bnfprod{tipo\_basico}
-    {"entero"}\\
-    \bnfmore{| \bnfsp "real"}\\
-    \bnfmore{| \bnfsp "caracter"}\\
-    \bnfmore{| \bnfsp "booleano"}\\
+	 	{\bnfpn{tipo\_basico}}\\
+		\bnfmore{| \bnfsp ''lista de '' \bnfsp \bnfpn{tipo\_basico}}\\
+	\bnfprod{tipo\_basico}
+    {\bnfpn{entero}}\\
+    \bnfmore{| \bnfsp \bnfpn{real}}\\
+    \bnfmore{| \bnfsp \bnfpn{caracter}}\\
+    \bnfmore{| \bnfsp \bnfpn{booleano}}\\
 	\bnfprod{Sentencias}
 		{\bnfpn{Sentencias} \bnfsp \bnfpn{Sentencia}}\\
 		\bnfmore{| \bnfsp \bnfpn{Sentencia}}\\
@@ -271,41 +271,41 @@ La sintaxis usando BNF y añadiendo las consideraciones correspondiente al lengu
     \bnfmore{| \bnfsp \bnfpn{sentencia\_entrada}}\\
     \bnfmore{| \bnfsp \bnfpn{sentencia\_salida}}\\
 	\bnfprod{sentencia\_asignacion}
-		{\bnfpn{identificador} \bnfsp "=" \bnfsp \bnfpn{expresion} \bnfsp ";"}\\
+		{\bnfpn{identificador} \bnfsp ''='' \bnfsp \bnfpn{expresion} \bnfsp '';''}\\
 	\bnfprod{sentencia\_if}
-		{"si" \bnfsp \bnfpn{condicion} \bnfsp \bnfpn{Sentencia}}\\
-		\bnfmore{| \bnfsp ["sino" \bnfpn{Sentencia}]}\\
+		{''si'' \bnfsp \bnfpn{condicion} \bnfsp \bnfpn{Sentencia}}\\
+		\bnfmore{| \bnfsp [''sino'' \bnfpn{Sentencia}]}\\
 	\bnfprod{sentencia\_while}
-		{"mientras" \bnfsp \bnfpn{condicion} \bnfsp \bnfpn{Sentencia}}\\
+		{''mientras'' \bnfsp \bnfpn{condicion} \bnfsp \bnfpn{Sentencia}}\\
   \bnfprod{sentencia\_repeat\_until}
-    {"repeat" \bnfsp \bnfpn{Sentencia} \bnfsp "until" \bnfsp "(" \bnfpn{condicion} \bnfsp ");"}\\
+    {''repetir'' \bnfsp \bnfpn{Sentencia} \bnfsp ''mientras'' \bnfsp ''('' \bnfpn{condicion} \bnfsp '');''}\\
   \bnfprod{sentencia\_return}
-    {"devuelve" \bnfsp \bnfpn{identificador} \bnfsp ";"}\\
+    {''devuelve'' \bnfsp \bnfpn{identificador} \bnfsp '';''}\\
   \bnfprod{sentencia\_avanzar}
-    {\bnfpn{identificador} \bnfsp ">> ;"}\\
+    {\bnfpn{identificador} \bnfsp ''>> ;''}\\
   \bnfprod{sentencia\_retroceder}
-    {\bnfpn{identificador} \bnfsp "<< ;"}\\
+    {\bnfpn{identificador} \bnfsp ''<< ;''}\\
   \bnfprod{sentencia\_cursor\_comienzo}
-    {"\$" \bnfsp \bnfpn{identificador} \bnfsp ";"}\\
+    {''\$'' \bnfsp \bnfpn{identificador} \bnfsp '';''}\\
   \bnfprod{sentencia\_entrada}
-    {"entrada" \bnfsp \bnfpn{lista\_variables}}\\
+    {''entrada'' \bnfsp \bnfpn{lista\_variables}}\\
   \bnfprod{lista\_variables}
-    {\bnfpn{lista\_variables} "," \bnfpn{identificador}}\\
+    {\bnfpn{lista\_variables} '','' \bnfpn{identificador}}\\
     \bnfmore{| \bnfsp \bnfpn{identificador}}\\
   \bnfprod{sentencia\_salida}
-    {"salida" \bnfsp \bnfpn{lista\_expresiones\_o\_cadena}}\\
+    {''salida'' \bnfsp \bnfpn{lista\_expresiones\_o\_cadena}}\\
   \bnfprod{lista\_expresiones\_o\_cadena}
-    {\bnfpn{cadena} \bnfsp "," \bnfsp \bnfpn{lista\_expresiones\_o\_cadena}}\\
-    \bnfmore{| \bnfsp \bnfpn{expresion} \bnfsp "," \bnfsp \bnfpn{lista\_expresiones\_o\_cadena}}\\
+    {\bnfpn{cadena} \bnfsp '','' \bnfsp \bnfpn{lista\_expresiones\_o\_cadena}}\\
+    \bnfmore{| \bnfsp \bnfpn{expresion} \bnfsp '','' \bnfsp \bnfpn{lista\_expresiones\_o\_cadena}}\\
     \bnfmore{| \bnfsp \bnfpn{cadena}}\\
     \bnfmore{| \bnfsp \bnfpn{expresion}}\\
   \bnfprod{cadena}
-    {"""\bnfpn{secuencia\_caract}"""}\\
+    {''''''\bnfpn{secuencia\_caract}''''''}\\
   \bnfprod{secuencia\_caract}
     {\bnfpn{secuencia\_caract} \bnfsp \bnfpn{caracter}}\\
     \bnfmore{| \bnfsp \bnfes}\\
 	\bnfprod{expresion}
-		{"("\bnfpn{expresion}")"}\\
+		{''(''\bnfpn{expresion}'')''}\\
 		\bnfmore{| \bnfsp \bnfpn{op\_unario} \bnfsp \bnfpn{expresion}}\\
 		\bnfmore{| \bnfsp \bnfpn{expresion} \bnfsp \bnfpn{op\_binario} \bnfsp \bnfpn{expresion}}\\
 		\bnfmore{| \bnfsp \bnfpn{op\_unario\_booleano} \bnfsp \bnfpn{booleano}}\\
@@ -315,23 +315,23 @@ La sintaxis usando BNF y añadiendo las consideraciones correspondiente al lengu
 		\bnfmore{| \bnfsp \bnfpn{identificador}}\\
 		\bnfmore{| \bnfsp \bnfpn{constante}}\\
 	\bnfprod{op\_ternario\_prim}
-    {"++"}\\
+    {++}\\
   \bnfprod{op\_ternario\_seg}
-    {"@"}\\
+    {@}\\
   \bnfprod{op\_binario}
-    {"+" \bnfsp | \bnfsp "-" \bnfsp | \bnfsp "*" \bnfsp | \bnfsp "/"}\\
-    \bnfmore{| \bnfsp "\&\&" \bnfsp | \bnfsp "\texttt{||}" \bnfsp | \bnfsp "\wedge"}\\
-    \bnfmore{| \bnfsp "<" \bnfsp | \bnfsp "<=" \bnfsp | \bnfsp ">" \bnfsp | \bnfsp ">=" \bnfsp | \bnfsp "==" \bnfsp | \bnfsp "!=" \bnfsp}\\
-    \bnfmore{| \bnfsp "@" \bnfsp | \bnfsp "--" \bnfsp | \bnfsp "\%" \bnfsp | \bnfsp "**"}\\
+    {+ \bnfsp | \bnfsp - \bnfsp | \bnfsp * \bnfsp | \bnfsp /}\\
+    \bnfmore{| \bnfsp \&\& \bnfsp | \bnfsp \texttt{||} \bnfsp | \bnfsp \wedge}\\
+    \bnfmore{| \bnfsp < \bnfsp | \bnfsp <= \bnfsp | \bnfsp > \bnfsp | \bnfsp >= \bnfsp | \bnfsp == \bnfsp | \bnfsp != \bnfsp}\\
+    \bnfmore{| \bnfsp @ \bnfsp | \bnfsp -- \bnfsp | \bnfsp \% \bnfsp | \bnfsp **}\\
   \bnfprod{op\_binario\_booleano}
-    { "\&\&" \bnfsp | \bnfsp "\texttt{||}" \bnfsp | \bnfsp "\wedge"  }\\
-    \bnfmore{| \bnfsp "==" \bnfsp | \bnfsp "!=" \bnfsp }\\
+    { \&\& \bnfsp | \bnfsp \texttt{||} \bnfsp | \bnfsp \wedge  }\\
+    \bnfmore{| \bnfsp == \bnfsp | \bnfsp != \bnfsp }\\
   \bnfprod{op\_unario}
-    { "-" \bnfsp | \bnfsp "!"}\\
+    { - \bnfsp | \bnfsp !}\\
   \bnfprod{op\_unario\_booleano}
-    { \bnfsp "!"}\\
+    { \bnfsp !}\\
   \bnfprod{funcion}
-    { \bnfpn{identificador} \bnfsp "(" \bnfsp \bnfpn{lista_const} \bnfsp ")"}\\
+    { \bnfpn{identificador} \bnfsp ''('' \bnfsp \bnfpn{lista_const} \bnfsp '')''}\\
   \bnfprod{lista_const}
     { \bnfpn{lista_const} [,] \bnfpn{constante}}\\
     \bnfmore{| \bnfsp \bnfes}\\
@@ -347,10 +347,10 @@ La sintaxis usando BNF y añadiendo las consideraciones correspondiente al lengu
   \bnfprod{constante\_basica}
     {\bnfpn{entero}}\\
     \bnfmore{| \bnfsp \bnfpn{real}}\\
-    \bnfmore{| \bnfsp "'"\bnfpn{caracter}"'"}\\
+    \bnfmore{| \bnfsp '''''\bnfpn{caracter}'''''}\\
     \bnfmore{| \bnfsp \bnfpn{booleano}}\\
   \bnfprod{lista}
-    {"[" \bnfpn{contenido\_lista} "]"}\\
+    {''['' \bnfpn{contenido\_lista} '']''}\\
   \bnfprod{contenido\_lista}
     {\bnfpn{contenido\_lista} [,] \bnfpn{constante\_basica}}\\
     \bnfmore{| \bnfsp \bnfes}\\
@@ -362,12 +362,12 @@ La sintaxis usando BNF y añadiendo las consideraciones correspondiente al lengu
   \bnfprod{caracter}
         {Símbolo ASCII}\\
 	\bnfprod{booleano}
-		{ "verdadero" | "falso" }\\
+		{ ''verdadero'' | ''falso'' }\\
 	\bnfprod{digito}
-		{\bnfpn{ "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" }}\\
+		{\bnfpn{ 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 }}\\
 	\bnfprod{letra}
-		{"a" \bnfsp | \bnfsp "b" \bnfsp | \bnfsp ... \bnfsp | \bnfsp "z"}\\
-		\bnfmore{| \bnfsp "A" \bnfsp | \bnfsp "B" \bnfsp | \bnfsp ... \bnfsp | \bnfsp "Z" }\\
+		{''a'' \bnfsp | \bnfsp ''b'' \bnfsp | \bnfsp ... \bnfsp | \bnfsp ''z''}\\
+		\bnfmore{| \bnfsp ''A'' \bnfsp | \bnfsp ''B'' \bnfsp | \bnfsp ... \bnfsp | \bnfsp ''Z'' }\\
 \end{bnf*}
 
 
