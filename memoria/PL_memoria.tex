@@ -305,7 +305,7 @@ La sintaxis usando BNF y añadiendo las consideraciones correspondiente al lengu
 		\bnfmore{| \bnfsp \bnfpn{booleano} \bnfsp \bnfpn{op\_binario\_booleano} \bnfsp \bnfpn{booleano}}\\
     \bnfmore{| \bnfsp \bnfpn{expresion} \bnfsp \bnfpn{op\_ternario\_prim} \bnfsp}\\
 	 \bnfmore{\bnfpn{expresion} \bnfsp \bnfpn{op\_ternario\_seg} \bnfsp \bnfpn{expresion}}\\
-    \bnfmore{| \bnfsp \bnfpn{funcion}}\\
+    \bnfmore{| \bnfsp \bnfpn{llamada\_subprograma}}\\
 		\bnfmore{| \bnfsp \bnfpn{identificador}}\\
 		\bnfmore{| \bnfsp \bnfpn{constante}}\\
 	\bnfprod{op\_ternario\_prim}
@@ -324,7 +324,7 @@ La sintaxis usando BNF y añadiendo las consideraciones correspondiente al lengu
     { - \bnfsp | \bnfsp !}\\
   \bnfprod{op\_unario\_booleano}
     { \bnfsp !}\\
-  \bnfprod{funcion}
+  \bnfprod{llamada\_subprograma}
     { \bnfpn{identificador} \bnfsp ''('' \bnfsp \bnfpn{lista\_const} \bnfsp '')''}\\
   \bnfprod{lista_const}
     { \bnfpn{lista_const} [,] \bnfpn{constante}}\\
@@ -334,7 +334,8 @@ La sintaxis usando BNF y añadiendo las consideraciones correspondiente al lengu
   \bnfprod{resto\_identificador}
     { \bnfpn{letra} \bnfsp \bnfpn{resto\_identificador}}\\
     \bnfmore{| \bnfsp \bnfpn{digito} \bnfsp \bnfpn{resto\_identificador}}\\
-    \bnfmore{| \bnfsp \bnfpn{caracter} \bnfsp \bnfpn{resto\_identificador}}\\
+    \bnfmore{| \bnfsp \bnfpn{digito} \bnfsp \bnfpn{resto\_identificador}}\\
+	 \bnfmore{| \bnfsp \epsilon}\\
   \bnfprod{constante}
     {\bnfpn{constante\_basica}}\\
     \bnfmore{| \bnfsp \bnfpn{lista}}\\
