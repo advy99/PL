@@ -219,17 +219,10 @@ La sintaxis usando BNF y añadiendo las consideraciones correspondiente al lengu
     	{''\{''}\\
 	\bnfprod{Fin\_de\_bloque}
     	{''\}''}\\
-  \bnfprod{Declar\_de\_variables\_locales}
-		{\bnfpn{Marca\_ini\_declar\_variables}}\\
-		\bnfmore{\bnfsp \bnfpn{Variables\_locales}}\\
-		\bnfmore{\bnfsp \bnfpn{Marca\_fin\_declar\_variables}}\\
-	\bnfprod{Marca\_ini\_declar\_variables}
-		{\bnfpn{ini\_declar\_var}}\\
-	\bnfprod{Marca\_fin\_declar\_variables}
-		{\bnfpn{fin\_declar\_var}}\\
-	\bnfprod{Variables\_locales}
-		{\bnfpn{Variables\_locales} \bnfsp \bnfpn{Cuerpo\_declar\_variables}}\\
+	\bnfprod{Declar\_de\_variables\_locales}
+		{\bnfpn{Declar\_de\_variables\_locales} \bnfsp \bnfpn{Cuerpo\_declar\_variables}}\\
 		\bnfmore{| \bnfsp \bnfpn{Cuerpo\_declar\_variables}}\\
+		\bnfmore{| \bnfsp \epsilon}\\
 	\bnfprod{Cuerpo\_declar\_variables}
 		{\bnfpn{tipo} \bnfsp \bnfpn{ident\_variables} '';''}\\
 	\bnfprod{ident\_variables}
