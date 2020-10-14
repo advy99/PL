@@ -208,106 +208,166 @@ La sintaxis usando BNF y añadiendo las consideraciones correspondiente al lengu
 	\bnfprod{Programa}
 		{\bnfpn{Cabecera\_programa} \bnfsp \bnfpn{bloque}}\\
 	\bnfprod{Cabecera\_programa}
-    	{"principal"}\\
+    	{"principal()"}\\
   \bnfprod{bloque}
 		{\bnfpn{Inicio\_de\_bloque}}\\
-		\bnfmore{\bnfpn{Declar\_de\_variables\_locales}}\\
-		\bnfmore{\bnfpn{Declar\_de\_subprogs}}\\
-		\bnfmore{\bnfpn{Sentencias}}\\
-		\bnfmore{\bnfpn{Fin\_de\_bloque}}\\
+		\bnfmore{| \bnfsp \bnfpn{Declar\_de\_variables\_locales}}\\
+		\bnfmore{| \bnfsp \bnfpn{Declar\_de\_subprogs}}\\
+		\bnfmore{| \bnfsp \bnfpn{Sentencias}}\\
+		\bnfmore{| \bnfsp \bnfpn{Fin\_de\_bloque}}\\
 	\bnfprod{Inicio\_de\_bloque}
     	{"\{"}\\
 	\bnfprod{Fin\_de\_bloque}
     	{"\}"}\\
   \bnfprod{Declar\_de\_variables\_locales}
 		{\bnfpn{Marca\_ini\_declar\_variables}}\\
-		\bnfmore{\bnfpn{Variables\_locales}}\\
-		\bnfmore{\bnfpn{Marca\_fin\_declar\_variables}}\\
+		\bnfmore{| \bnfsp \bnfpn{Variables\_locales}}\\
+		\bnfmore{| \bnfsp \bnfpn{Marca\_fin\_declar\_variables}}\\
 	\bnfprod{Marca\_ini\_declar\_variables}
 		{"ini\_declar\_var"}\\
 	\bnfprod{Marca\_fin\_declar\_variables}
 		{"fin\_declar\_var"}\\
 	\bnfprod{Variables\_locales}
 		{\bnfpn{Variables\_locales} \bnfsp \bnfpn{Cuerpo\_declar\_variables}}\\
-		\bnfmore{\bnfpn{Cuerpo\_declar\_variables}}\\
+		\bnfmore{| \bnfsp \bnfpn{Cuerpo\_declar\_variables}}\\
 	\bnfprod{Cuerpo\_declar\_variables}
 		{\bnfpn{tipo} \bnfsp \bnfpn{ident\_variables} ";"}\\
+  \bnfprod{ident\_variables}
+    {\bnfpn{ident\_variables} \bnfsp "," \bnfsp \bnfpn{identificador} ["=" \bnfpn{expresion}]}\\
+    \bnfmore{| \bnfsp \bnfpn{identificador} ["=" \bnfpn{expresion}]}}\\
 	\bnfprod{Declar\_de\_subprogs}
     {\bnfpn{Declar\_de\_subprogs} \bnfsp \bnfpn{Declar\_subprog}}\\
-    \bnfmore{\bnfes}\\
+    \bnfmore{| \bnfsp \bnfes}\\
   \bnfprod{Declar\_subprog}
     {\bnfpn{Cabecera\_subprograma} \bnfsp \bnfpn{bloque}}\\
   \bnfprod{Cabecera\_subprograma}
     {\bnfpn{tipo} \bnfsp \bnfpn{identificador} \bnfsp "("\bnfpn{parametros}")"}\\
   \bnfprod{parametros}
-    {\bnfpn{parametros} \bnfsp \bnfpn{parametro}}\\
-    \bnfmore{\bnfes}\\
+    {\bnfpn{parametros} \bnfsp [","] \bnfsp \bnfpn{parametro}}\\
+    \bnfmore{| \bnfsp \bnfes}\\
   \bnfprod{parametro}
     {\bnfpn{tipo} \bnfsp \bnfpn{identificador}}\\
+  \bnfprod{tipo}
+    {\bnfpn{tipo\_basico}}\\
+    \bnfmore{| \bnfsp "lista de " \bnfsp \bnfpd{tipo\_basico}}\\
+  \bnfprod{tipo\_basico}
+    {"entero"}\\
+    \bnfmore{| \bnfsp "real"}\\
+    \bnfmore{| \bnfsp "caracter"}\\
+    \bnfmore{| \bnfsp "booleano"}\\
 	\bnfprod{Sentencias}
 		{\bnfpn{Sentencias} \bnfsp \bnfpn{Sentencia}}\\
-		\bnfmore{\bnfpn{Sentencia}}\\
+		\bnfmore{| \bnfsp \bnfpn{Sentencia}}\\
 	\bnfprod{Sentencia}
 		{\bnfpn{bloque}}\\
 		\bnfmore{| \bnfsp \bnfpn{sentencia\_asignacion}}\\
 		\bnfmore{| \bnfsp \bnfpn{sentencia\_if}}\\
 		\bnfmore{| \bnfsp \bnfpn{sentencia\_while}}\\
-		\bnfmore{| \bnfsp \bnfpn{sentencia\_entrada}}\\
-		\bnfmore{| \bnfsp \bnfpn{sentencia\_salida}}\\
-		\bnfmore{| \bnfsp \bnfpn{sentencia\_return}}\\
-		\bnfmore{| \bnfsp \bnfpn{sentencia\_while}}\\
 		\bnfmore{| \bnfsp \bnfpn{sentencia\_repeat\_until}}\\
+    \bnfmore{| \bnfsp \bnfpn{sentencia\_return}}\\
+    \bnfmore{| \bnfsp \bnfpn{sentencia\_avanzar}}\\
+    \bnfmore{| \bnfsp \bnfpn{sentencia\_retroceder}}\\
+    \bnfmore{| \bnfsp \bnfpn{sentencia\_cursor\_comienzo}}\\
+    \bnfmore{| \bnfsp \bnfpn{sentencia\_entrada}}\\
+    \bnfmore{| \bnfsp \bnfpn{sentencia\_salida}}\\
 	\bnfprod{sentencia\_asignacion}
-		{\bnfpn{expresion} \bnfsp = \bnfsp \bnfpn{expresion}}\\
+		{\bnfpn{identificador} \bnfsp "=" \bnfsp \bnfpn{expresion} \bnfsp ";"}\\
 	\bnfprod{sentencia\_if}
-		{si \bnfsp \bnfpn{condicion} \bnfsp \bnfpn{Inicio\_de\_bloque}}\\
-		\bnfmore{\bnfpn{Cuerpo\_de\_bloque}}\\
-		\bnfmore{\bnfpn{Fin\_de\_bloque}}\\
+		{"si" \bnfsp \bnfpn{condicion} \bnfsp \bnfpn{Sentencia}}\\
+		\bnfmore{| \bnfsp ["sino" \bnfpn{Sentencia}]}\\
 	\bnfprod{sentencia\_while}
-		{mientras \bnfsp \bnfpn{condicion} \bnfsp \bnfpn{Inicio\_de\_bloque}}\\
-		\bnfmore{\bnfpn{Cuerpo\_de\_bloque}}\\
-		\bnfmore{\bnfpn{Fin\_de\_bloque}}\\
-	\bnfprod{sentencia\_entrada}
-		{\bnfpn{nomb\_entrada} \bnfsp \bnfpn{lista\_variables}}\\
-	\bnfprod{sentencia\_salida}
-		{\bnfpn{nomb\_salida} \bnfsp \bnfpn{lista\_expresiones\_o\_cadena}}\\
+		{"mientras" \bnfsp \bnfpn{condicion} \bnfsp \bnfpn{Sentencia}}\\
+  \bnfprod{sentencia\_repeat\_until}
+    {"repeat" \bnfsp \bnfpn{Sentencia} \bnfsp "until" \bnfsp "(" \bnfpn{condicion} \bnfsp ");"}\\
+  \bnfprod{sentencia\_return}
+    {"devuelve" \bnfsp \bnfpn{identificador} \bnfsp ";"}\\
+  \bnfprod{sentencia\_avanzar}
+    {\bnfpn{identificador} \bnfsp ">> ;"}\\
+  \bnfprod{sentencia\_retroceder}
+    {\bnfpn{identificador} \bnfsp "<< ;"}\\
+  \bnfprod{sentencia\_cursor\_comienzo}
+    {"\$" \bnfsp \bnfpn{identificador} \bnfsp ";"}\\
+  \bnfprod{sentencia\_entrada}
+    {"entrada" \bnfsp \bnfpn{lista\_variables}}\\
+  \bnfprod{lista\_variables}
+    {\bnfpn{lista\_variables} "," \bnfpn{identificador}}\\
+    \bnfmore{| \bnfsp \bnfpn{identificador}}\\
+  \bnfprod{sentencia\_salida}
+    {"salida" \bnfsp \bnfpn{lista\_expresiones\_o\_cadena}}\\
+  \bnfprod{lista\_expresiones\_o\_cadena}
+    {\bnfpn{cadena} \bnfsp "," \bnfsp \bnfpn{lista\_expresiones\_o\_cadena}}\\
+    \bnfmore{| \bnfsp \bnfpn{expresion} \bnfsp "," \bnfsp \bnfpn{lista\_expresiones\_o\_cadena}}\\
+    \bnfmore{| \bnfsp \bnfpn{cadena}}\\
+    \bnfmore{| \bnfsp \bnfpn{expresion}}\\
+  \bnfprod{cadena}
+    {"""\bnfpn{secuencia\_caract}"""}\\
+  \bnfprod{secuencia\_caract}
+    {\bnfpn{secuencia\_caract} \bnfsp \bnfpn{caracter}}\\
+    \bnfmore{| \bnfsp \bnfes}\\
 	\bnfprod{expresion}
-		{(\bnfpn{expresion})}\\
+		{"("\bnfpn{expresion}")"}\\
 		\bnfmore{| \bnfsp \bnfpn{op\_unario} \bnfsp \bnfpn{expresion}}\\
 		\bnfmore{| \bnfsp \bnfpn{expresion} \bnfsp \bnfpn{op\_binario} \bnfsp \bnfpn{expresion}}\\
 		\bnfmore{| \bnfsp \bnfpn{op\_unario\_booleano} \bnfsp \bnfpn{booleano}}\\
 		\bnfmore{| \bnfsp \bnfpn{booleano} \bnfsp \bnfpn{op\_binario\_booleano} \bnfsp \bnfpn{booleano}}\\
+    \bnfmore{| \bnfsp \bnfpn{expresion} \bnfsp \bnfpn{op\_ternario\_prim} \bnfsp \bnfpn{expresion} \bnfsp \bnfpn{op\_ternario\_seg} \bnfsp \bnfpn{expresion}}\\
+    \bnfmore{| \bnfsp \bnfpn{funcion}}\\
 		\bnfmore{| \bnfsp \bnfpn{identificador}}\\
 		\bnfmore{| \bnfsp \bnfpn{constante}}\\
-		\bnfmore{| \bnfsp \bnfpn{funcion}}\\
-	\bnfprod{identificador}
-		{ \bnfpn{entero} \bnfsp | \bnfsp \bnfpn{real} \bnfsp | \bnfsp \bnfpn{caracter}} \\
-	\bnfprod{real}
-		{\bnfpn{entero}.\bnfpn{entero}}\\
+	\bnfprod{op\_ternario\_prim}
+    {"++"}\\
+  \bnfprod{op\_ternario\_seg}
+    {"@"}\\
+  \bnfprod{op\_binario}
+    {"+" \bnfsp | \bnfsp "-" \bnfsp | \bnfsp "*" \bnfsp | \bnfsp "/"}\\
+    \bnfmore{| \bnfsp "\&\&" \bnfsp | \bnfsp "\texttt{||}" \bnfsp | \bnfsp "\wedge"}\\
+    \bnfmore{| \bnfsp "<" \bnfsp | \bnfsp "<=" \bnfsp | \bnfsp ">" \bnfsp | \bnfsp ">=" \bnfsp | \bnfsp "==" \bnfsp | \bnfsp "!=" \bnfsp}\\
+    \bnfmore{| \bnfsp "@" \bnfsp | \bnfsp "--" \bnfsp | \bnfsp "\%" \bnfsp | \bnfsp "**"}\\
+  \bnfprod{op\_binario\_booleano}
+    { "\&\&" \bnfsp | \bnfsp "\texttt{||}" \bnfsp | \bnfsp "\wedge"  }\\
+    \bnfmore{| \bnfsp "==" \bnfsp | \bnfsp "!=" \bnfsp }\\
+  \bnfprod{op\_unario}
+    { "-" \bnfsp | \bnfsp "!"}\\
+  \bnfprod{op\_unario\_booleano}
+    { \bnfsp "!"}\\
+  \bnfprod{funcion}
+    { \bnfpn{identificador} \bnfsp "(" \bnfsp \bnfpn{lista_const} \bnfsp ")"}\\
+  \bnfprod{lista_const}
+    { \bnfpn{lista_const} [,] \bnfpn{constante}}\\
+    \bnfmore{| \bnfsp \bnfes}\\
+  \bnfprod{identificador}
+		{ \bnfpn{letra} \bnfsp \bnfpn{resto\_identificador}}\\
+  \bnfprod{resto\_identificador}
+    { \bnfpn{letra} \bnfsp \bnfpn{resto\_identificador}}\\
+    \bnfmore{| \bnfsp \bnfpn{digito} \bnfsp \bnfpn{resto\_identificador}}\\
+    \bnfmore{| \bnfsp \bnfpn{caracter} \bnfsp \bnfpn{resto\_identificador}}\\
+  \bnfprod{constante}
+    {\bnfpn{constante\_basica}}\\
+    \bnfmore{| \bnfsp \bnfpn{lista}}\\
+  \bnfprod{constante\_basica}
+    {\bnfpn{entero}}\\
+    \bnfmore{| \bnfsp \bnfpn{real}}\\
+    \bnfmore{| \bnfsp "'"\bnfpn{caracter}"'"}\\
+    \bnfmore{| \bnfsp \bnfpn{booleano}}\\
+  \bnfprod{lista}
+    {"[" \bnfpn{contenido\_lista} "]"}\\
+  \bnfprod{contenido\_lista}
+    {\bnfpn{contenido\_lista} [,] \bnfpn{constante\_basica}}\\
+    \bnfmore{| \bnfsp \bnfes}\\
 	\bnfprod{entero}
-		{\bnfpn{entero} \bnfpn{digito} }\\
-		\bnfmore{| \bnfsp \bnfpn{digito}}\\
+    {\bnfpn{entero} \bnfpn{digito}}\\
+    \bnfmore{| \bnfsp \bnfpn{digito}}\\
+  \bnfprod{real}
+		{\bnfpn{entero}.\bnfpn{entero}}\\
+  \bnfprod{caracter}
+        {Símbolo ASCII}\\
 	\bnfprod{booleano}
-		{\bnfpn{ verdadero | falso }}\\
+		{ "verdadero" | "falso" }\\
 	\bnfprod{digito}
-		{\bnfpn{ 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 }}\\
-	\bnfprod{caracter}
-        {\bnfpn{caracter}  \bnfpn{letra}}\\
-        \bnfmore{\bnfpn{letra}}\\
+		{\bnfpn{ "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" }}\\
 	\bnfprod{letra}
-		{''a'' \bnfsp | \bnfsp ''b'' \bnfsp | \bnfsp ... \bnfsp | \bnfsp ''z''}\\
-		\bnfmore{ ''A'' \bnfsp | \bnfsp ''B'' \bnfsp | \bnfsp ... \bnfsp | \bnfsp ''Z'' }\\
-	\bnfprod{op\_binario}
-		{+ \bnfsp | \bnfsp - \bnfsp | \bnfsp * \bnfsp | \bnfsp /}\\
-		\bnfmore{| \bnfsp \&\& \bnfsp | \bnfsp \texttt{||} \bnfsp | \bnfsp \wedge  }\\
-		\bnfmore{| \bnfsp < \bnfsp | \bnfsp <= \bnfsp | \bnfsp > \bnfsp | \bnfsp >= \bnfsp | \bnfsp == \bnfsp | \bnfsp != \bnfsp }\\
-	\bnfprod{op\_binario\_booleano}
-		{ \&\& \bnfsp | \bnfsp \texttt{||} \bnfsp | \bnfsp \wedge  }\\
-		\bnfmore{| \bnfsp == \bnfsp | \bnfsp != \bnfsp }\\
-	\bnfprod{op\_unario}
-		{ + \bnfsp | \bnfsp - \bnfsp | \bnfsp !}\\
-	\bnfprod{op\_unario\_booleano}
-		{ \bnfsp !}\\
+		{"a" \bnfsp | \bnfsp "b" \bnfsp | \bnfsp ... \bnfsp | \bnfsp "z"}\\
+		\bnfmore{| \bnfsp "A" \bnfsp | \bnfsp "B" \bnfsp | \bnfsp ... \bnfsp | \bnfsp "Z" }\\
 \end{bnf*}
 
 
