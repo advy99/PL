@@ -310,7 +310,8 @@ La sintaxis usando BNF y añadiendo las consideraciones correspondiente al lengu
 		\bnfmore{| \bnfsp \bnfpn{expresion} \bnfsp \bnfpn{op\_binario} \bnfsp \bnfpn{expresion}}\\
 		\bnfmore{| \bnfsp \bnfpn{op\_unario\_booleano} \bnfsp \bnfpn{booleano}}\\
 		\bnfmore{| \bnfsp \bnfpn{booleano} \bnfsp \bnfpn{op\_binario\_booleano} \bnfsp \bnfpn{booleano}}\\
-    \bnfmore{| \bnfsp \bnfpn{expresion} \bnfsp \bnfpn{op\_ternario\_prim} \bnfsp \bnfpn{expresion} \bnfsp \bnfpn{op\_ternario\_seg} \bnfsp \bnfpn{expresion}}\\
+    \bnfmore{| \bnfsp \bnfpn{expresion} \bnfsp \bnfpn{op\_ternario\_prim} \bnfsp}\\
+	 \bnfmore{\bnfpn{expresion} \bnfsp \bnfpn{op\_ternario\_seg} \bnfsp \bnfpn{expresion}}\\
     \bnfmore{| \bnfsp \bnfpn{funcion}}\\
 		\bnfmore{| \bnfsp \bnfpn{identificador}}\\
 		\bnfmore{| \bnfsp \bnfpn{constante}}\\
@@ -331,7 +332,7 @@ La sintaxis usando BNF y añadiendo las consideraciones correspondiente al lengu
   \bnfprod{op\_unario\_booleano}
     { \bnfsp !}\\
   \bnfprod{funcion}
-    { \bnfpn{identificador} \bnfsp ''('' \bnfsp \bnfpn{lista_const} \bnfsp '')''}\\
+    { \bnfpn{identificador} \bnfsp ''('' \bnfsp \bnfpn{lista\_const} \bnfsp '')''}\\
   \bnfprod{lista_const}
     { \bnfpn{lista_const} [,] \bnfpn{constante}}\\
     \bnfmore{| \bnfsp \bnfes}\\
@@ -347,7 +348,7 @@ La sintaxis usando BNF y añadiendo las consideraciones correspondiente al lengu
   \bnfprod{constante\_basica}
     {\bnfpn{entero}}\\
     \bnfmore{| \bnfsp \bnfpn{real}}\\
-    \bnfmore{| \bnfsp '''''\bnfpn{caracter}'''''}\\
+    \bnfmore{| \bnfsp \bnfpn{caracter}}\\
     \bnfmore{| \bnfsp \bnfpn{booleano}}\\
   \bnfprod{lista}
     {''['' \bnfpn{contenido\_lista} '']''}\\
@@ -360,7 +361,7 @@ La sintaxis usando BNF y añadiendo las consideraciones correspondiente al lengu
   \bnfprod{real}
 		{\bnfpn{entero}.\bnfpn{entero}}\\
   \bnfprod{caracter}
-        {Símbolo ASCII}\\
+        {Simbolo ASCII}\\
 	\bnfprod{booleano}
 		{ ''verdadero'' | ''falso'' }\\
 	\bnfprod{digito}
