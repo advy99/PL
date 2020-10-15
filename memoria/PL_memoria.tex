@@ -423,8 +423,28 @@ La regla parámetro a su vez nos genéra la estructura de un único parámetro, 
 
 \subsection{Sentencias}
 
+La declaración de sentencias comienza en la produccion \texttt{Sentencias} que nos permite generar todas las posibles sentencias que necesitemos.
 
+Las posibles sentencias que podemos generar son:
 
+\begin{itemize}
+    \item{Sentencias de asignacion}
+    \item{Sentencias if}
+    \item{Sentencias while}
+    \item{Sentencias return}
+    \item{Sentencias de entrada}
+    \item{Sentencias de salida}
+\end{itemize}
+
+Por las caracteristicas del lenguaje asiganado se nos pide añadir la sentencia de tipo repeat-until. Esta sentencia consiste en repetir una sentencia determinada mientras se cumpla una expresión. Generamos esta sentencia a través de la regla \texttt{<sentencia\_repeat\_until>}.
+
+Además, debido a que nuestro lenguaje trabaja con el tipo de dato lista, debemos añadir tres sentencias adicionales:
+
+\begin{itemize}
+    \item{Sentencia avanzar}: La sentencia avanzar se genera a través de la regla \texttt{<sentencia\_avanzar>} y consiste en aplicar el operador ''$>>$'' a una lista, para que el cursor avance una posición.
+    \item{Sentencia retroceder}: Esta sentencia se genera mediante la regla \texttt{<sentencia\_retroceder>} y consiste en aplicar el operador ''$<<$'' a una lista, para que el cursos retroceda una posición.
+    \item{Sentencia cursor comienzo}: Finalmente la sentencia cursor comienzo consiste en aplicar el operador ''\$'' a una lista para que el cursor vuelva a la posición inicial. Esta sentencia se genera mendiante la regla \texttt{<sentencia_cursor_comienzo>}.
+\end{itemize}
 
 \section{Identificación de los tokens con el máximo nivel de abstracción.}
 
