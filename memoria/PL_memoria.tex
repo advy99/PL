@@ -294,7 +294,7 @@ La sintaxis usando BNF y añadiendo las consideraciones correspondiente al lengu
     \bnfmore{| \bnfsp \bnfpn{cadena}}\\
     \bnfmore{| \bnfsp \bnfpn{expresion}}\\
   \bnfprod{cadena}
-    {\bnfpn{secuencia\_caract}}\\
+	 {''"''\bnfpn{secuencia\_caract} ''"''}\\
   \bnfprod{secuencia\_caract}
     {\bnfpn{secuencia\_caract} \bnfsp \bnfpn{caracter}}\\
     \bnfmore{| \bnfsp \epsilon}\\
@@ -368,7 +368,7 @@ Tras la definición formal de la sintaxis del lenguaje utilizando BNF, en este a
 \subsection{Sección principal.}
 
 % Comentar que comenzamos con principal y un bloque, y de que esta compuesto un bloque
-Nuestro programa comenzará con una cabecera de programa seguida de un bloque. La cabecera de programa, en nuestro caso, será la cadena \"principal()\".
+Nuestro programa comenzará con una cabecera de programa seguida de un bloque. La cabecera de programa, en nuestro caso, será la cadena ''principal()''.
 
 Tras esta cadena le sigue un bloque, que en nuestro caso está delimitado por un inicio de bloque y un fin de bloque, que serán respectivamente ''\{'' y ''\}''. Dentro de cada bloque existirán tres secciones más distinguidas:
 
@@ -382,7 +382,7 @@ Cada una de estas secciones se desarrollan a partir de distintas reglas que pode
 
 \subsection{Declaración de variables}
 
-La declaración de variables se hace según las producciones de \texttt{Declar_de_variables_locales} donde vemos que las variables se declaran siguiendo las producciones de \texttt{Cuerpo_declar_variables}.
+La declaración de variables se hace según las producciones de \texttt{<Declar_de_variables_locales>} donde vemos que las variables se declaran siguiendo las producciones de \texttt{<Cuerpo_declar_variables>}.
 
 
 Para declarar una o varias variables es necesario especificar su ''tipo'', uno o varios ''identificadores'' y un punto y coma ('';''). Se crean tantas variables como identificadores pongamos.
@@ -392,20 +392,14 @@ Los identificadores son combinaciones alfanuméricas que deben empezar siempre p
 
 \subsubsection{Tipos de datos}
 
-\hspace{5mm}
-- entero: Un numero entero entre 0 y 9.
+\begin{itemize}
 
-\hspace{5mm}
-- real: Un entero separado de otro entero por un punto (''.'')
-
-\hspace{5mm}
-- caracter: Cualquier elemento que pertenezca a la tabla ASCII.
-
-\hspace{5mm}
-- booleano: Puede ser o la cadena "verdadero" o la cadena "falso".
-
-\hspace{5mm}
-- listade <tipo_basico> : Es una lista formada por datos cuyo tipo viene en <tipo_basico>. Esos tipos son los cuatro explicados anteriormente.
+	\item entero: Un numero entero entre 0 y 9.
+	\item real: Un entero separado de otro entero por un punto (''.'')
+	\item caracter: Cualquier elemento que pertenezca a la tabla ASCII.
+	\item booleano: Puede ser o la cadena ''verdadero'' o la cadena ''falso''.
+	\item listade <tipo_basico> : Es una lista formada por datos cuyo tipo viene en <tipo_basico>. Esos tipos son los cuatro explicados anteriormente.
+\end{itemize}
 
 \subsection{Declaración de subprogramas: Funciones}
 
