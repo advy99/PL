@@ -234,7 +234,7 @@ La sintaxis usando BNF y añadiendo las consideraciones correspondiente al lengu
   \bnfprod{Declar\_subprog}
     {\bnfpn{Cabecera\_subprograma} \bnfsp \bnfpn{bloque}}\\
   \bnfprod{Cabecera\_subprograma}
-    {\bnfpn{tipo} \bnfsp \bnfpn{identificador} \bnfsp ''(''\bnfpn{parametros}'')''}\\
+	 { [ \bnfpn{tipo}] \bnfsp \bnfpn{identificador} \bnfsp ''(''\bnfpn{parametros}'')''}\\
   \bnfprod{parametros}
     {\bnfpn{parametros} \bnfsp ['',''] \bnfsp \bnfpn{parametro}}\\
     \bnfmore{| \bnfsp \epsilon}\\
@@ -263,6 +263,7 @@ La sintaxis usando BNF y añadiendo las consideraciones correspondiente al lengu
     \bnfmore{| \bnfsp \bnfpn{sentencia\_cursor\_comienzo}}\\
     \bnfmore{| \bnfsp \bnfpn{sentencia\_entrada}}\\
     \bnfmore{| \bnfsp \bnfpn{sentencia\_salida}}\\
+    \bnfmore{| \bnfsp \epsilon}\\
 	\bnfprod{sentencia\_asignacion}
 		{\bnfpn{identificador} \bnfsp ''='' \bnfsp \bnfpn{expresion} \bnfsp '';''}\\
 	\bnfprod{sentencia\_if}
@@ -317,9 +318,9 @@ La sintaxis usando BNF y añadiendo las consideraciones correspondiente al lengu
     \bnfmore{| \bnfsp \&\& \bnfsp | \bnfsp \texttt{||} \bnfsp | \bnfsp \wedge  }\\
     \bnfmore{| \bnfsp @ \bnfsp | \bnfsp -- \bnfsp | \bnfsp \% \bnfsp | \bnfsp **}\\
   \bnfprod{op\_unario}
-    { - \bnfsp | \bnfsp !}\\
+    { + \bnfsp | \bnfsp - \bnfsp | \bnfsp ! \bnfsp | \bnfsp \# \bnfsp | \bnfsp ?}\\
   \bnfprod{llamada\_subprograma}
-    { \bnfpn{identificador} \bnfsp ''('' \bnfsp \bnfpn{lista\_const} \bnfsp '')''}\\
+    { \bnfpn{identificador} \bnfsp ''('' \bnfsp \bnfpn{lista\_const} \bnfsp '');''}\\
   \bnfprod{lista_const}
     { \bnfpn{lista_const} [,] \bnfpn{constante}}\\
     \bnfmore{| \bnfsp \epsilon}\\
@@ -367,7 +368,17 @@ Tras la definición formal de la sintaxis del lenguaje utilizando BNF, en este a
 \subsection{Sección principal.}
 
 % Comentar que comenzamos con principal y un bloque, y de que esta compuesto un bloque
+Nuestro programa comenzará con una cabecera de programa seguida de un bloque. La cabecera de programa, en nuestro caso, será la cadena \"principal()\".
 
+Tras esta cadena le sigue un bloque, que en nuestro caso está delimitado por un inicio de bloque y un fin de bloque, que serán respectivamente ''\{'' y ''\}''. Dentro de cada bloque existirán tres secciones más distinguidas:
+
+\begin{enumerate}
+	\item Declaración de variables locales.
+	\item Declaración de subprogramas.
+	\item Sentencias.
+\end{enumerate}
+
+Cada una de estas secciones se desarrollan a partir de distintas reglas que podemos observar en el BNF, y que explicaremos en las siguientes secciones.
 
 \subsection{Declaración de variables}
 
@@ -376,6 +387,18 @@ Tras la definición formal de la sintaxis del lenguaje utilizando BNF, en este a
 
 
 \subsection{Declaración de subprogramas: Funciones}
+
+En nuestro caso, debido al lenguaje asignado, los subprogramas serán funciones.
+
+Para declarar una función existe una regla \texttt{<Declar_de_subprogs>} que sus posibles producciones son, la declaración de una función seguido de la declaración de la propia función, de forma que podamos declarar varias funciones y no solo una, o la cadena vacia, de forma que podamos no parar de declarar un subprograma o no declarar ninguno.
+
+Para declarar el cuerpo de una función tenemos la regla \texttt{<Declar\_subprog>}, la cuál produce la cabecera de la función seguida de un bloque.
+
+La cabecera de la función es generáda por \texttt{<Cabecera\_subprograma>} y será un tipo (el tipo de la variable que devolverá la función), este tipo es opcional ya que pueden existir funciones que no devuelvan nada, seguido de un identificador que servirá como nombre de la función y por último una serie de parámetros entre paréntesis.
+
+Estos parámetros se generan con la regla \texttt{<parametros>}, que se trata de un parámetro, predecido de una coma y más parámetros, o un único parámetro, generádo con la regla \texttt{<parametro>}.
+
+La regla parámetro a su vez nos genéra la estructura de un único parámetro, que está formada por el tipo y el identificador de dicho parámetro.
 
 \subsection{Sentencias}
 
