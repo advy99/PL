@@ -382,9 +382,30 @@ Cada una de estas secciones se desarrollan a partir de distintas reglas que pode
 
 \subsection{Declaración de variables}
 
+La declaración de variables se hace según las producciones de \texttt{Declar_de_variables_locales} donde vemos que las variables se declaran siguiendo las producciones de \texttt{Cuerpo_declar_variables}.
+
+
+Para declarar una o varias variables es necesario especificar su ''tipo'', uno o varios ''identificadores'' y un punto y coma ('';''). Se crean tantas variables como identificadores pongamos.
+
+
+Los identificadores son combinaciones alfanuméricas que deben empezar siempre por una letra. En la declaración de variables deben ir después del ''tipo'', separados por comas. Se da la opción de inicializar alguna de las variables asignándole una expresión con el símbolo ''='' a su identificador.
+
 \subsubsection{Tipos de datos}
 
+\hspace{5mm}
+- entero: Un numero entero entre 0 y 9.
 
+\hspace{5mm}
+- real: Un entero separado de otro entero por un punto (''.'')
+
+\hspace{5mm}
+- caracter: Cualquier elemento que pertenezca a la tabla ASCII.
+
+\hspace{5mm}
+- booleano: Puede ser o la cadena "verdadero" o la cadena "falso".
+
+\hspace{5mm}
+- listade <tipo_basico> : Es una lista formada por datos cuyo tipo viene en <tipo_basico>. Esos tipos son los cuatro explicados anteriormente.
 
 \subsection{Declaración de subprogramas: Funciones}
 
