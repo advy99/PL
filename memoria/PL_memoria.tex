@@ -267,12 +267,12 @@ La sintaxis usando BNF y añadiendo las consideraciones correspondiente al lengu
 	\bnfprod{sentencia\_asignacion}
 		{\bnfpn{identificador} \bnfsp ''='' \bnfsp \bnfpn{expresion} \bnfsp '';''}\\
 	\bnfprod{sentencia\_if}
-		{''si'' \bnfsp \bnfpn{condicion} \bnfsp \bnfpn{Sentencia}}\\
+		{''si'' \bnfsp \bnfpn{expresion} \bnfsp \bnfpn{Sentencia}}\\
 		\bnfmore{| \bnfsp [''sino'' \bnfpn{Sentencia}]}\\
 	\bnfprod{sentencia\_while}
-		{''mientras'' \bnfsp \bnfpn{condicion} \bnfsp \bnfpn{Sentencia}}\\
+		{''mientras'' \bnfsp \bnfpn{expresion} \bnfsp \bnfpn{Sentencia}}\\
   \bnfprod{sentencia\_repeat\_until}
-    {''repetir'' \bnfsp \bnfpn{Sentencia} \bnfsp ''mientras'' \bnfsp ''('' \bnfpn{condicion} \bnfsp '');''}\\
+    {''repetir'' \bnfsp \bnfpn{Sentencia} \bnfsp ''mientras'' \bnfsp ''('' \bnfpn{expresion} \bnfsp '');''}\\
   \bnfprod{sentencia\_return}
     {''devuelve'' \bnfsp \bnfpn{identificador} \bnfsp '';''}\\
   \bnfprod{sentencia\_avanzar}
