@@ -301,8 +301,6 @@ La sintaxis usando BNF y añadiendo las consideraciones correspondiente al lengu
 		{''(''\bnfpn{expresion}'')''}\\
 		\bnfmore{| \bnfsp \bnfpn{op\_unario} \bnfsp \bnfpn{expresion}}\\
 		\bnfmore{| \bnfsp \bnfpn{expresion} \bnfsp \bnfpn{op\_binario} \bnfsp \bnfpn{expresion}}\\
-		\bnfmore{| \bnfsp \bnfpn{op\_unario\_booleano} \bnfsp \bnfpn{booleano}}\\
-		\bnfmore{| \bnfsp \bnfpn{booleano} \bnfsp \bnfpn{op\_binario\_booleano} \bnfsp \bnfpn{booleano}}\\
     \bnfmore{| \bnfsp \bnfpn{expresion} \bnfsp \bnfpn{op\_ternario\_prim} \bnfsp}\\
 	 \bnfmore{\bnfpn{expresion} \bnfsp \bnfpn{op\_ternario\_seg} \bnfsp \bnfpn{expresion}}\\
     \bnfmore{| \bnfsp \bnfpn{llamada\_subprograma}}\\
@@ -316,14 +314,10 @@ La sintaxis usando BNF y añadiendo las consideraciones correspondiente al lengu
     {+ \bnfsp | \bnfsp - \bnfsp | \bnfsp * \bnfsp | \bnfsp /}\\
     \bnfmore{| \bnfsp \&\& \bnfsp | \bnfsp \texttt{||} \bnfsp | \bnfsp \wedge}\\
     \bnfmore{| \bnfsp < \bnfsp | \bnfsp <= \bnfsp | \bnfsp > \bnfsp | \bnfsp >= \bnfsp | \bnfsp == \bnfsp | \bnfsp != \bnfsp}\\
+    \bnfmore{| \bnfsp \&\& \bnfsp | \bnfsp \texttt{||} \bnfsp | \bnfsp \wedge  }\\
     \bnfmore{| \bnfsp @ \bnfsp | \bnfsp -- \bnfsp | \bnfsp \% \bnfsp | \bnfsp **}\\
-  \bnfprod{op\_binario\_booleano}
-    { \&\& \bnfsp | \bnfsp \texttt{||} \bnfsp | \bnfsp \wedge  }\\
-    \bnfmore{| \bnfsp == \bnfsp | \bnfsp != \bnfsp }\\
   \bnfprod{op\_unario}
     { - \bnfsp | \bnfsp !}\\
-  \bnfprod{op\_unario\_booleano}
-    { \bnfsp !}\\
   \bnfprod{llamada\_subprograma}
     { \bnfpn{identificador} \bnfsp ''('' \bnfsp \bnfpn{lista\_const} \bnfsp '')''}\\
   \bnfprod{lista_const}
@@ -333,7 +327,6 @@ La sintaxis usando BNF y añadiendo las consideraciones correspondiente al lengu
 		{ \bnfpn{letra} \bnfsp \bnfpn{resto\_identificador}}\\
   \bnfprod{resto\_identificador}
     { \bnfpn{letra} \bnfsp \bnfpn{resto\_identificador}}\\
-    \bnfmore{| \bnfsp \bnfpn{digito} \bnfsp \bnfpn{resto\_identificador}}\\
     \bnfmore{| \bnfsp \bnfpn{digito} \bnfsp \bnfpn{resto\_identificador}}\\
 	 \bnfmore{| \bnfsp \epsilon}\\
   \bnfprod{constante}
