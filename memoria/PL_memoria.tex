@@ -224,17 +224,17 @@ La sintaxis usando BNF y añadiendo las consideraciones correspondiente al lengu
 		\bnfmore{| \bnfsp \bnfpn{Cuerpo\_declar\_variables}}\\
 		\bnfmore{| \bnfsp \epsilon}\\
 	\bnfprod{Cuerpo\_declar\_variables}
-		{\bnfpn{tipo} \bnfsp \bnfpn{ident\_variables} '';''}\\
+		{\bnfpn{tipo} \bnfsp \bnfpn{ident\_variables} ;}\\
 	\bnfprod{ident\_variables}
-    {\bnfpn{ident\_variables} \bnfsp '','' \bnfsp \bnfpn{identificador} [''='' \bnfpn{expresion}]}\\
-    \bnfmore{| \bnfsp \bnfpn{identificador} [''='' \bnfpn{expresion}]}\\
+    {\bnfpn{ident\_variables} \bnfsp '','' \bnfsp \bnfpn{identificador} [= \bnfpn{expresion}]}\\
+    \bnfmore{| \bnfsp \bnfpn{identificador} [= \bnfpn{expresion}]}\\
 	\bnfprod{Declar\_de\_subprogs}
     {\bnfpn{Declar\_de\_subprogs} \bnfsp \bnfpn{Declar\_subprog}}\\
     \bnfmore{| \bnfsp \epsilon}\\
   \bnfprod{Declar\_subprog}
     {\bnfpn{Cabecera\_subprograma} \bnfsp \bnfpn{bloque}}\\
   \bnfprod{Cabecera\_subprograma}
-	 { [ \bnfpn{tipo}] \bnfsp \bnfpn{identificador} \bnfsp ''(''\bnfpn{parametros}'')''}\\
+	 { [ \bnfpn{tipo}] \bnfsp \bnfpn{identificador} \bnfsp ( \bnfpn{parametros} ) }\\
   \bnfprod{parametros}
     {\bnfpn{parametros} \bnfsp ['',''] \bnfsp \bnfpn{parametro}}\\
     \bnfmore{| \bnfsp \epsilon}\\
@@ -265,22 +265,22 @@ La sintaxis usando BNF y añadiendo las consideraciones correspondiente al lengu
     \bnfmore{| \bnfsp \bnfpn{sentencia\_salida}}\\
     \bnfmore{| \bnfsp \epsilon}\\
 	\bnfprod{sentencia\_asignacion}
-		{\bnfpn{identificador} \bnfsp ''='' \bnfsp \bnfpn{expresion} \bnfsp '';''}\\
+		{\bnfpn{identificador} \bnfsp = \bnfsp \bnfpn{expresion} \bnfsp  ; }\\
 	\bnfprod{sentencia\_if}
 		{''si'' \bnfsp \bnfpn{expresion} \bnfsp \bnfpn{Sentencia}}\\
-		\bnfmore{| \bnfsp [''sino'' \bnfpn{Sentencia}]}\\
+		\bnfmore{ \bnfsp [''sino'' \bnfpn{Sentencia}]}\\
 	\bnfprod{sentencia\_while}
 		{''mientras'' \bnfsp \bnfpn{expresion} \bnfsp \bnfpn{Sentencia}}\\
   \bnfprod{sentencia\_repeat\_until}
-    {''repetir'' \bnfsp \bnfpn{Sentencia} \bnfsp ''mientras'' \bnfsp ''('' \bnfpn{expresion} \bnfsp '');''}\\
+    {''repetir'' \bnfsp \bnfpn{Sentencia} \bnfsp ''mientras'' \bnfsp ( \bnfpn{expresion} \bnfsp ) ; }\\
   \bnfprod{sentencia\_return}
-    {''devuelve'' \bnfsp \bnfpn{identificador} \bnfsp '';''}\\
+    {''devuelve'' \bnfsp \bnfpn{identificador} \bnfsp ;}\\
   \bnfprod{sentencia\_avanzar}
-    {\bnfpn{identificador} \bnfsp ''>> ;''}\\
+    {\bnfpn{identificador} \bnfsp ''>> '';}\\
   \bnfprod{sentencia\_retroceder}
-    {\bnfpn{identificador} \bnfsp ''<< ;''}\\
+    {\bnfpn{identificador} \bnfsp ''<< '';}\\
   \bnfprod{sentencia\_cursor\_comienzo}
-    {''\$'' \bnfsp \bnfpn{identificador} \bnfsp '';''}\\
+    {''\$'' \bnfsp \bnfpn{identificador} \bnfsp ;}\\
   \bnfprod{sentencia\_entrada}
     {''entrada'' \bnfsp \bnfpn{lista\_variables}}\\
   \bnfprod{lista\_variables}
@@ -289,7 +289,7 @@ La sintaxis usando BNF y añadiendo las consideraciones correspondiente al lengu
   \bnfprod{sentencia\_salida}
     {''salida'' \bnfsp \bnfpn{lista\_expresiones\_o\_cadena}}\\
   \bnfprod{lista\_expresiones\_o\_cadena}
-    {\bnfpn{cadena} \bnfsp '','' \bnfsp \bnfpn{lista\_expresiones\_o\_cadena}}\\
+    {\bnfpn{lista\_expresiones\_o\_cadena} \bnfsp '','' \bnfsp \bnfpn{cadena}}\\
     \bnfmore{| \bnfsp \bnfpn{expresion} \bnfsp '','' \bnfsp \bnfpn{lista\_expresiones\_o\_cadena}}\\
     \bnfmore{| \bnfsp \bnfpn{cadena}}\\
     \bnfmore{| \bnfsp \bnfpn{expresion}}\\
@@ -299,7 +299,7 @@ La sintaxis usando BNF y añadiendo las consideraciones correspondiente al lengu
     {\bnfpn{secuencia\_caract} \bnfsp \bnfpn{caracter}}\\
     \bnfmore{| \bnfsp \epsilon}\\
 	\bnfprod{expresion}
-		{''(''\bnfpn{expresion}'')''}\\
+		{ ( \bnfpn{expresion} ) }\\
 		\bnfmore{| \bnfsp \bnfpn{op\_unario} \bnfsp \bnfpn{expresion}}\\
 		\bnfmore{| \bnfsp \bnfpn{expresion} \bnfsp \bnfpn{op\_binario} \bnfsp \bnfpn{expresion}}\\
     \bnfmore{| \bnfsp \bnfpn{expresion} \bnfsp \bnfpn{op\_ternario\_prim} \bnfsp}\\
@@ -320,14 +320,14 @@ La sintaxis usando BNF y añadiendo las consideraciones correspondiente al lengu
   \bnfprod{op\_unario}
     { - \bnfsp | \bnfsp ! \bnfsp | \bnfsp \# \bnfsp | \bnfsp ?}\\
   \bnfprod{llamada\_subprograma}
-    { \bnfpn{identificador} \bnfsp ''('' \bnfsp \bnfpn{lista\_const} \bnfsp '');''}\\
+    { \bnfpn{identificador} \bnfsp  ( \bnfsp \bnfpn{lista\_const} \bnfsp ) \bnfsp ;}\\
   \bnfprod{lista_const}
     { \bnfpn{lista_const} [,] \bnfpn{constante}}\\
     \bnfmore{| \bnfsp \epsilon}\\
   \bnfprod{identificador}
 		{ \bnfpn{letra} \bnfsp \bnfpn{resto\_identificador}}\\
   \bnfprod{resto\_identificador}
-    { \bnfpn{letra} \bnfsp \bnfpn{resto\_identificador}}\\
+    { \bnfpn{resto\_identificador} \bnfsp \bnfpn{letra}}\\
     \bnfmore{| \bnfsp \bnfpn{digito} \bnfsp \bnfpn{resto\_identificador}}\\
 	 \bnfmore{| \bnfsp \epsilon}\\
   \bnfprod{constante}
