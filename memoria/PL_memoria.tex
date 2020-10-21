@@ -236,8 +236,13 @@ La sintaxis usando BNF y añadiendo las consideraciones correspondiente al lengu
   \bnfprod{Cabecera\_subprograma}
 	 { [ \bnfpn{tipo}] \bnfsp \bnfpn{identificador} \bnfsp ( \bnfpn{parametros} ) }\\
   \bnfprod{parametros}
-    {\bnfpn{parametros} \bnfsp ['',''] \bnfsp \bnfpn{parametro}}\\
+    {\bnfpn{parametro}}\\
+	 \bnfmore{| \bnfsp \bnfpn{parametro\_fijo} \bnfsp \bnfpn{parametro}}\\
     \bnfmore{| \bnfsp \epsilon}\\
+  \bnfprod{parametro\_fijo}
+	 {\bnfpn{parametro\_fijo} \bnfsp \bnfpn{parametro\_fijo} }\\
+	 \bnfmore{| \bnfsp \bnfpn{parametro} \bnfsp ,}\\
+	 \bnfmore{| \bnfsp \epsilon}\\
   \bnfprod{parametro}
     {\bnfpn{tipo} \bnfsp \bnfpn{identificador}}\\
   \bnfprod{tipo}
