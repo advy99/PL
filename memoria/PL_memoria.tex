@@ -456,7 +456,48 @@ Además, debido a que nuestro lenguaje trabaja con el tipo de dato lista, debemo
 
 \section{Identificación de los tokens con el máximo nivel de abstracción.}
 
-
+% Please add the following required packages to your document preamble:
+% \usepackage{graphicx}
+\begin{table}[h]
+\centering
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{|c|c|c|c|}
+\hline
+\textbf{Token} & \textbf{Identificador} & \textbf{Atributos} & \textbf{Patrón} \\ \hline
+CONSTANTE\_BASICA & 257 & 0: entero, 1:real, 2:caracter, 3:booleano  & ({[}a-zA-Z{]}+ | {[}0-9{]}+ | {[}0-9{]}+"."{[}0-9{]}+ | "verdadero" | "falso") \\ \hline
+LISTA & 258 &  & ``{[}`` CONSTANTE\_BASICA* ``{]}`` \\ \hline
+CORCHETE\_ABRE & 259 &  & ``{[}`` \\ \hline
+CORCHETE\_CIERRA & 260 &  & ``{]}`` \\ \hline
+COMA & 261 &  & ``,`` \\ \hline
+OP\_EXC\_BIN & 262 & 0:+, 1:*, 2:/, 3:\&\&, 4:||, 5:\textasciicircum{}, 6:\textless{}, 7:\textless{}=, 8:\textgreater{}, 9:\textgreater{}=, 10:==, 11:!=, 12:--, 13:\%, 14:** & (``+`` | ``*`` | ``/`` | ``\&\&`` | ``||`` | ``\textasciicircum{}`` | ``\textless{}`` | ``\textgreater{}`` | ``\textless{}=`` | ``\textgreater{}=`` | ``==`` | ``!=`` | ``--`` | ``\%`` | ``**``) \\ \hline
+MENOS & 263 &  & ``-`` \\ \hline
+OP\_EXC\_UN & 264 & 0:!, 1:\#, 2:? & (`` ! `` | ``\#`` | `` ? ``) \\ \hline
+ARROBA & 265 &  & ``@`` \\ \hline
+MASMAS & 266 &  & ``++`` \\ \hline
+ID & 267 &  & {[}a-zA-Z{]}+{[}a-zA-Z0-9{]}* \\ \hline
+PYC & 268 &  & ``;`` \\ \hline
+PARENTESIS\_ABRE & 269 &  & ``(`` \\ \hline
+PARENTESIS\_CIERRA & 270 &  & ``)`` \\ \hline
+COMILLAS & 271 &  & `` '' `` \\ \hline
+DOLAR & 272 &  & ``\$`` \\ \hline
+AVANZAR & 273 &  & ``\textgreater{}\textgreater{}`` \\ \hline
+RETROCEDER & 274 &  & ``\textless{}\textless{}`` \\ \hline
+ENTRADA & 275 &  & ``entrada`` \\ \hline
+SALIDA & 276 &  & ``salida`` \\ \hline
+MIENTRAS & 277 &  & ``mientras`` \\ \hline
+REPETIR & 278 &  & ``repetir`` \\ \hline
+DEVUELVE & 279 &  & ``devuelve`` \\ \hline
+SI & 280 &  & ``si`` \\ \hline
+SINO & 281 &  & ``sino`` \\ \hline
+ASIGNACION & 282 &  & ``=`` \\ \hline
+LISTADE & 283 &  & ``listade`` \\ \hline
+LLAVE\_ABRE & 284 &  & ``\}`` \\ \hline
+LLAVE\_CIERRA & 285 &  & ``\{`` \\ \hline
+TIPO\_BASICO & 286 & 0: entero, 1:real, 2:caracter, 3:booleano & (``entero`` | ``real`` | ``caracter`` | ``booleano``) \\ \hline
+PRINCIPAL & 287 &  & ``principal()`` \\ \hline
+\end{tabular}%
+}
+\end{table}
 
 
 \end{document}
