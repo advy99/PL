@@ -236,8 +236,13 @@ La sintaxis usando BNF y añadiendo las consideraciones correspondiente al lengu
   \bnfprod{Cabecera\_subprograma}
 	 { [ \bnfpn{tipo}] \bnfsp \bnfpn{identificador} \bnfsp ( \bnfpn{parametros} ) }\\
   \bnfprod{parametros}
-    {\bnfpn{parametros} \bnfsp ['',''] \bnfsp \bnfpn{parametro}}\\
+    {\bnfpn{parametro}}\\
+	 \bnfmore{| \bnfsp \bnfpn{parametro\_preced} \bnfsp \bnfpn{parametro}}\\
     \bnfmore{| \bnfsp \epsilon}\\
+  \bnfprod{parametro\_preced}
+	 {\bnfpn{parametro\_preced} \bnfsp \bnfpn{parametro\_preced} }\\
+	 \bnfmore{| \bnfsp \bnfpn{parametro} \bnfsp ,}\\
+	 \bnfmore{| \bnfsp \epsilon}\\
   \bnfprod{parametro}
     {\bnfpn{tipo} \bnfsp \bnfpn{identificador}}\\
   \bnfprod{tipo}
@@ -341,8 +346,13 @@ La sintaxis usando BNF y añadiendo las consideraciones correspondiente al lengu
   \bnfprod{lista}
     {''['' \bnfpn{contenido\_lista} '']''}\\
   \bnfprod{contenido\_lista}
-    {\bnfpn{contenido\_lista} [,] \bnfpn{constante\_basica}}\\
+    {\bnfpn{contenido\_lista\_preced} \bnfsp \bnfpn{constante\_basica}}\\
+	 \bnfmore{| \bnfsp \bnfpn{constante\_basica}}\\
     \bnfmore{| \bnfsp \epsilon}\\
+  \bnfprod{contenido\_lista\_preced}
+  	 {\bnfpn{contenido\_lista\_preced} \bnfsp \bnfpn{contenido\_lista\_preced}}\\
+	 \bnfmore{| \bnfpn{constante\_basica} \bnfsp ,}\\
+	 \bnfmore{| \epsilon}\\
 	\bnfprod{entero}
     {\bnfpn{entero} \bnfpn{digito}}\\
     \bnfmore{| \bnfsp \bnfpn{digito}}\\
