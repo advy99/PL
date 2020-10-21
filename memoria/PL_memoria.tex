@@ -326,7 +326,12 @@ La sintaxis usando BNF y añadiendo las consideraciones correspondiente al lengu
   \bnfprod{llamada\_subprograma}
     { \bnfpn{identificador} \bnfsp  ( \bnfsp \bnfpn{lista\_const} \bnfsp ) \bnfsp ;}\\
   \bnfprod{lista_const}
-    { \bnfpn{lista_const} [,] \bnfpn{constante}}\\
+    {\bnfpn{constante}}\\
+	 \bnfmore{| \bnfsp \bnfpn{lista_const_prec} \bnfsp \bnfpn{constante}}\\
+    \bnfmore{| \bnfsp \epsilon}\\
+  \bnfprod{lista_const_prec}
+  	 {\bnfpn{lista_const_prec} \bnfsp \bnfpn{lista_const_prec}}\\
+    \bnfmore{| \bnfsp \bnfpn{constante} \bnfsp , }\\
     \bnfmore{| \bnfsp \epsilon}\\
   \bnfprod{identificador}
 		{ \bnfpn{letra} \bnfsp \bnfpn{resto\_identificador}}\\
