@@ -28,5 +28,6 @@
 #define	LLAVE_CIERRA	284
 #define	TIPO_BASICO	285
 #define	PRINCIPAL	286
+#define CADENA 287
 
 

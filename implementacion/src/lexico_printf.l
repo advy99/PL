@@ -1,7 +1,7 @@
 %{
 #include <stdlib.h>
 #include <string.h>
-#include <y.tab.h>
+//#include <y.tab.h>
 #include "tabla_tokens.h"
 
 int num_linea = 1;
@@ -14,7 +14,7 @@ digito		[0-9]
 %%
 
 "\n"								num_linea++;
-[" ""\t"]+						;
+(" "|"\t")+						;
 "principal()"					printf("lexema='%s' token='PRINCIPAL'\n",yytext); return(PRINCIPAL);
 "entero"							printf("lexema='%s' token='TIPO_BASICO' atributo='0'\n",yytext); return(TIPO_BASICO);
 "real"							printf("lexema='%s' token='TIPO_BASICO' atributo='1'\n",yytext); return(TIPO_BASICO);
@@ -34,7 +34,7 @@ digito		[0-9]
 "<<"								printf("lexema='%s' token='RETROCEDER'\n",yytext); return(RETROCEDER);
 ">>"								printf("lexema='%s' token='AVANZAR'\n",yytext); return(AVANZAR);
 "$"								printf("lexema='%s' token='DOLAR'\n",yytext); return(DOLAR);
-"\""								printf("lexema='%s' token='COMILLAS'\n",yytext); return(COMILLAS);
+"\\\""								printf("lexema='%s' token='COMILLAS'\n",yytext); return(COMILLAS);
 ")"								printf("lexema='%s' token='PARENTESIS_CIERRA'\n",yytext); return(PARENTESIS_CIERRA);
 "("								printf("lexema='%s' token='PARENTESIS_ABRE'\n",yytext); return(PARENTESIS_ABRE);
 ";"								printf("lexema='%s' token='PYC'\n",yytext); return(PYC);
@@ -65,8 +65,9 @@ digito		[0-9]
 {digito}+						printf("lexema='%s' token='CONSTANTE_BASICA' atributo='0'\n",yytext); return(CONSTANTE_BASICA);
 {digito}+"."{digito}+		printf("lexema='%s' token='CONSTANTE_BASICA' atributo='1'\n",yytext); return(CONSTANTE_BASICA);
 "\'"{letra}"\'"				printf("lexema='%s' token='CONSTANTE_BASICA' atributo='2'\n",yytext); return(CONSTANTE_BASICA);
-"verdadero" | "falso"		printf("lexema='%s' token='CONSTANTE_BASICA' atributo='3'\n",yytext); return(CONSTANTE_BASICA);
-{letra}[{letra}{digito}]*	printf("lexema='%s' token='ID'\n",yytext); return(ID);
-.							return("Símbolo erróneo: '%s' en línea %d\n",yytext, num_linea);
-
+("verdadero"|"falso")		printf("lexema='%s' token='CONSTANTE_BASICA' atributo='3'\n",yytext); return(CONSTANTE_BASICA);
+"\""{letra}(" "|{letra}|{digito})*"\""	printf("lexema='%s' token='CADENA'\n",yytext); return(CADENA);
+{letra}({letra}|{digito})*	printf("lexema='%s' token='ID'\n",yytext); return(ID);
+.							printf("Símbolo erróneo: '%s' en línea %d\n",yytext, num_linea);
 %%
+
