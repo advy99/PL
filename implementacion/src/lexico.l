@@ -62,10 +62,9 @@ digito		[0-9]
 ","								return(COMA);
 "]"								return(CORCHETE_CIERRA);
 "["								return(CORCHETE_ABRE);
-									return(LISTA);
 {digito}+						yylval = 0; return(CONSTANTE_BASICA);
 {digito}+"."{digito}+		yylval = 1; return(CONSTANTE_BASICA);
-"\""{letra}+"\""				yylval = 2; return(CONSTANTE_BASICA);
+"\'"{letra}"\'"				yylval = 2; return(CONSTANTE_BASICA);
 "verdadero" | "falso"		yylval = 3; return(CONSTANTE_BASICA);
 {letra}[{letra}{digito}]*	return(ID);
 .							return("Símbolo erróneo: '%s' en línea %d\n",yytext, num_linea);
