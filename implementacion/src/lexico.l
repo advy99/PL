@@ -67,6 +67,6 @@ digito		[0-9]
 "\'"{letra}"\'"				yylval = 2; return(CONSTANTE_BASICA);
 "verdadero" | "falso"		yylval = 3; return(CONSTANTE_BASICA);
 {letra}[{letra}{digito}]*	return(ID);
-.							return("Símbolo erróneo: '%s' en línea %d\n",yytext, num_linea);
+.							printf("Símbolo erróneo: '%s' en línea %d\n",yytext, num_linea);
 
 %%

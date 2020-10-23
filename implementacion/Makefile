@@ -13,7 +13,7 @@ crear_carpetas:
 $(BIN)/lexico: $(SRC)/lex.yy.c
 	gcc $^ -o $@ -I$(INCLUDE) -lfl
 
-$(SRC)/lex.yy.c: $(SRC)/lexico.l
+$(SRC)/lex.yy.c: $(SRC)/lexico_printf.l
 	lex -o $@ $^
 
 
