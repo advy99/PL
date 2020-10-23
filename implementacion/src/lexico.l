@@ -6,7 +6,6 @@
 int num_linea = 1;
 
 %}
-%%
 
 letra		[a-zA-Z]
 digito		[0-9]
