@@ -1,12 +1,12 @@
 %{
 #include <stdlib.h>
 #include <string.h>
+#include <y.tab.h>
 #include "tabla_tokens.h"
 
 int num_linea = 1;
 
 %}
-%%
 
 letra		[a-zA-Z]
 digito		[0-9]
