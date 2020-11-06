@@ -1,31 +1,33 @@
-entero potencia(entero base, entero exponente){
-
-	entero almacen = base;
-	entero iter = 0;
-	
-	repetir{
-		almacen = almacen * almacen;
-		iter = iter + 1;	
-	}mientras(iter < exponente);
-
-	devuelve almacen;
-
-}
 
 
 principal(){
+
+
+	entero potencia(entero base, entero exponente){
+
+		entero almacen = base;
+		entero iter = 0;
+
+		repetir{
+			almacen = almacen * almacen;
+			iter = iter + 1;
+		}mientras(iter < exponente);
+
+		devuelve almacen;
+
+	}
 
 	cadena ejemplo_Cadena = "Este es un ejemplo";
 	entero ejemploEntero = 3;
 	real ejemploReal = 4.5;
 	caracter ejemploCaracter = 'f';
 	booleano ejemploBooleano = verdadero;
-	
+
 	listade entero ejemploLista = [4,2,3,5,3,6,3];
-	
+
 	ejemploLista>>;
 	entero devuelto = ?ejemploLista;
-	
+
 	si(ejemploEntero == devuelto | ejemploReal < 5.0){
 		ejemploBooleano = falso;
 	}
