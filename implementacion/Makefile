@@ -13,11 +13,11 @@ crear_carpetas:
 $(BIN)/lexico: $(SRC)/lex.yy.c
 	gcc $^ -o $@ -I$(INCLUDE) -lfl
 
-$(SRC)/lex.yy.c: $(SRC)/lexico_printf.l
+$(SRC)/lex.yy.c: $(SRC)/lexico.l
 	lex -o $@ $^
  
 $(INCLUDE)/y.tab.h: $(SRC)/sintactico.y
-    bison -d $^ -o $@
+	bison -d $^ -o $@
 
 clean:
 	-rm $(BIN)/lexico

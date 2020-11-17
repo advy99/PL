@@ -10,9 +10,6 @@ int num_linea = 1;
 
 %}
 
-%error-verbose
-
-
 
 %token CONSTANTE_BASICA
 %token CORCHETE_ABRE
