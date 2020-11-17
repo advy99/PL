@@ -464,36 +464,37 @@ Además, debido a que nuestro lenguaje trabaja con el tipo de dato lista, debemo
 \begin{tabular}{|c|c|c|c|}
 \hline
 \textbf{Token} & \textbf{Identificador} & \textbf{Atributos} & \textbf{Patrón} \\ \hline
-CONSTANTE\_BASICA & 257 & 0: entero, 1:real, 2:caracter, 3:booleano  & ("{[}a-zA-Z{]}" | {[}0-9{]}+ | {[}0-9{]}+"."{[}0-9{]}+ | "verdadero" | "falso") \\ \hline
-CORCHETE\_ABRE & 258 &  & ``{[}`` \\ \hline
-CORCHETE\_CIERRA & 259 &  & ``{]}`` \\ \hline
-COMA & 260 &  & ``,`` \\ \hline
-OP\_EXC\_BIN & 261 & 0:+, 1:*, 2:/, 3:\&\&, 4:||, 5:\textasciicircum{}, 6:\textless{}, 7:\textless{}=, 8:\textgreater{}, 9:\textgreater{}=, 10:==, 11:!=, 12:--, 13:\%, 14:** & (``+`` | ``*`` | ``/`` | ``\&\&`` | ``||`` | ``\textasciicircum{}`` | ``\textless{}`` | ``\textgreater{}`` | ``\textless{}=`` | ``\textgreater{}=`` | ``==`` | ``!=`` | ``--`` | ``\%`` | ``**``) \\ \hline
-MENOS & 262 &  & ``-`` \\ \hline
-OP\_EXC\_UN & 263 & 0:!, 1:\#, 2:? & (`` ! `` | ``\#`` | `` ? ``) \\ \hline
-ARROBA & 264 &  & ``@`` \\ \hline
-MASMAS & 265 &  & ``++`` \\ \hline
-ID & 266 &  & {[}a-zA-Z{]}+{[}a-zA-Z0-9{]}* \\ \hline
-PYC & 267 &  & ``;`` \\ \hline
-PARENTESIS\_ABRE & 268 &  & ``(`` \\ \hline
-PARENTESIS\_CIERRA & 269 &  & ``)`` \\ \hline
-COMILLAS & 270 &  & `` '' `` \\ \hline
-DOLAR & 271 &  & ``\$`` \\ \hline
-AVANZAR & 272 &  & ``\textgreater{}\textgreater{}`` \\ \hline
-RETROCEDER & 273 &  & ``\textless{}\textless{}`` \\ \hline
-ENTRADA & 274 &  & ``entrada`` \\ \hline
-SALIDA & 275 &  & ``salida`` \\ \hline
-MIENTRAS & 276 &  & ``mientras`` \\ \hline
-REPETIR & 277 &  & ``repetir`` \\ \hline
-DEVUELVE & 278 &  & ``devuelve`` \\ \hline
-SI & 279 &  & ``si`` \\ \hline
-SINO & 280 &  & ``sino`` \\ \hline
-ASIGNACION & 281 &  & ``=`` \\ \hline
-LISTADE & 282 &  & ``listade`` \\ \hline
-LLAVE\_ABRE & 283 &  & ``\}`` \\ \hline
-LLAVE\_CIERRA & 284 &  & ``\{`` \\ \hline
-TIPO\_BASICO & 285 & 0: entero, 1:real, 2:caracter, 3:booleano & (``entero`` | ``real`` | ``caracter`` | ``booleano``) \\ \hline
-PRINCIPAL & 286 &  & ``principal()`` \\ \hline
+CONSTANTE\_BASICA & 257 & 0: entero, 1:real, 2:caracter, 3:booleano  & (``{[}a-zA-Z{]}'' | {[}0-9{]}+ | {[}0-9{]}+``.''{[}0-9{]}+ | ``verdadero'' | ``falso'') \\ \hline
+CORCHETE\_ABRE & 258 &  & ``{[}'' \\ \hline
+CORCHETE\_CIERRA & 259 &  & ``{]}'' \\ \hline
+COMA & 260 &  & ``,'' \\ \hline
+OP\_EXC\_BIN & 261 & 0:+, 1:*, 2:/, 3:\&\&, 4:||, 5:\textasciicircum{}, 6:\textless{}, 7:\textless{}=, 8:\textgreater{}, 9:\textgreater{}=, 10:==, 11:!=, 12:--, 13:\%, 14:** & (``+'' | ``*'' | ``/'' | ``\&\&'' | ``||'' | ``\textasciicircum{}'' | ``\textless{}'' | ``\textgreater{}'' | ``\textless{}='' | ``\textgreater{}='' | ``=='' | ``!='' | ``--'' | ``\%'' | ``**'') \\ \hline
+MENOS & 262 &  & ``-'' \\ \hline
+OP\_EXC\_UN & 263 & 0:!, 1:\#, 2:? & (`` ! '' | ``\#'' | `` ?'') \\ \hline
+ARROBA & 264 &  & ``@'' \\ \hline
+MASMAS & 265 &  & ``++'' \\ \hline
+ID & 266 &  & ``{[}a-zA-Z{]}+{[}a-zA-Z0-9{]}*'' \\ \hline
+PYC & 267 &  & ``;'' \\ \hline
+PARENTESIS\_ABRE & 268 &  & ``('' \\ \hline
+PARENTESIS\_CIERRA & 269 &  & ``)'' \\ \hline
+COMILLAS & 270 &  & `` '' '' \\ \hline
+DOLAR & 271 &  & ``\$'' \\ \hline
+AVANZAR & 272 &  & ``\textgreater{}\textgreater{}'' \\ \hline
+RETROCEDER & 273 &  & ``\textless{}\textless{}'' \\ \hline
+ENTRADA & 274 &  & ``entrada'' \\ \hline
+SALIDA & 275 &  & ``salida'' \\ \hline
+MIENTRAS & 276 &  & ``mientras'' \\ \hline
+REPETIR & 277 &  & ``repetir'' \\ \hline
+DEVUELVE & 278 &  & ``devuelve'' \\ \hline
+SI & 279 &  & ``si'' \\ \hline
+SINO & 280 &  & ``sino'' \\ \hline
+ASIGNACION & 281 &  & ``='' \\ \hline
+LISTADE & 282 &  & ``listade'' \\ \hline
+LLAVE\_ABRE & 283 &  & ``\}'' \\ \hline
+LLAVE\_CIERRA & 284 &  & ``\{'' \\ \hline
+TIPO\_BASICO & 285 & 0: entero, 1:real, 2:caracter, 3:booleano & (``entero'' | ``real'' | ``caracter'' | ``booleano'') \\ \hline
+PRINCIPAL & 286 &  & ``principal()'' \\ \hline
+CADENA & 287 & & `` ''{[}a-zA-Z0-9{]}*'' '' \\ \hline
 \end{tabular}%
 }
 \end{table}
