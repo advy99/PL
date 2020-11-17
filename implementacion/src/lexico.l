@@ -2,9 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <y.tab.h>
-#include "tabla_tokens.h"
 
-int num_linea = 1;
 
 %}
 
@@ -66,6 +64,7 @@ digito		[0-9]
 {digito}+"."{digito}+		yylval = 1; return(CONSTANTE_BASICA);
 "\'"{letra}"\'"				yylval = 2; return(CONSTANTE_BASICA);
 "verdadero" | "falso"		yylval = 3; return(CONSTANTE_BASICA);
+"\""{letra}(" "|{letra}|{digito})*"\"" return(CADENA);
 {letra}[{letra}{digito}]*	return(ID);
 .							printf("Símbolo erróneo: '%s' en línea %d\n",yytext, num_linea);
 
