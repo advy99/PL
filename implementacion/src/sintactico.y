@@ -49,6 +49,7 @@ int num_linea = 1;
 %left ARROBA
 
 
+
 %start programa
 
 %%
@@ -120,7 +121,7 @@ parametro_preced            : parametro_preced parametro_preced
                                 | parametro COMA;
 
 sentencias                  : sentencias sentencia
-                                | sentencia ;
+                                | ;
 
 sentencia                   : bloque
                                 | ID ASIGNACION expresion PYC
@@ -133,8 +134,7 @@ sentencia                   : bloque
                                 | ID RETROCEDER PYC
                                 | DOLAR ID PYC
                                 | ENTRADA lista_variables
-                                | SALIDA lista_expresiones_o_cadena
-                                | ;
+                                | SALIDA lista_expresiones_o_cadena ;
 
 lista_variables             : lista_variables COMA ID
                                 | ID ;
