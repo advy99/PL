@@ -89,7 +89,7 @@ contenido_lista             : contenido_lista_preced CONSTANTE_BASICA
                                 | CONSTANTE_BASICA
                                 | ;
 
-contenido_lista_preced      : contenido_lista_preced contenido_lista_preced
+contenido_lista_preced      : contenido_lista_preced CONSTANTE_BASICA COMA
                                 | CONSTANTE_BASICA COMA ;
 
 
@@ -102,8 +102,7 @@ declar_subprogramas         : declar_subprogramas declar_subp
 
 declar_subp                 : cabecera_subp bloque ;
 
-cabecera_subp               : tipo ID PARENTESIS_ABRE parametros PARENTESIS_CIERRA
-                                | ID PARENTESIS_ABRE parametros PARENTESIS_CIERRA ;
+cabecera_subp               : tipo ID PARENTESIS_ABRE parametros PARENTESIS_CIERRA ;
 
 tipo                        : TIPO_BASICO
                                 | LISTADE TIPO_BASICO ;
@@ -114,7 +113,7 @@ parametros                  : parametro
 
 parametro                   : tipo ID ;
 
-parametro_preced            : parametro_preced parametro_preced
+parametro_preced            : parametro_preced parametro COMA
                                 | parametro COMA;
 
 sentencias                  : sentencias sentencia
