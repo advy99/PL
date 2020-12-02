@@ -18,6 +18,7 @@ digito		[0-9]
 "real"							yylval = 1; return(TIPO_BASICO);
 "caracter"						yylval = 2; return(TIPO_BASICO);
 "booleano"						yylval = 3; return(TIPO_BASICO);
+"vacio"							yylval = 4; return(TIPO_BASICO);
 "}"								return(LLAVE_CIERRA);
 "{"								return(LLAVE_ABRE);
 "listade"						return(LISTADE);
