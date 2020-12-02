@@ -27,7 +27,7 @@ $(OBJ)/y.tab.o: $(SRC)/y.tab.c
 $(SRC)/y.tab.c: $(SRC)/lexico.l $(SRC)/lex.yy.c
 	bison -o $@ $(SRC)/sintactico.y
 
-$(SRC)/lex.yy.c: $(SRC)/lexico.l
+$(SRC)/lex.yy.c: $(SRC)/lexico.l $(INCLUDE)/y.tab.h
 	lex -o $@ $^
 
 $(INCLUDE)/y.tab.h: $(SRC)/sintactico.y

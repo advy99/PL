@@ -24,7 +24,6 @@ int num_linea = 1;
 %token PYC
 %token PARENTESIS_ABRE
 %token PARENTESIS_CIERRA
-%token COMILLAS
 %token DOLAR
 %token AVANZAR
 %token RETROCEDER
@@ -43,7 +42,12 @@ int num_linea = 1;
 %token PRINCIPAL
 %token CADENA
 
-%left OP_EXC_UN OP_EXC_BIN
+%left OP_EXC_BIN
+%right OP_EXC_UN
+%left MENOS
+%left MASMAS
+%left ARROBA
+
 
 %start programa
 
@@ -68,6 +72,7 @@ expresion                   : PARENTESIS_ABRE expresion PARENTESIS_CIERRA
                                 | OP_EXC_UN expresion
                                 | expresion OP_EXC_BIN expresion
                                 | expresion MASMAS expresion ARROBA expresion
+                                | MENOS expresion
                                 | llamada_subprograma
                                 | ID
                                 | constante ;

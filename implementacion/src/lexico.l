@@ -32,7 +32,6 @@ digito		[0-9]
 "<<"								return(RETROCEDER);
 ">>"								return(AVANZAR);
 "$"								return(DOLAR);
-"\""								return(COMILLAS);
 ")"								return(PARENTESIS_CIERRA);
 "("								return(PARENTESIS_ABRE);
 ";"								return(PYC);
