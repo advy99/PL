@@ -48,7 +48,7 @@ int num_linea = 1;
 %left MASMAS
 %left ARROBA
 
-%left COMA
+%nonassoc COMA
 
 %left CORCHETE_ABRE
 %left CORCHETE_CIERRA
@@ -137,7 +137,7 @@ lista_variables             : lista_variables COMA ID
                                 | ID ;
 
 lista_expresiones_o_cadena  : lista_expresiones_o_cadena COMA CADENA
-                                | expresion COMA lista_expresiones_o_cadena
+									 	  | lista_expresiones_o_cadena COMA expresion
                                 | CADENA
                                 | expresion ;
 
