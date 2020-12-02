@@ -13,6 +13,7 @@ digito		[0-9]
 
 "\n"								num_linea++;
 [" ""\t"]+						;
+"variable"						return(VAR);
 "principal()"					return(PRINCIPAL);
 "entero"							yylval = 0; return(TIPO_BASICO);
 "real"							yylval = 1; return(TIPO_BASICO);
@@ -64,7 +65,7 @@ digito		[0-9]
 {digito}+"."{digito}+		yylval = 1; return(CONSTANTE_BASICA);
 "\'"{letra}"\'"				yylval = 2; return(CONSTANTE_BASICA);
 "verdadero" | "falso"		yylval = 3; return(CONSTANTE_BASICA);
-"\""(" "|{letra}|{digito})*"\"" return(CADENA);
+"\""(" "|{letra}|{digito})*"\"" yylval = 4; return(CADENA);
 {letra}[{letra}{digito}]*	return(ID);
 .							printf("Símbolo erróneo: '%s' en línea %d\n",yytext, num_linea);
 
