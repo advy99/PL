@@ -1,5 +1,5 @@
-#include<stdio.h>
-#include<stdlib.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 extern FILE * yyin;
 
@@ -11,12 +11,12 @@ FILE * abrir_entrada(int argc, char * argv[] ) {
 	if( argc > 1 ) {
 		f = fopen(argv[1],"r");
 		if (f == NULL) {
-			fprintf(stderr,"fichero’%s’noencontrado\n",argv[1]);
+			fprintf(stderr,"fichero ’%s’ no encontrado\n",argv[1]);
 			exit(1);
 		} else
-			printf("leyendofichero’%s’.\n",argv[1]);
+			printf("leyendo fichero ’%s’ .\n",argv[1]);
 	} else
-		printf("leyendoentradaestándar.\n");
+		printf("leyendo entrada estándar.\n");
 	return f;
 }
 

@@ -16,22 +16,22 @@ $(BIN)/prueba: $(OBJ)/main.o $(OBJ)/y.tab.o
 	gcc -o $@ $^
 
 $(OBJ)/main.o: $(SRC)/main.c
-	gcc -c -o $(OBJ)/main.o $(SRC)/main.c -I$(INCLUDE)
+	gcc -c -o $(OBJ)/main.o $(SRC)/main.c -I$(SRC)
 
 $(BIN)/lexico: $(SRC)/lex.yy.c
-	gcc $^ -o $@ -I$(INCLUDE) -lfl -I$(INCLUDE)
+	lex $^ -o $@ -I$(INCLUDE) -lfl
 
 $(OBJ)/y.tab.o: $(SRC)/y.tab.c
-	gcc -c -o $@ $(SRC)/y.tab.c -I$(INCLUDE)
+	gcc -c -o $@ $(SRC)/y.tab.c -lfl -I$(SRC)
 
 $(SRC)/y.tab.c: $(SRC)/lexico.l $(SRC)/lex.yy.c
-	yacc -o $@ $(SRC)/sintactico.y -Wcounterexamples
+	yacc -d -o $@ $(SRC)/sintactico.y
 
-$(SRC)/lex.yy.c: $(SRC)/lexico.l $(INCLUDE)/y.tab.h
-	lex -o $@ $^
+$(SRC)/lex.yy.c: $(SRC)/lexico.l
+	lex -o $@ $(SRC)/lexico.l
 
-$(INCLUDE)/y.tab.h: $(SRC)/sintactico.y
-	yacc -d $^ -o $@
+#$(INCLUDE)/y.tab.h: $(SRC)/sintactico.y
+#	yacc -d $^ -o $@
 
 clean:
 	-rm $(BIN)/*
