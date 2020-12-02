@@ -85,8 +85,7 @@ contenido_lista             : contenido_lista_preced CONSTANTE_BASICA
                                 | ;
 
 contenido_lista_preced      : contenido_lista_preced contenido_lista_preced
-                                | CONSTANTE_BASICA COMA
-                                | ;
+                                | CONSTANTE_BASICA COMA ;
 
 
 
@@ -97,8 +96,8 @@ lista_const                 : constante
                                 | ;
 
 lista_constante_preced      : lista_constante_preced lista_constante_preced
-                                | constante COMA
-                                | ;
+                                | constante COMA ;
+
 
 declar_subprogramas         : declar_subprogramas declar_subp
                                 | ;
@@ -118,8 +117,7 @@ parametros                  : parametro
 parametro                   : tipo ID ;
 
 parametro_preced            : parametro_preced parametro_preced
-                                | parametro COMA
-                                | ;
+                                | parametro COMA;
 
 sentencias                  : sentencias sentencia
                                 | sentencia ;
