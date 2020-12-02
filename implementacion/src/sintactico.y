@@ -48,6 +48,10 @@ int num_linea = 1;
 %left MASMAS
 %left ARROBA
 
+%left COMA
+
+%left CORCHETE_ABRE
+%left CORCHETE_CIERRA
 
 
 %start programa
@@ -89,15 +93,8 @@ contenido_lista_preced      : contenido_lista_preced contenido_lista_preced
                                 | CONSTANTE_BASICA COMA ;
 
 
+llamada_subprograma         : ID PARENTESIS_ABRE parametros PARENTESIS_CIERRA PYC ;
 
-llamada_subprograma         : ID PARENTESIS_ABRE lista_const PARENTESIS_CIERRA PYC ;
-
-lista_const                 : constante
-                                | lista_constante_preced constante
-                                | ;
-
-lista_constante_preced      : lista_constante_preced lista_constante_preced
-                                | constante COMA ;
 
 
 declar_subprogramas         : declar_subprogramas declar_subp
