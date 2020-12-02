@@ -64,7 +64,6 @@ programa					: PRINCIPAL bloque ;
 
 bloque						: LLAVE_ABRE variables declar_subprogramas sentencias LLAVE_CIERRA ;
 
-bloque						: error {printf("Error, se esperaba un bloque.\n"); yyerrok;} ;
 
 
 variables					: declar_variables
@@ -77,6 +76,7 @@ cuerpo_declar_var			: VAR tipo ident_variables PYC ;
 
 ident_variables             : ident_variables COMA ID
                                 | ident_variables COMA ID ASIGNACION expresion
+                                | ident_variables COMA ID ASIGNACION CADENA
                                 | ID
                                 | ID ASIGNACION expresion ;
 
