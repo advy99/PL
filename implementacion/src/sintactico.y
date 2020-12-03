@@ -133,7 +133,7 @@ sentencia                   : bloque
                                 | SI expresion sentencia SINO sentencia
                                 | MIENTRAS expresion sentencia
                                 | REPETIR sentencia MIENTRAS PARENTESIS_ABRE expresion PARENTESIS_CIERRA PYC
-                                | DEVUELVE ID PYC
+                                | DEVUELVE expresion PYC
                                 | ID AVANZAR PYC
                                 | ID RETROCEDER PYC
                                 | DOLAR ID PYC
