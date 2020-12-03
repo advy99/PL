@@ -8,11 +8,11 @@
 
 letra		[a-zA-Z]
 digito		[0-9]
+
+
 %option noyywrap
 %%
 
-"\n"								num_linea++;
-[" ""\t"]+						;
 "variable"						return(VAR);
 "principal()"					return(PRINCIPAL);
 "entero"							yylval = 0; return(TIPO_BASICO);
@@ -29,7 +29,7 @@ digito		[0-9]
 "devuelve"						return(DEVUELVE);
 "repetir"						return(REPETIR);
 "mientras"						return(MIENTRAS);
-"salida"							return(SALIDA);
+"salida"						return(SALIDA);
 "entrada"						return(ENTRADA);
 "<<"								return(RETROCEDER);
 ">>"								return(AVANZAR);
@@ -63,10 +63,12 @@ digito		[0-9]
 "["								return(CORCHETE_ABRE);
 {digito}+						yylval = 0; return(CONSTANTE_BASICA);
 {digito}+"."{digito}+		yylval = 1; return(CONSTANTE_BASICA);
-"\'"{letra}"\'"				yylval = 2; return(CONSTANTE_BASICA);
+"\'"."\'"						yylval = 2; return(CONSTANTE_BASICA);
 ("verdadero"|"falso")		yylval = 3; return(CONSTANTE_BASICA);
-"\""(" "|{letra}|{digito})*"\"" yylval = 4; return(CADENA);
+\'[^\']+\'						return(CADENA);
 {letra}({letra}|{digito})*	return(ID);
+"\n"								num_linea++;
+[" ""\t"]+						;
 .							printf("Símbolo erróneo: '%s' en línea %d\n",yytext, num_linea);
 
 %%

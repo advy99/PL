@@ -83,6 +83,7 @@ ident_variables             : ident_variables COMA ID
 expresion                   : PARENTESIS_ABRE expresion PARENTESIS_CIERRA
                                 | OP_EXC_UN expresion
                                 | expresion OP_EXC_BIN expresion
+                                | expresion MENOS expresion
                                 | expresion MASMAS expresion ARROBA expresion
                                 | MENOS expresion
                                 | llamada_subprograma
@@ -100,7 +101,7 @@ contenido_lista_preced      : contenido_lista_preced CONSTANTE_BASICA COMA
                                 | CONSTANTE_BASICA COMA ;
 
 
-llamada_subprograma         : ID PARENTESIS_ABRE parametros PARENTESIS_CIERRA PYC ;
+llamada_subprograma         : ID PARENTESIS_ABRE lista_variables_constantes PARENTESIS_CIERRA;
 
 
 
@@ -132,7 +133,7 @@ sentencia                   : bloque
                                 | SI expresion sentencia SINO sentencia
                                 | MIENTRAS expresion sentencia
                                 | REPETIR sentencia MIENTRAS PARENTESIS_ABRE expresion PARENTESIS_CIERRA PYC
-                                | DEVUELVE ID PYC
+                                | DEVUELVE expresion PYC
                                 | ID AVANZAR PYC
                                 | ID RETROCEDER PYC
                                 | DOLAR ID PYC
@@ -140,6 +141,12 @@ sentencia                   : bloque
                                 | SALIDA lista_expresiones_o_cadena PYC ;
 
 lista_variables             : lista_variables COMA ID
+                                | ID ;
+
+
+lista_variables_constantes  : lista_variables_constantes COMA ID
+                                | lista_variables_constantes COMA constante
+                                | constante
                                 | ID ;
 
 lista_expresiones_o_cadena  : lista_expresiones_o_cadena COMA CADENA
