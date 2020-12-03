@@ -69,7 +69,7 @@ principal() {
 
             variable entero dato ;
 
-            dato= 2 ;
+            dato= 2
 
             dato= valor*20/dato ;
         }
