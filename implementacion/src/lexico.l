@@ -8,6 +8,8 @@
 
 letra		[a-zA-Z]
 digito		[0-9]
+
+
 %option noyywrap
 %%
 
@@ -29,7 +31,7 @@ digito		[0-9]
 "devuelve"						return(DEVUELVE);
 "repetir"						return(REPETIR);
 "mientras"						return(MIENTRAS);
-"salida"							return(SALIDA);
+"salida"						return(SALIDA);
 "entrada"						return(ENTRADA);
 "<<"								return(RETROCEDER);
 ">>"								return(AVANZAR);
@@ -65,8 +67,8 @@ digito		[0-9]
 {digito}+"."{digito}+		yylval = 1; return(CONSTANTE_BASICA);
 "\'"{letra}"\'"				yylval = 2; return(CONSTANTE_BASICA);
 ("verdadero"|"falso")		yylval = 3; return(CONSTANTE_BASICA);
-"\""(" "|{letra}|{digito})*"\"" yylval = 4; return(CADENA);
-{letra}({letra}|{digito})*	return(ID);
+"\""([^\"]|\\.)*"\""    printf("'%s'\n",yytext); return(CADENA);
+{letra}({letra}|{digito})*	printf("ID: '%s'\n",yytext); return(ID);
 .							printf("Símbolo erróneo: '%s' en línea %d\n",yytext, num_linea);
 
 %%
