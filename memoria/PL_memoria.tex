@@ -226,15 +226,17 @@ La sintaxis usando BNF y añadiendo las consideraciones correspondiente al lengu
 	\bnfprod{Cuerpo\_declar\_variables}
 		{\bnfpn{tipo} \bnfsp \bnfpn{ident\_variables} ;}\\
 	\bnfprod{ident\_variables}
-    {\bnfpn{ident\_variables} \bnfsp  ,  \bnfsp \bnfpn{identificador} [= \bnfpn{expresion}]}\\
-    \bnfmore{| \bnfsp \bnfpn{identificador} [= \bnfpn{expresion}]}\\
+    {\bnfpn{ident\_variables} \bnfsp  ,  \bnfsp \bnfpn{identificador}}\\
+    \bnfmore{| \bnfsp \bnfpn{ident\_variables} \bnfsp , \bnfsp \bnfpn{identificador} \bnfsp = \bnfsp \bnfpn{expresion}}\\
+\bnfmore{| \bnfsp \bnfpn{identificador}}\\
+\bnfmore{| \bnfsp \bnfpn{identificador} \bnfsp = \bnfsp \bnfpn{expresion}}\\
 	\bnfprod{Declar\_de\_subprogs}
     {\bnfpn{Declar\_de\_subprogs} \bnfsp \bnfpn{Declar\_subprog}}\\
     \bnfmore{| \bnfsp \epsilon}\\
   \bnfprod{Declar\_subprog}
     {\bnfpn{Cabecera\_subprograma} \bnfsp \bnfpn{bloque}}\\
   \bnfprod{Cabecera\_subprograma}
-	 { [ \bnfpn{tipo}] \bnfsp \bnfpn{identificador} \bnfsp ( \bnfpn{parametros} ) }\\
+	 { \bnfpn{tipo} \bnfsp \bnfpn{identificador} \bnfsp ( \bnfpn{parametros} ) }\\
   \bnfprod{parametros}
     {\bnfpn{parametro}}\\
 	 \bnfmore{| \bnfsp \bnfpn{parametro\_preced} \bnfsp \bnfpn{parametro}}\\
@@ -242,7 +244,6 @@ La sintaxis usando BNF y añadiendo las consideraciones correspondiente al lengu
   \bnfprod{parametro\_preced}
 	 {\bnfpn{parametro\_preced} \bnfsp \bnfpn{parametro\_preced} }\\
 	 \bnfmore{| \bnfsp \bnfpn{parametro} \bnfsp ,}\\
-	 \bnfmore{| \bnfsp \epsilon}\\
   \bnfprod{parametro}
     {\bnfpn{tipo} \bnfsp \bnfpn{identificador}}\\
   \bnfprod{tipo}
@@ -255,7 +256,7 @@ La sintaxis usando BNF y añadiendo las consideraciones correspondiente al lengu
     \bnfmore{| \bnfsp \bnfpn{booleano}}\\
 	\bnfprod{Sentencias}
 		{\bnfpn{Sentencias} \bnfsp \bnfpn{Sentencia}}\\
-		\bnfmore{| \bnfsp \bnfpn{Sentencia}}\\
+		\bnfmore{| \bnfsp \epsilon}\\
 	\bnfprod{Sentencia}
 		{\bnfpn{bloque}}\\
 		\bnfmore{| \bnfsp \bnfpn{sentencia\_asignacion}}\\
@@ -268,7 +269,6 @@ La sintaxis usando BNF y añadiendo las consideraciones correspondiente al lengu
     \bnfmore{| \bnfsp \bnfpn{sentencia\_cursor\_comienzo}}\\
     \bnfmore{| \bnfsp \bnfpn{sentencia\_entrada}}\\
     \bnfmore{| \bnfsp \bnfpn{sentencia\_salida}}\\
-    \bnfmore{| \bnfsp \epsilon}\\
 	\bnfprod{sentencia\_asignacion}
 		{\bnfpn{identificador} \bnfsp = \bnfsp \bnfpn{expresion} \bnfsp  ; }\\
 	\bnfprod{sentencia\_if}
@@ -309,6 +309,7 @@ La sintaxis usando BNF y añadiendo las consideraciones correspondiente al lengu
 		\bnfmore{| \bnfsp \bnfpn{expresion} \bnfsp \bnfpn{op\_binario} \bnfsp \bnfpn{expresion}}\\
     \bnfmore{| \bnfsp \bnfpn{expresion} \bnfsp \bnfpn{op\_ternario\_prim} \bnfsp}\\
 	 \bnfmore{\bnfpn{expresion} \bnfsp \bnfpn{op\_ternario\_seg} \bnfsp \bnfpn{expresion}}\\
+    \bnfmore{| \bnfsp - \bnfsp \bnfpn{expresion}}\\
     \bnfmore{| \bnfsp \bnfpn{llamada\_subprograma}}\\
 		\bnfmore{| \bnfsp \bnfpn{identificador}}\\
 		\bnfmore{| \bnfsp \bnfpn{constante}}\\
@@ -341,7 +342,7 @@ La sintaxis usando BNF y añadiendo las consideraciones correspondiente al lengu
 	 \bnfmore{| \bnfsp \epsilon}\\
   \bnfprod{constante}
     {\bnfpn{constante\_basica}}\\
-    \bnfmore{| \bnfsp \bnfpn{lista}}\\
+    \bnfmore{| \bnfsp {Inicio\_de\_bloque} \bnfsp \bnfpn{contenido\_lista} \bnfsp {Fin\_de\_bloque}}\\
   \bnfprod{constante\_basica}
     {\bnfpn{entero}}\\
     \bnfmore{| \bnfsp \bnfpn{real}}\\
@@ -354,9 +355,8 @@ La sintaxis usando BNF y añadiendo las consideraciones correspondiente al lengu
 	 \bnfmore{| \bnfsp \bnfpn{constante\_basica}}\\
     \bnfmore{| \bnfsp \epsilon}\\
   \bnfprod{contenido\_lista\_preced}
-  	 {\bnfpn{contenido\_lista\_preced} \bnfsp \bnfpn{contenido\_lista\_preced}}\\
+  	 {\bnfpn{contenido\_lista\_preced} \bnfsp \bnfpn{constante\_basica} \bnfsp ,}\\
 	 \bnfmore{| \bnfpn{constante\_basica} \bnfsp ,}\\
-	 \bnfmore{| \epsilon}\\
 	\bnfprod{entero}
     {\bnfpn{entero} \bnfpn{digito}}\\
     \bnfmore{| \bnfsp \bnfpn{digito}}\\

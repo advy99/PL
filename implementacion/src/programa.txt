@@ -46,7 +46,7 @@ principal() {
             variable entero valor ;
 
             caracter funcionE (caracter e1, caracter e2){
-                salida 'ho :Sdf asre?#/2?!laas' ;
+                salida 'introduzca dos caracteres: ';
                 entrada e1, e2;
 
                 si (e1=='a')
@@ -56,13 +56,12 @@ principal() {
 
                     si (e1=='b')
                         devuelve e2;
-                	  sino
-                    	   devuelve ' ';
+                	sino
+                    	devuelve ' ';
                 }
+            }
 
-
-        }
-
+        salida 'introduzca un valor entero: ';
         entrada valor ;
 
         si (d1>0.0){
@@ -82,5 +81,17 @@ principal() {
     }
 
    }
+
+    pe=pe++10@0;
+    pf=pf++10.0@0;
+    pc=pc++'#'@0;
+
+    si (?pe == 20)
+        ve = ?pe;
+
+    sino{
+        pe = pe * pe2;
+        pe = pe++10*(20/2000)@?pe;
+    }   
 
 }
