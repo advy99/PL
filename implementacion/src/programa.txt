@@ -1,8 +1,8 @@
-principal(){
+principal() {
 
     variable entero ve;
-    variable real vf1, vf2, vf3;
-    variable caracter vc, vc2;
+    variable real vf1 vf2, vf3, vf4
+    variable caracter vc vc2;
     variable booleano vl;
     variable listade entero pe, pe2;
     variable listade real pf, pf2;
@@ -13,15 +13,15 @@ principal(){
 
         variable entero x1, x2;
 
-        caracter funcionB (caracter b1, booleano b2){
+        caracter funcionB (caracter sdf b1, booleano b2){
 
             variable real xf, x2;
 
-            real funcionC (booleano c1, entero c2){
+            real funcionC (booleano  c1, entero c2){
 
                 variable real x1 ;
 
-                x1 = 1.3 ;
+                x1 = 1.3;
 
                 si (c2>10)
                     c2 = c2 - 1;
@@ -32,11 +32,12 @@ principal(){
             }
 
             xf = functionC(verdadero, 10);
-            x2 = xf*(funcionC(falso,1)-funcionC(verdadero,23))/10.0;
-
+            x2 = xf*(funcionC(falso,1) funcionC(verdadero,23))/10.0;
 
             mientras (x2*funcionC(falso,1)-xf<10.0)
                 x2= x2*xf ;
+
+				a = 34 4/(23-(23/11)-+3*3);
         }
 
         real funcionD (real d1){
