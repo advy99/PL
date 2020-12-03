@@ -50,7 +50,6 @@ int num_linea = 1;
 %left MASMAS
 %left ARROBA
 
-%nonassoc COMA
 
 %left CORCHETE_ABRE
 %left CORCHETE_CIERRA
@@ -62,8 +61,8 @@ int num_linea = 1;
 
 programa					: PRINCIPAL bloque ;
 
-bloque						: LLAVE_ABRE variables declar_subprogramas sentencias LLAVE_CIERRA ;
 
+bloque						: LLAVE_ABRE variables declar_subprogramas sentencias LLAVE_CIERRA ;
 
 
 variables					: declar_variables
@@ -77,7 +76,8 @@ cuerpo_declar_var			: VAR tipo ident_variables PYC ;
 ident_variables             : ident_variables COMA ID
                                 | ident_variables COMA ID ASIGNACION expresion
                                 | ID
-                                | ID ASIGNACION expresion ;
+                                | ID ASIGNACION expresion
+										  | error ;
 
 expresion                   : PARENTESIS_ABRE expresion PARENTESIS_CIERRA
                                 | OP_EXC_UN expresion
@@ -87,7 +87,8 @@ expresion                   : PARENTESIS_ABRE expresion PARENTESIS_CIERRA
                                 | MENOS expresion
                                 | llamada_subprograma
                                 | ID
-                                | constante ;
+                                | constante
+										  | error ;
 
 constante                   : CONSTANTE_BASICA
                                 | CORCHETE_ABRE contenido_lista CORCHETE_CIERRA ;
@@ -109,7 +110,8 @@ declar_subprogramas         : declar_subprogramas declar_subp
 
 declar_subp                 : cabecera_subp bloque ;
 
-cabecera_subp               : tipo ID PARENTESIS_ABRE parametros PARENTESIS_CIERRA ;
+cabecera_subp               : tipo ID PARENTESIS_ABRE parametros PARENTESIS_CIERRA
+									 | error;
 
 tipo                        : TIPO_BASICO
                                 | LISTADE TIPO_BASICO ;
