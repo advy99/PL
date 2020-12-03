@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <string.h>
 
+int yylex();
 void yyerror(char * mensaje);
 
 int num_linea = 1;
@@ -41,12 +42,18 @@ int num_linea = 1;
 %token TIPO_BASICO
 %token PRINCIPAL
 %token CADENA
+%token VAR
 
 %left OP_EXC_BIN
 %right OP_EXC_UN
 %left MENOS
 %left MASMAS
 %left ARROBA
+
+%nonassoc COMA
+
+%left CORCHETE_ABRE
+%left CORCHETE_CIERRA
 
 
 %start programa
@@ -55,16 +62,21 @@ int num_linea = 1;
 
 programa					: PRINCIPAL bloque ;
 
-bloque						: LLAVE_ABRE declar_variables declar_subprogramas sentencias LLAVE_CIERRA ;
+bloque						: LLAVE_ABRE variables declar_subprogramas sentencias LLAVE_CIERRA ;
+
+
+
+variables					: declar_variables
+				 				| ;
 
 declar_variables			: declar_variables cuerpo_declar_var
-						 		| cuerpo_declar_var
-								| ;
+						 		| cuerpo_declar_var ;
 
-cuerpo_declar_var			: tipo ident_variables PYC ;
+cuerpo_declar_var			: VAR tipo ident_variables PYC ;
 
 ident_variables             : ident_variables COMA ID
                                 | ident_variables COMA ID ASIGNACION expresion
+                                | ident_variables COMA ID ASIGNACION CADENA
                                 | ID
                                 | ID ASIGNACION expresion ;
 
@@ -84,19 +96,12 @@ contenido_lista             : contenido_lista_preced CONSTANTE_BASICA
                                 | CONSTANTE_BASICA
                                 | ;
 
-contenido_lista_preced      : contenido_lista_preced contenido_lista_preced
+contenido_lista_preced      : contenido_lista_preced CONSTANTE_BASICA COMA
                                 | CONSTANTE_BASICA COMA ;
 
 
+llamada_subprograma         : ID PARENTESIS_ABRE parametros PARENTESIS_CIERRA PYC ;
 
-llamada_subprograma         : ID PARENTESIS_ABRE lista_const PARENTESIS_CIERRA PYC ;
-
-lista_const                 : constante
-                                | lista_constante_preced constante
-                                | ;
-
-lista_constante_preced      : lista_constante_preced lista_constante_preced
-                                | constante COMA ;
 
 
 declar_subprogramas         : declar_subprogramas declar_subp
@@ -104,8 +109,7 @@ declar_subprogramas         : declar_subprogramas declar_subp
 
 declar_subp                 : cabecera_subp bloque ;
 
-cabecera_subp               : tipo ID PARENTESIS_ABRE parametros PARENTESIS_CIERRA
-                                | ID PARENTESIS_ABRE parametros PARENTESIS_CIERRA ;
+cabecera_subp               : tipo ID PARENTESIS_ABRE parametros PARENTESIS_CIERRA ;
 
 tipo                        : TIPO_BASICO
                                 | LISTADE TIPO_BASICO ;
@@ -116,11 +120,11 @@ parametros                  : parametro
 
 parametro                   : tipo ID ;
 
-parametro_preced            : parametro_preced parametro_preced
+parametro_preced            : parametro_preced parametro COMA
                                 | parametro COMA;
 
 sentencias                  : sentencias sentencia
-                                | sentencia ;
+                                | ;
 
 sentencia                   : bloque
                                 | ID ASIGNACION expresion PYC
@@ -132,15 +136,14 @@ sentencia                   : bloque
                                 | ID AVANZAR PYC
                                 | ID RETROCEDER PYC
                                 | DOLAR ID PYC
-                                | ENTRADA lista_variables
-                                | SALIDA lista_expresiones_o_cadena
-                                | ;
+                                | ENTRADA lista_variables PYC
+                                | SALIDA lista_expresiones_o_cadena PYC ;
 
 lista_variables             : lista_variables COMA ID
                                 | ID ;
 
 lista_expresiones_o_cadena  : lista_expresiones_o_cadena COMA CADENA
-                                | expresion COMA lista_expresiones_o_cadena
+									 	  | lista_expresiones_o_cadena COMA expresion
                                 | CADENA
                                 | expresion ;
 
@@ -148,6 +151,7 @@ lista_expresiones_o_cadena  : lista_expresiones_o_cadena COMA CADENA
 
 
 #include "lex.yy.c"
+
 
 void yyerror( char *msg )
 {

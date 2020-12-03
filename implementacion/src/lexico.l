@@ -13,11 +13,13 @@ digito		[0-9]
 
 "\n"								num_linea++;
 [" ""\t"]+						;
+"variable"						return(VAR);
 "principal()"					return(PRINCIPAL);
 "entero"							yylval = 0; return(TIPO_BASICO);
 "real"							yylval = 1; return(TIPO_BASICO);
 "caracter"						yylval = 2; return(TIPO_BASICO);
 "booleano"						yylval = 3; return(TIPO_BASICO);
+"vacio"							yylval = 4; return(TIPO_BASICO);
 "}"								return(LLAVE_CIERRA);
 "{"								return(LLAVE_ABRE);
 "listade"						return(LISTADE);
@@ -62,9 +64,9 @@ digito		[0-9]
 {digito}+						yylval = 0; return(CONSTANTE_BASICA);
 {digito}+"."{digito}+		yylval = 1; return(CONSTANTE_BASICA);
 "\'"{letra}"\'"				yylval = 2; return(CONSTANTE_BASICA);
-"verdadero" | "falso"		yylval = 3; return(CONSTANTE_BASICA);
-"\""(" "|{letra}|{digito})*"\"" return(CADENA);
-{letra}[{letra}{digito}]*	return(ID);
+("verdadero"|"falso")		yylval = 3; return(CONSTANTE_BASICA);
+"\""(" "|{letra}|{digito})*"\"" yylval = 4; return(CADENA);
+{letra}({letra}|{digito})*	return(ID);
 .							printf("Símbolo erróneo: '%s' en línea %d\n",yytext, num_linea);
 
 %%
