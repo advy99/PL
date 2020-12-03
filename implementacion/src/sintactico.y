@@ -5,12 +5,12 @@
 #include <string.h>
 
 int yylex();
-void yyerror(char * mensaje);
+void yyerror(const char * mensaje);
 
 int num_linea = 1;
 
 %}
-
+%error-verbose
 
 %token CONSTANTE_BASICA
 %token CORCHETE_ABRE
@@ -76,7 +76,6 @@ cuerpo_declar_var			: VAR tipo ident_variables PYC ;
 
 ident_variables             : ident_variables COMA ID
                                 | ident_variables COMA ID ASIGNACION expresion
-                                | ident_variables COMA ID ASIGNACION CADENA
                                 | ID
                                 | ID ASIGNACION expresion ;
 
@@ -160,7 +159,7 @@ lista_expresiones_o_cadena  : lista_expresiones_o_cadena COMA CADENA
 #include "lex.yy.c"
 
 
-void yyerror( char *msg )
+void yyerror(const char *msg)
 {
     fprintf(stderr,"[Linea %d]: %s\n", num_linea, msg) ;
 }

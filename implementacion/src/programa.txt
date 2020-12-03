@@ -1,8 +1,8 @@
 principal(){
 
     variable entero ve;
-    variable real vf;
-    variable caracter vc;
+    variable real vf1, vf2, vf3;
+    variable caracter vc, vc2;
     variable booleano vl;
     variable listade entero pe, pe2;
     variable listade real pf, pf2;

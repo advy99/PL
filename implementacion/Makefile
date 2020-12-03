@@ -25,7 +25,7 @@ $(OBJ)/y.tab.o: $(SRC)/y.tab.c
 	gcc -c -o $@ $(SRC)/y.tab.c -lfl -I$(SRC)
 
 $(SRC)/y.tab.c: $(SRC)/lexico.l $(SRC)/lex.yy.c
-	yacc -d -o $@ $(SRC)/sintactico.y
+	bison -d -o $@ $(SRC)/sintactico.y
 
 $(SRC)/lex.yy.c: $(SRC)/lexico.l
 	lex -o $@ $(SRC)/lexico.l
