@@ -1,6 +1,6 @@
 principal() {
 
-    variable etero ve;
+    variable ~sd$d ve;
     variable real vf1 vf2, vf3, vf4
     variable caracter vc vc2;
     variable booleano vl;
