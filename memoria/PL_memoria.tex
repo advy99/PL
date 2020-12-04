@@ -108,7 +108,7 @@
 
 \setmarginsrb{2 cm}{1 cm}{2 cm}{2 cm}{1 cm}{1.5 cm}{1 cm}{1.5 cm}
 
-\title{Práctica 1. Grupo Viernes 3.\\
+\title{Práctica 3. Grupo Viernes 3.\\
   \hspace{0.05cm} }
 \author{Antonio David Villegas Yeguas\\
 		Juan Emilio Martinez Manjon\\
@@ -224,7 +224,7 @@ La sintaxis usando BNF y añadiendo las consideraciones correspondiente al lengu
 		\bnfmore{| \bnfsp \bnfpn{Cuerpo\_declar\_variables}}\\
 		\bnfmore{| \bnfsp \epsilon}\\
 	\bnfprod{Cuerpo\_declar\_variables}
-		{\bnfpn{tipo} \bnfsp \bnfpn{ident\_variables} ;}\\
+		{variable \bnfsp \bnfpn{tipo} \bnfsp \bnfpn{ident\_variables} ;}\\
 	\bnfprod{ident\_variables}
     {\bnfpn{ident\_variables} \bnfsp  ,  \bnfsp \bnfpn{identificador}}\\
     \bnfmore{| \bnfsp \bnfpn{ident\_variables} \bnfsp , \bnfsp \bnfpn{identificador} \bnfsp = \bnfsp \bnfpn{expresion}}\\
@@ -493,8 +493,9 @@ LISTADE & 282 &  & ``listade'' \\ \hline
 LLAVE\_ABRE & 283 &  & ``\}'' \\ \hline
 LLAVE\_CIERRA & 284 &  & ``\{'' \\ \hline
 TIPO\_BASICO & 285 & 0: entero, 1:real, 2:caracter, 3:booleano & (``entero'' | ``real'' | ``caracter'' | ``booleano'') \\ \hline
-PRINCIPAL & 286 &  & ``principal()'' \\ \hline
-CADENA & 287 & & `` ''{[}a-zA-Z0-9{]}*'' '' \\ \hline
+VAR & 286 &  & ``variable'' \\ \hline
+PRINCIPAL & 287 &  & ``principal()'' \\ \hline
+CADENA & 288 & & `` ''{[}a-zA-Z0-9{]}*'' '' \\ \hline
 \end{tabular}%
 }
 \end{table}

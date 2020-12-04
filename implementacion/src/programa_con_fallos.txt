@@ -1,8 +1,8 @@
 principal() {
 
-    variable real ve;
-    variable real vf1, vf2, vf3, vf4;
-    variable caracter vci, vc2;
+    variable ~23 ve;
+    variable real vf1 vf2, vf3, vf4
+    variable caracter vci vc2;
     variable booleano vl;
     variable listade entero pe, pe2;
     variable listade real pf, pf2;
@@ -17,7 +17,7 @@ principal() {
 
             variable real xf, x2;
 
-            real funcionC (booleano c1, entero c2){
+            real funcionC (booleano asdf c1, entero c2){
 
                 variable real x1 ;
 
@@ -32,7 +32,7 @@ principal() {
             }
 
             xf = functionC(verdadero, 10);
-            x2 = xf*(funcionC(falso,1) + funcionC(verdadero,23))/10.0;
+            x2 = xf*(funcionC(falso,1)  funcionC(verdadero,23))/10.0;
 
             mientras (x2*funcionC(falso,1)-xf<10.0)
                 x2= x2*xf ;
@@ -49,7 +49,7 @@ principal() {
                 salida 'introduzca dos caracteres: ';
                 entrada e1, e2;
 
-                si (e1 ^ e2)
+                si (e1 ^ && e2)
                     devuelve e1 ;
 
                 sino{
