@@ -1,6 +1,6 @@
 principal() {
 
-    variable entero ve;
+    variable etero ve;
     variable real vf1 vf2, vf3, vf4
     variable caracter vc vc2;
     variable booleano vl;
@@ -92,6 +92,6 @@ principal() {
     sino{
         pe = pe * pe2;
         pe = pe++10*(20/2000)@?pe;
-    }   
+    }
 
 }
