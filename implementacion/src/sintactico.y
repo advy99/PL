@@ -114,7 +114,8 @@ cabecera_subp               : tipo ID PARENTESIS_ABRE parametros PARENTESIS_CIER
 									 | error;
 
 tipo                        : TIPO_BASICO
-                                | LISTADE TIPO_BASICO ;
+                                | LISTADE TIPO_BASICO
+										  | error ;
 
 parametros                  : parametro
                                 | parametro_preced parametro
