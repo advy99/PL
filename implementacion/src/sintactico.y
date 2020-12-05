@@ -79,13 +79,13 @@ declar_variables			: declar_variables cuerpo_declar_var
 						 		| cuerpo_declar_var ;
 
 cuerpo_declar_var			: VAR
-						  		  tipo { tipoTmp = $1.tipo  }
+						  		  tipo { tipoTmp = $1.tipo;  }
 								  ident_variables PYC ;
 
-ident_variables             : ident_variables COMA ID { TS_insertaIDENT($3); }
-                                | ident_variables COMA ID ASIGNACION expresion { TS_insertaIDENT($3); }
-                                | ID { TS_insertaIDENT($1); }
-                                | ID ASIGNACION expresion {  TS_insertaIDENT($1);  }
+ident_variables             : ident_variables COMA ID { TS_InsertaIDENT($3); }
+                                | ident_variables COMA ID ASIGNACION expresion { TS_InsertaIDENT($3); }
+                                | ID { TS_InsertaIDENT($1); }
+                                | ID ASIGNACION expresion {  TS_InsertaIDENT($1);  }
 										  | error ;
 
 expresion                   : PARENTESIS_ABRE expresion PARENTESIS_CIERRA
