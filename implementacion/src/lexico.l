@@ -15,21 +15,21 @@ digito		[0-9]
 
 "variable"						return(VAR);
 "principal()"					return(PRINCIPAL);
-"entero"							yylval.atrib =  0; return(TIPO_BASICO);
-"real"							yylval.atrib =  1; return(TIPO_BASICO);
-"caracter"						yylval.atrib =  2; return(TIPO_BASICO);
-"booleano"						yylval.atrib =  3; return(TIPO_BASICO);
-"vacio"							yylval.atrib =  4; return(TIPO_BASICO);
+"entero"							yylval.atrib =  0; yylval.tipo = dtipo::entero return(TIPO_BASICO);
+"real"							yylval.atrib =  1; yylval.tipo = dtipo::real return(TIPO_BASICO);
+"caracter"						yylval.atrib =  2; yylval.tipo = dtipo::caracter return(TIPO_BASICO);
+"booleano"						yylval.atrib =  3; yylval.tipo = dtipo::booleano return(TIPO_BASICO);
+"vacio"							yylval.atrib =  4; yylval.tipo = dtipo::vacio return(TIPO_BASICO);
 "}"								return(LLAVE_CIERRA);
 "{"								return(LLAVE_ABRE);
-"listade"						return(LISTADE);
+"listade"						yylval.tipo = lista; return(LISTADE);
 "="								return(ASIGNACION);
 "sino"							return(SINO);
 "si"								return(SI);
 "devuelve"						return(DEVUELVE);
 "repetir"						return(REPETIR);
 "mientras"						return(MIENTRAS);
-"salida"						return(SALIDA);
+"salida"							return(SALIDA);
 "entrada"						return(ENTRADA);
 "<<"								return(RETROCEDER);
 ">>"								return(AVANZAR);

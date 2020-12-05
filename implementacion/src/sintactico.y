@@ -9,6 +9,8 @@ void yyerror(const char * mensaje);
 
 int num_linea = 1;
 
+#include "estructuras_datos.h"
+
 %}
 %error-verbose
 
@@ -62,7 +64,12 @@ int num_linea = 1;
 programa					: PRINCIPAL bloque ;
 
 
-bloque						: LLAVE_ABRE variables declar_subprogramas sentencias LLAVE_CIERRA ;
+bloque						: LLAVE_ABRE  { TS_InsertaMARCA(); }
+								  variables
+								  declar_subprogramas
+								  sentencias
+								  LLAVE_CIERRA { TS_VaciarEntradas(); };
+
 
 
 variables					: declar_variables
@@ -71,12 +78,14 @@ variables					: declar_variables
 declar_variables			: declar_variables cuerpo_declar_var
 						 		| cuerpo_declar_var ;
 
-cuerpo_declar_var			: VAR tipo ident_variables PYC ;
+cuerpo_declar_var			: VAR
+						  		  tipo { tipoTmp = $1.tipo  }
+								  ident_variables PYC ;
 
-ident_variables             : ident_variables COMA ID
-                                | ident_variables COMA ID ASIGNACION expresion
-                                | ID
-                                | ID ASIGNACION expresion
+ident_variables             : ident_variables COMA ID { TS_insertaIDENT($3); }
+                                | ident_variables COMA ID ASIGNACION expresion { TS_insertaIDENT($3); }
+                                | ID { TS_insertaIDENT($1); }
+                                | ID ASIGNACION expresion {  TS_insertaIDENT($1);  }
 										  | error ;
 
 expresion                   : PARENTESIS_ABRE expresion PARENTESIS_CIERRA
@@ -108,9 +117,9 @@ llamada_subprograma         : ID PARENTESIS_ABRE lista_variables_constantes PARE
 declar_subprogramas         : declar_subprogramas declar_subp
                                 | ;
 
-declar_subp                 : cabecera_subp bloque ;
+declar_subp                 : cabecera_subp bloque  ;
 
-cabecera_subp               : tipo ID PARENTESIS_ABRE parametros PARENTESIS_CIERRA
+cabecera_subp               : tipo ID PARENTESIS_ABRE parametros PARENTESIS_CIERRA { TS_InsertaSUBPROG($2);  }
 									 | error;
 
 tipo                        : TIPO_BASICO
@@ -121,7 +130,7 @@ parametros                  : parametro
                                 | parametro_preced parametro
                                 | ;
 
-parametro                   : tipo ID ;
+parametro                   : tipo ID { TS_InsertaPARAMF($2); };
 
 parametro_preced            : parametro_preced parametro COMA
                                 | parametro COMA;
