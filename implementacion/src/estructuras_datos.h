@@ -19,6 +19,7 @@ typedef enum {
 	real,
 	caracter,
 	booleano,
+	vacio,
 	lista,
 	desconocido,
 	no_asignado
@@ -29,9 +30,7 @@ typedef struct {
 	char * nombre;
 	dtipo tipoDato;
 	unsigned int parametros;
-	unsigned int dimensiones;
-	int tamDimen1;
-	int tamDimen2;
+	int tamDimen;
 } entradaTS ;
 
 
@@ -39,6 +38,8 @@ typedef struct {
 
 unsigned int TOPE = 0;
 unsigned int subprog;
+dtipo tipoTmp;
+
 
 entradaTS TS[MAX_TS];
 
@@ -65,4 +66,9 @@ void TS_InsertaSUBPROG(char * subprograma);
 
 void TS_InsertaPARAMF(char * parametro);
 
+dtipo encontrarEntrada(char * nombre);
+
 #endif
+
+
+
