@@ -58,7 +58,7 @@ typedef struct {
 
 void TS_InsertaIDENT(char * indentificador);
 
-void TS_InsertaMarca();
+void TS_InsertaMARCA();
 
 void TS_VaciarENTRADAS();
 

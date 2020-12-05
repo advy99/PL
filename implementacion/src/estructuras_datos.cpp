@@ -23,7 +23,7 @@ void TS_InsertaIDENT(char * identificador){
 	TOPE++;
 }
 
-void TS_InsertaMarca(){
+void TS_InsertaMARCA(){
 
 	entradaTS nueva_entrada;
 
