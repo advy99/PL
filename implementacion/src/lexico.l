@@ -66,7 +66,7 @@ digito		[0-9]
 "\'"."\'"						yylval = 2; return(CONSTANTE_BASICA);
 ("verdadero"|"falso")		yylval = 3; return(CONSTANTE_BASICA);
 \'[^\']+\'						return(CADENA);
-{letra}({letra}|{digito})*	return(ID);
+{letra}({letra}|{digito})*	yylval.lexema = strdup (yytext); return(ID);
 "\n"								num_linea++;
 [" ""\t"]+						;
 .							printf("Error lexico - símbolo erróneo: '%s' en línea %d\n",yytext, num_linea);
