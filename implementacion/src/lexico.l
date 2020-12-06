@@ -9,8 +9,8 @@
 letra		[a-zA-Z]
 digito		[0-9]
 
-
 %option noyywrap
+
 %%
 
 "variable"						return(VAR);

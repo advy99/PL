@@ -11,6 +11,43 @@ int num_linea = 1;
 
 #include "estructuras_datos.h"
 
+#define MAX_TS 500
+
+unsigned long int TOPE = 0;
+unsigned int subprog;
+dtipo tipoTmp;
+
+
+entradaTS TS[MAX_TS];
+
+typedef struct {
+	int atrib;
+	char * lexema;
+	dtipo tipo;
+} atributos;
+
+#define YYSTYPE atributos
+
+// falta funciones:
+// insertar
+// modificar
+// consultar
+
+void TS_InsertaIDENT(atributos atrib);
+
+void TS_InsertaMARCA();
+
+void TS_VaciarENTRADAS();
+
+void TS_InsertaSUBPROG(atributos atrib);
+
+void TS_InsertaPARAMF(atributos atrib);
+
+int incrementaTOPE();
+
+dtipo encontrarEntrada(char * nombre);
+
+
 %}
 %error-verbose
 
@@ -170,9 +207,149 @@ lista_expresiones_o_cadena  : lista_expresiones_o_cadena COMA CADENA
 
 #include "lex.yy.c"
 
+#include "estructuras_datos.h"
 
 void yyerror(const char *msg)
 {
     fprintf(stderr,"[Linea %d]: %s\n", num_linea, msg) ;
 }
+
+
+void TS_InsertaIDENT(atributos atributo){
+	printf("Identificador %d", atributo.lexema);
+
+	entradaTS nueva_entrada;
+
+	nueva_entrada.entrada = funcion;
+
+	strcpy(nueva_entrada.nombre, atributo.lexema );
+
+	nueva_entrada.parametros = 0;
+
+	nueva_entrada.tipoDato = tipoTmp;
+
+	TS[TOPE] = nueva_entrada;
+
+	incrementaTOPE();
+
+
+}
+
+void TS_InsertaMARCA(){
+
+	entradaTS nueva_entrada;
+
+	nueva_entrada.entrada = marca;
+
+	// metemos cadena vacia siempre al meter algo, por si encontramos sin querer
+	// por el tema de basura
+	strcpy(nueva_entrada.nombre, "" );
+
+	TS[TOPE] = nueva_entrada;
+
+	incrementaTOPE();
+}
+
+void TS_VaciarENTRADAS(){
+
+	// lo mismo habria que comprobar si ha llegado a encontrar
+	// la marca, por el tema de error semantico si tenemos un cierra llave
+
+	while ( TS[TOPE].entrada != marca && TOPE > 0 ){
+		TOPE--;
+	}
+
+}
+
+void TS_InsertaSUBPROG(atributos atributo){
+
+
+	dtipo tipo_buscar = encontrarEntrada(atributo.lexema);
+
+	if ( tipo_buscar == desconocido ){
+		entradaTS nueva_entrada;
+
+		nueva_entrada.entrada = funcion;
+
+		strcpy(nueva_entrada.nombre, atributo.lexema );
+
+		nueva_entrada.parametros = 0;
+
+		nueva_entrada.tipoDato = tipoTmp;
+
+		TS[TOPE] = nueva_entrada;
+
+		subprog = TOPE;
+
+		incrementaTOPE();
+
+	} else {
+		printf("\nError semantico en la linea %d. Redefinición de '%s'\n", num_linea, atributo.lexema);
+	}
+
+
+
+}
+
+void TS_InsertaPARAMF(atributos atributo){
+	// aqui hay que utilizar TOPE	- 1 porque es sobre la funcion que hemos añadido antes
+
+	entradaTS nueva_entrada;
+
+	nueva_entrada.entrada = parametro_formal;
+
+	strcpy(nueva_entrada.nombre, atributo.lexema );
+
+	nueva_entrada.parametros = 0;
+
+	nueva_entrada.tipoDato = atributo.tipo;
+
+	TS[TOPE] = nueva_entrada;
+
+	TS[subprog].parametros++;
+
+	incrementaTOPE();
+
+}
+
+
+
+dtipo encontrarEntrada(char * nombre) {
+	// devuelve la posicion de una entrada con mismo nombre, -1 si no la encuentra
+
+	int pos_actual = TOPE;
+	dtipo tipo = desconocido;
+
+	while ( strcmp(TS[pos_actual].nombre, nombre ) != 0 ) {
+		// son distintos, seguimos buscando
+		pos_actual-- ;
+	}
+
+	if ( pos_actual != -1 ) {
+		tipo = TS[pos_actual].tipoDato;
+	} else {
+		printf("\nError semantico en la linea %d. Identificador '%s' no declarado\n", num_linea, nombre);
+	}
+
+	return tipo;
+
+}
+
+
+int incrementaTOPE(){
+
+	int salida = 1;
+
+	if (TOPE == MAX_TS) {
+		printf("ERROR: Tope de la pila alcanzado. Demasiadas entradas en la tabla de símbolos. Abortando compilación");
+
+		salida = 0;
+
+	} else {
+		TOPE++;
+	}
+
+	return salida;
+}
+
 

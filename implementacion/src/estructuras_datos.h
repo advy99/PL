@@ -34,42 +34,6 @@ typedef struct {
 } entradaTS ;
 
 
-#define MAX_TS 500
-
-unsigned long int TOPE = 0;
-unsigned int subprog;
-dtipo tipoTmp;
-
-
-entradaTS TS[MAX_TS];
-
-typedef struct {
-	int atrib;
-	char * lexema;
-	dtipo tipo;
-} atributos;
-
-#define YYSTYPE atributos
-
-// falta funciones:
-// insertar
-// modificar
-// consultar
-
-void TS_InsertaIDENT(char * indentificador);
-
-void TS_InsertaMARCA();
-
-void TS_VaciarENTRADAS();
-
-void TS_InsertaSUBPROG(char * subprograma);
-
-void TS_InsertaPARAMF(char * parametro);
-
-int incrementaTOPE();
-
-dtipo encontrarEntrada(char * nombre);
-
 #endif
 
 

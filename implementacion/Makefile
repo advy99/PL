@@ -12,7 +12,7 @@ crear_carpetas:
 	-@mkdir -p $(BIN)
 
 
-$(BIN)/prueba: $(OBJ)/main.o $(OBJ)/y.tab.o $(OBJ)/estructuras_datos.o
+$(BIN)/prueba: $(OBJ)/main.o $(OBJ)/y.tab.o
 	gcc -o $@ $^
 
 $(OBJ)/main.o: $(SRC)/main.c
@@ -30,8 +30,6 @@ $(SRC)/y.tab.c: $(SRC)/lexico.l $(SRC)/lex.yy.c
 $(SRC)/lex.yy.c: $(SRC)/lexico.l
 	lex -o $@ $(SRC)/lexico.l
 
-$(OBJ)/estructuras_datos.o: $(SRC)/estructuras_datos.cpp $(SRC)/estructuras_datos.h
-	gcc -c -o $@ $(SRC)/estructuras_datos.cpp -I$(SRC)
 
 #$(INCLUDE)/y.tab.h: $(SRC)/sintactico.y
 #	yacc -d $^ -o $@
