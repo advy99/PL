@@ -30,6 +30,7 @@ $(SRC)/y.tab.c: $(SRC)/lexico.l $(SRC)/lex.yy.c
 $(SRC)/lex.yy.c: $(SRC)/lexico.l
 	lex -o $@ $(SRC)/lexico.l
 
+
 #$(INCLUDE)/y.tab.h: $(SRC)/sintactico.y
 #	yacc -d $^ -o $@
 

@@ -9,17 +9,17 @@
 letra		[a-zA-Z]
 digito		[0-9]
 
-
 %option noyywrap
+
 %%
 
 "variable"						return(VAR);
 "principal()"					return(PRINCIPAL);
-"entero"							yylval.atrib =  0; yylval.tipo = dtipo::entero return(TIPO_BASICO);
-"real"							yylval.atrib =  1; yylval.tipo = dtipo::real return(TIPO_BASICO);
-"caracter"						yylval.atrib =  2; yylval.tipo = dtipo::caracter return(TIPO_BASICO);
-"booleano"						yylval.atrib =  3; yylval.tipo = dtipo::booleano return(TIPO_BASICO);
-"vacio"							yylval.atrib =  4; yylval.tipo = dtipo::vacio return(TIPO_BASICO);
+"entero"							yylval.atrib =  0; yylval.tipo = entero; return(TIPO_BASICO);
+"real"							yylval.atrib =  1; yylval.tipo = real; return(TIPO_BASICO);
+"caracter"						yylval.atrib =  2; yylval.tipo = caracter; return(TIPO_BASICO);
+"booleano"						yylval.atrib =  3; yylval.tipo = booleano; return(TIPO_BASICO);
+"vacio"							yylval.atrib =  4; yylval.tipo = vacio; return(TIPO_BASICO);
 "}"								return(LLAVE_CIERRA);
 "{"								return(LLAVE_ABRE);
 "listade"						yylval.tipo = lista; return(LISTADE);
