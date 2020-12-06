@@ -17,10 +17,10 @@ void TS_InsertaIDENT(char * identificador){
 
 	TS[TOPE] = nueva_entrada;
 
-	TOPE++;
+	incrementaTOPE();
 
 
-	TOPE++;
+
 }
 
 void TS_InsertaMARCA(){
@@ -35,7 +35,7 @@ void TS_InsertaMARCA(){
 
 	TS[TOPE] = nueva_entrada;
 
-	TOPE++;
+	incrementaTOPE();
 }
 
 void TS_VaciarENTRADAS(){
@@ -69,7 +69,7 @@ void TS_InsertaSUBPROG(char * subprograma){
 
 		subprog = TOPE;
 
-		TOPE++;
+		incrementaTOPE();
 
 	} else {
 		printf("\nError semantico en la linea %d. Redefinición de '%s'\n", num_linea, subprograma);
@@ -96,7 +96,7 @@ void TS_InsertaPARAMF(char * parametro){
 
 	TS[subprog].parametros++;
 
-	TOPE++;
+	incrementaTOPE();
 
 }
 
@@ -123,5 +123,21 @@ dtipo encontrarEntrada(char * nombre) {
 
 }
 
+
+int incrementaTOPE(){
+
+	int salida = 1;
+
+	if (TOPE == MAX_TS) {
+		printf("ERROR: Tope de la pila alcanzado. Demasiadas entradas en la tabla de símbolos. Abortando compilación");
+
+		salida = 0;
+
+	} else {
+		TOPE++;
+	}
+
+	return salida;
+}
 
 

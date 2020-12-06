@@ -36,7 +36,7 @@ typedef struct {
 
 #define MAX_TS 500
 
-unsigned int TOPE = 0;
+unsigned long int TOPE = 0;
 unsigned int subprog;
 dtipo tipoTmp;
 
@@ -65,6 +65,8 @@ void TS_VaciarENTRADAS();
 void TS_InsertaSUBPROG(char * subprograma);
 
 void TS_InsertaPARAMF(char * parametro);
+
+int incrementaTOPE();
 
 dtipo encontrarEntrada(char * nombre);
 
