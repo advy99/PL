@@ -259,6 +259,9 @@ void TS_VaciarENTRADAS(){
 		TOPE--;
 	}
 
+	// tambien eliminamos la marca
+	TOPE--;
+
 }
 
 void TS_InsertaSUBPROG(atributos atributo){
