@@ -20,7 +20,6 @@ void TS_InsertaIDENT(char * identificador){
 	incrementaTOPE();
 
 
-
 }
 
 void TS_InsertaMARCA(){

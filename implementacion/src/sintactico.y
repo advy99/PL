@@ -68,7 +68,7 @@ bloque						: LLAVE_ABRE  { TS_InsertaMARCA(); }
 								  variables
 								  declar_subprogramas
 								  sentencias
-								  LLAVE_CIERRA { TS_VaciarEntradas(); };
+								  LLAVE_CIERRA { TS_VaciarENTRADAS(); };
 
 
 
