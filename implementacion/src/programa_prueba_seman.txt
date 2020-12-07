@@ -1,0 +1,7 @@
+principal(){
+	variable real hola;
+
+
+	hola = 1;
+
+}
