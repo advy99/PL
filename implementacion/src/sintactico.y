@@ -19,7 +19,7 @@ unsigned long int TOPE = 0;
 unsigned long int TOPE_PARAMF = 0;
 bool subprog = false;
 dtipo tipoTmp;
-
+bool listaTmp;
 
 entradaTS TS[MAX_TS];
 
@@ -52,13 +52,15 @@ void TS_InsertaPARAMF(atributos atrib);
 
 int incrementaTOPE();
 
-dtipo encontrarEntrada(string nombre, bool quiero_que_este);
+entradaTS encontrarEntrada(string nombre, bool quiero_que_este);
 
 bool esFuncion(string nombre);
 
 void comprobarEsVarOParamametroFormal(atributos atrib);
 
 void comprobarEsTipo(dtipo tipo, atributos atrib);
+
+void comprobarEsLista(atributos atrib);
 
 string tipoAstring(dtipo tipo);
 
@@ -139,13 +141,13 @@ ident_variables             : ident_variables COMA ID { TS_InsertaIDENT($3); }
 										  | error ;
 
 expresion                   : PARENTESIS_ABRE expresion PARENTESIS_CIERRA {$$.tipo = $2.tipo;}
-                                | OP_EXC_UN expresion
-                                | expresion OP_EXC_BIN expresion
-                                | expresion MENOS expresion
+                                | OP_EXC_UN expresion {$$.tipo = $2.tipo;}
+                                | expresion OP_EXC_BIN expresion	{comprobarEsTipo($1.tipo, $3); $$.tipo = $1.tipo;}
+                                | expresion MENOS expresion {comprobarEsTipo($1.tipo, $3); $$.tipo = $1.tipo;}
                                 | expresion MASMAS expresion ARROBA expresion
-                                | MENOS expresion
+                                | MENOS expresion { $$.tipo = $2.tipo;}
                                 | llamada_subprograma
-                                | ID							{dtipo t = encontrarEntrada($1.lexema, true); $$.tipo = $1.tipo;}
+                                | ID							{dtipo t = encontrarEntrada($1.lexema, true).tipoDato; $$.tipo = $1.tipo;}
                                 | constante
 										  | error ;
 
@@ -160,7 +162,7 @@ contenido_lista_preced      : contenido_lista_preced CONSTANTE_BASICA COMA
                                 | CONSTANTE_BASICA COMA ;
 
 
-llamada_subprograma         : ID PARENTESIS_ABRE lista_variables_constantes PARENTESIS_CIERRA;
+llamada_subprograma         : ID PARENTESIS_ABRE lista_variables_constantes PARENTESIS_CIERRA {dtipo t = encontrarEntrada($1.lexema, true).tipoDato;} ;
 
 
 
@@ -173,8 +175,8 @@ declar_subp                 : cabecera_subp {subprog = true;}
 cabecera_subp               : tipo ID PARENTESIS_ABRE parametros PARENTESIS_CIERRA { TS_InsertaSUBPROG($2);  }
 									 | error;
 
-tipo                        : TIPO_BASICO {tipoTmp = $1.tipo; }
-                                | LISTADE TIPO_BASICO
+tipo                        : TIPO_BASICO {listaTmp = false; tipoTmp = $1.tipo; }
+                                | LISTADE TIPO_BASICO {listaTmp = true; tipoTmp = $1.tipo;}
 										  | error ;
 
 parametros                  : parametro
@@ -190,16 +192,17 @@ sentencias                  : sentencias sentencia
                                 | ;
 
 sentencia                   : bloque
-                                | ID ASIGNACION expresion PYC { comprobarEsTipo(encontrarEntrada($1.lexema, true), $3);}
+                                | ID ASIGNACION expresion PYC { comprobarEsTipo(encontrarEntrada($1.lexema, true).tipoDato, $3);}
                                 | SI PARENTESIS_ABRE expresion PARENTESIS_CIERRA sentencia {comprobarEsTipo(booleano, $3); }
                                 | SI PARENTESIS_ABRE expresion PARENTESIS_CIERRA sentencia SINO sentencia {comprobarEsTipo(booleano, $3); }
                                 | MIENTRAS PARENTESIS_ABRE expresion PARENTESIS_CIERRA sentencia {comprobarEsTipo(booleano, $3); }
                                 | REPETIR sentencia MIENTRAS PARENTESIS_ABRE expresion PARENTESIS_CIERRA PYC {comprobarEsTipo(booleano, $5); }
                                 | DEVUELVE expresion PYC
-                                | ID AVANZAR PYC
-                                | ID RETROCEDER PYC
-                                | DOLAR ID PYC
+                                | ID AVANZAR PYC		{ comprobarEsLista($1); }
+                                | ID RETROCEDER PYC { comprobarEsLista($1); }
+                                | DOLAR ID PYC { comprobarEsLista($2); }
                                 | ENTRADA lista_variables PYC
+										  | llamada_subprograma PYC
                                 | SALIDA lista_expresiones_o_cadena PYC ;
 
 lista_variables             : lista_variables COMA ID {comprobarEsVarOParamametroFormal($3);}
@@ -209,7 +212,8 @@ lista_variables             : lista_variables COMA ID {comprobarEsVarOParamametr
 lista_variables_constantes  : lista_variables_constantes COMA ID {comprobarEsVarOParamametroFormal($3);}
                                 | lista_variables_constantes COMA constante
                                 | constante
-                                | ID {comprobarEsVarOParamametroFormal($1);} ;
+                                | ID {comprobarEsVarOParamametroFormal($1);}
+										  | ;
 
 lista_expresiones_o_cadena  : lista_expresiones_o_cadena COMA CADENA
 									 	  | lista_expresiones_o_cadena COMA expresion
@@ -246,6 +250,8 @@ void TS_InsertaIDENT(atributos atributo){
 	// ponemos parametros a 0 porque no este a basura
 	nueva_entrada.parametros = 0;
 
+	nueva_entrada.es_lista = listaTmp;
+
 	// el tipo es el leido en la variable temporal en yacc
 	nueva_entrada.tipoDato = tipoTmp;
 
@@ -273,7 +279,7 @@ void TS_InsertaIDENT(atributos atributo){
 	} else {
 		// si se ha declarado antes, mostramos un error
 		// como los parametros de funciones son añadidos tras la marca de bloque, se tendrá en cuenta sus redeclaraciones
-		printf("Error semantico: Redeclaración de '%s' en la linea %d\n", atributo.lexema.c_str(), num_linea);
+		printf("Error semantico en la linea %d: Redeclaración de '%s'\n", num_linea, atributo.lexema.c_str());
 	}
 
 
@@ -332,7 +338,7 @@ void TS_VaciarENTRADAS(){
 void TS_InsertaSUBPROG(atributos atributo){
 
 	// buscamos si ya está añadida una entrada con el mismo lexema
-	dtipo tipo_buscar = encontrarEntrada(atributo.lexema, false);
+	dtipo tipo_buscar = encontrarEntrada(atributo.lexema, false).tipoDato;
 
 	// si no lo ha encontrado, lo añadimos
 	if ( tipo_buscar == desconocido ){
@@ -418,11 +424,13 @@ void TS_InsertaPARAMF(atributos atributo){
 
 // funcion para encontrar una entrada en toda la pila
 // muchas veces no la usamos porque solo buscamos hasta la marca anterior
-dtipo encontrarEntrada(string nombre, bool quiero_que_este) {
+entradaTS encontrarEntrada(string nombre, bool quiero_que_este) {
 	// devuelve la posicion de una entrada con mismo nombre, -1 si no la encuentra
 
 	int pos_actual = TOPE - 1;
-	dtipo tipo = desconocido;
+	entradaTS entrada;
+
+	entrada.tipoDato = desconocido;
 
 	while ( TS[pos_actual].nombre != nombre && pos_actual >= 0 ) {
 		// son distintos, seguimos buscando
@@ -431,12 +439,12 @@ dtipo encontrarEntrada(string nombre, bool quiero_que_este) {
 
 	// si lo encontramos, devolvemos el tipo encontrado
 	if ( pos_actual != -1 ) {
-		tipo = TS[pos_actual].tipoDato;
+		entrada = TS[pos_actual];
 	} else if (quiero_que_este) {
 		printf("\nError semantico en la linea %d. Identificador '%s' no declarado\n", num_linea, nombre.c_str());
 	}
 
-	return tipo;
+	return entrada;
 
 }
 
@@ -481,7 +489,7 @@ bool esFuncion(string nombre){
 void comprobarEsVarOParamametroFormal(atributos atrib) {
 
 	// simplemente buscamos en la pila
-	dtipo t = encontrarEntrada(atrib.lexema, true);
+	dtipo t = encontrarEntrada(atrib.lexema, true).tipoDato;
 
 	// y si es desconocido, no asignado, o una funcion, damos el error
 	if ( t == desconocido || t == no_asignado || esFuncion(atrib.lexema) ){
@@ -516,4 +524,16 @@ string tipoAstring(dtipo tipo){
 
 	return tipo_str;
 }
+
+
+void comprobarEsLista(atributos atrib) {
+
+	entradaTS entrada = encontrarEntrada(atrib.lexema, true);
+
+	if ( !entrada.es_lista ) {
+		printf("Error semantico en la linea %d: Operación solo aplicable a una lista.\n", num_linea);
+	}
+
+}
+
 
