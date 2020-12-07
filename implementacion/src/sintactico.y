@@ -1,8 +1,10 @@
 %{
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
+#include <cstdlib>
+#include <cstdio>
+#include <string>
+
+using namespace std;
 
 int yylex();
 void yyerror(const char * mensaje);
@@ -22,7 +24,7 @@ entradaTS TS[MAX_TS];
 
 typedef struct {
 	int atrib;
-	char * lexema;
+	string lexema;
 	dtipo tipo;
 } atributos;
 
@@ -45,7 +47,7 @@ void TS_InsertaPARAMF(atributos atrib);
 
 int incrementaTOPE();
 
-dtipo encontrarEntrada(char * nombre);
+dtipo encontrarEntrada(string nombre, bool quiero_que_este);
 
 
 %}
@@ -122,7 +124,7 @@ cuerpo_declar_var			: VAR
 ident_variables             : ident_variables COMA ID { TS_InsertaIDENT($3); }
                                 | ident_variables COMA ID ASIGNACION expresion { TS_InsertaIDENT($3); }
                                 | ID { TS_InsertaIDENT($1); }
-                                | ID ASIGNACION expresion {  TS_InsertaIDENT($1);  }
+                                | ID ASIGNACION expresion {  TS_InsertaIDENT($1); }
 										  | error ;
 
 expresion                   : PARENTESIS_ABRE expresion PARENTESIS_CIERRA
@@ -216,21 +218,39 @@ void yyerror(const char *msg)
 
 
 void TS_InsertaIDENT(atributos atributo){
-	printf("Identificador %d", atributo.lexema);
+
+	//printf("Identificador %s\n\n", atributo.lexema.c_str());
 
 	entradaTS nueva_entrada;
 
-	nueva_entrada.entrada = funcion;
+	nueva_entrada.entrada = variable;
 
-	strcpy(nueva_entrada.nombre, atributo.lexema );
+	nueva_entrada.nombre = atributo.lexema;
 
 	nueva_entrada.parametros = 0;
 
 	nueva_entrada.tipoDato = tipoTmp;
 
-	TS[TOPE] = nueva_entrada;
+	int pos_id_buscado = TOPE - 1;
+	bool encontrado = false;
 
-	incrementaTOPE();
+	while ( pos_id_buscado >= 0 && TS[pos_id_buscado].entrada != marca && !encontrado) {
+
+		if ( atributo.lexema == TS[pos_id_buscado].nombre ) {
+			encontrado = true;
+		} else {
+			pos_id_buscado--;
+		}
+	}
+
+	if ( !encontrado ) {
+		TS[TOPE] = nueva_entrada;
+
+		incrementaTOPE();
+
+	} else {
+		printf("Error sintactico: Redeclaración de la variable '%s' en la linea %d\n", atributo.lexema.c_str(), num_linea);
+	}
 
 
 }
@@ -243,7 +263,7 @@ void TS_InsertaMARCA(){
 
 	// metemos cadena vacia siempre al meter algo, por si encontramos sin querer
 	// por el tema de basura
-	strcpy(nueva_entrada.nombre, "" );
+	nueva_entrada.nombre = "";
 
 	TS[TOPE] = nueva_entrada;
 
@@ -267,14 +287,14 @@ void TS_VaciarENTRADAS(){
 void TS_InsertaSUBPROG(atributos atributo){
 
 
-	dtipo tipo_buscar = encontrarEntrada(atributo.lexema);
+	dtipo tipo_buscar = encontrarEntrada(atributo.lexema, false);
 
 	if ( tipo_buscar == desconocido ){
 		entradaTS nueva_entrada;
 
 		nueva_entrada.entrada = funcion;
 
-		strcpy(nueva_entrada.nombre, atributo.lexema );
+		nueva_entrada.nombre = atributo.lexema;
 
 		nueva_entrada.parametros = 0;
 
@@ -287,7 +307,7 @@ void TS_InsertaSUBPROG(atributos atributo){
 		incrementaTOPE();
 
 	} else {
-		printf("\nError semantico en la linea %d. Redefinición de '%s'\n", num_linea, atributo.lexema);
+		printf("\nError semantico en la linea %d. Redefinición de '%s'\n", num_linea, atributo.lexema.c_str());
 	}
 
 
@@ -301,7 +321,7 @@ void TS_InsertaPARAMF(atributos atributo){
 
 	nueva_entrada.entrada = parametro_formal;
 
-	strcpy(nueva_entrada.nombre, atributo.lexema );
+	nueva_entrada.nombre = atributo.lexema;
 
 	nueva_entrada.parametros = 0;
 
@@ -317,21 +337,21 @@ void TS_InsertaPARAMF(atributos atributo){
 
 
 
-dtipo encontrarEntrada(char * nombre) {
+dtipo encontrarEntrada(string nombre, bool quiero_que_este) {
 	// devuelve la posicion de una entrada con mismo nombre, -1 si no la encuentra
 
 	int pos_actual = TOPE;
 	dtipo tipo = desconocido;
 
-	while ( strcmp(TS[pos_actual].nombre, nombre ) != 0 ) {
+	while ( TS[pos_actual].nombre != nombre && pos_actual >= 0 ) {
 		// son distintos, seguimos buscando
 		pos_actual-- ;
 	}
 
 	if ( pos_actual != -1 ) {
 		tipo = TS[pos_actual].tipoDato;
-	} else {
-		printf("\nError semantico en la linea %d. Identificador '%s' no declarado\n", num_linea, nombre);
+	} else if (quiero_que_este) {
+		printf("\nError semantico en la linea %d. Identificador '%s' no declarado\n", num_linea, nombre.c_str());
 	}
 
 	return tipo;

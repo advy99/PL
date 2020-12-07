@@ -1,6 +1,9 @@
 #ifndef ESTRUCTURAS_DATOS
 #define ESTRUCTURAS_DATOS
 
+#include <string>
+
+using namespace std;
 
 typedef enum {
 	// marca comienzo de bloque
@@ -27,7 +30,7 @@ typedef enum {
 
 typedef struct {
 	tipoEntrada entrada;
-	char * nombre;
+	string nombre;
 	dtipo tipoDato;
 	unsigned int parametros;
 	int tamDimen;
