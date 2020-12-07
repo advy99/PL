@@ -16,11 +16,16 @@ int num_linea = 1;
 #define MAX_TS 500
 
 unsigned long int TOPE = 0;
-unsigned int subprog;
+unsigned long int TOPE_PARAMF = 0;
+bool subprog = false;
 dtipo tipoTmp;
 
 
 entradaTS TS[MAX_TS];
+
+// necesitamos pila auxiliar para los parametros, porque si no
+// los introduce antes de la funcion, por la forma de expandir reglas de bison
+entradaTS TS_paramf[MAX_TS];
 
 typedef struct {
 	int atrib;
@@ -122,28 +127,26 @@ variables					: declar_variables
 declar_variables			: declar_variables cuerpo_declar_var
 						 		| cuerpo_declar_var ;
 
-cuerpo_declar_var			: VAR
-						  		  tipo { tipoTmp = $1.tipo;  }
-								  ident_variables PYC ;
+cuerpo_declar_var			: VAR tipo ident_variables PYC ;
 
 ident_variables             : ident_variables COMA ID { TS_InsertaIDENT($3); }
                                 | ident_variables COMA ID ASIGNACION expresion { TS_InsertaIDENT($3); }
                                 | ID { TS_InsertaIDENT($1); }
-                                | ID ASIGNACION expresion {  TS_InsertaIDENT($1);if ($1.tipo != $3.tipo) {printf("Error semantico en la linea %d: Los tipos son distintos\n", num_linea);} }
+                                | ID ASIGNACION expresion {  TS_InsertaIDENT($1); comprobarEsTipo($1.tipo, $3); }
 										  | error ;
 
-expresion                   : PARENTESIS_ABRE expresion PARENTESIS_CIERRA
+expresion                   : PARENTESIS_ABRE expresion PARENTESIS_CIERRA {$$.tipo = $2.tipo;}
                                 | OP_EXC_UN expresion
                                 | expresion OP_EXC_BIN expresion
                                 | expresion MENOS expresion
                                 | expresion MASMAS expresion ARROBA expresion
                                 | MENOS expresion
                                 | llamada_subprograma
-                                | ID
+                                | ID							{dtipo t = encontrarEntrada($1.lexema, true); $$.tipo = $1.tipo;}
                                 | constante
 										  | error ;
 
-constante                   : CONSTANTE_BASICA
+constante                   : CONSTANTE_BASICA {tipoTmp = $1.tipo;}
                                 | CORCHETE_ABRE contenido_lista CORCHETE_CIERRA ;
 
 contenido_lista             : contenido_lista_preced CONSTANTE_BASICA
@@ -161,12 +164,13 @@ llamada_subprograma         : ID PARENTESIS_ABRE lista_variables_constantes PARE
 declar_subprogramas         : declar_subprogramas declar_subp
                                 | ;
 
-declar_subp                 : cabecera_subp bloque  ;
+declar_subp                 : cabecera_subp {subprog = true;}
+									 	bloque  {subprog = false;} ;
 
 cabecera_subp               : tipo ID PARENTESIS_ABRE parametros PARENTESIS_CIERRA { TS_InsertaSUBPROG($2);  }
 									 | error;
 
-tipo                        : TIPO_BASICO
+tipo                        : TIPO_BASICO {tipoTmp = $1.tipo; }
                                 | LISTADE TIPO_BASICO
 										  | error ;
 
@@ -174,7 +178,7 @@ parametros                  : parametro
                                 | parametro_preced parametro
                                 | ;
 
-parametro                   : tipo ID { tipoTmp = $1.tipo; TS_InsertaPARAMF($2); };
+parametro                   : tipo ID { TS_InsertaPARAMF($2); };
 
 parametro_preced            : parametro_preced parametro COMA
                                 | parametro COMA;
@@ -183,10 +187,10 @@ sentencias                  : sentencias sentencia
                                 | ;
 
 sentencia                   : bloque
-                                | ID ASIGNACION expresion PYC { comprobarEsTipo($1.tipo, $3);}
-                                | SI PARENTESIS_ABRE expresion PARENTESIS_CIERRA sentencia {comprobarEsTipo(booleano, $2); }
-                                | SI PARENTESIS_ABRE expresion PARENTESIS_CIERRA sentencia SINO sentencia {comprobarEsTipo(booleano, $2); }
-                                | MIENTRAS PARENTESIS_ABRE expresion PARENTESIS_CIERRA sentencia {comprobarEsTipo(booleano, $2); }
+                                | ID ASIGNACION expresion PYC { comprobarEsTipo(encontrarEntrada($1.lexema, true), $3);}
+                                | SI PARENTESIS_ABRE expresion PARENTESIS_CIERRA sentencia {comprobarEsTipo(booleano, $3); }
+                                | SI PARENTESIS_ABRE expresion PARENTESIS_CIERRA sentencia SINO sentencia {comprobarEsTipo(booleano, $3); }
+                                | MIENTRAS PARENTESIS_ABRE expresion PARENTESIS_CIERRA sentencia {comprobarEsTipo(booleano, $3); }
                                 | REPETIR sentencia MIENTRAS PARENTESIS_ABRE expresion PARENTESIS_CIERRA PYC {comprobarEsTipo(booleano, $5); }
                                 | DEVUELVE expresion PYC
                                 | ID AVANZAR PYC
@@ -202,7 +206,7 @@ lista_variables             : lista_variables COMA ID {comprobarEsVarOParamametr
 lista_variables_constantes  : lista_variables_constantes COMA ID {comprobarEsVarOParamametroFormal($3);}
                                 | lista_variables_constantes COMA constante
                                 | constante
-                                | ID ;
+                                | ID {comprobarEsVarOParamametroFormal($1);} ;
 
 lista_expresiones_o_cadena  : lista_expresiones_o_cadena COMA CADENA
 									 	  | lista_expresiones_o_cadena COMA expresion
@@ -239,6 +243,15 @@ void TS_InsertaIDENT(atributos atributo){
 	int pos_id_buscado = TOPE - 1;
 	bool encontrado = false;
 
+	int num_params = 0;
+
+	if (encontrado) {
+		int contador = 0;
+	}
+
+	encontrado = false;
+	pos_id_buscado = TOPE - 1;
+
 	while ( pos_id_buscado >= 0 && TS[pos_id_buscado].entrada != marca && !encontrado) {
 
 		if ( atributo.lexema == TS[pos_id_buscado].nombre ) {
@@ -249,12 +262,13 @@ void TS_InsertaIDENT(atributos atributo){
 	}
 
 	if ( !encontrado ) {
+
 		TS[TOPE] = nueva_entrada;
 
 		incrementaTOPE();
 
 	} else {
-		printf("Error semantico: Redeclaración de la variable '%s' en la linea %d\n", atributo.lexema.c_str(), num_linea);
+		printf("Error semantico: Redeclaración de '%s' en la linea %d\n", atributo.lexema.c_str(), num_linea);
 	}
 
 
@@ -274,6 +288,18 @@ void TS_InsertaMARCA(){
 	TS[TOPE] = nueva_entrada;
 
 	incrementaTOPE();
+
+
+	if ( subprog ){
+
+		while (TOPE_PARAMF > 0){
+			TS[TOPE] = TS_paramf[TOPE_PARAMF - 1];
+
+			TOPE_PARAMF--;
+			incrementaTOPE();
+		}
+	}
+
 }
 
 void TS_VaciarENTRADAS(){
@@ -308,14 +334,22 @@ void TS_InsertaSUBPROG(atributos atributo){
 
 		TS[TOPE] = nueva_entrada;
 
-		subprog = TOPE;
-
 		incrementaTOPE();
 
 	} else {
 		printf("\nError semantico en la linea %d. Redefinición de '%s'\n", num_linea, atributo.lexema.c_str());
 	}
 
+	// volcamos la pila de parametros, dejamos TOPE_PARAMF ya que necesitamos
+	// añadir los parametros como si fueran variables al comenzar el bloque
+	int num_params = TOPE_PARAMF;
+	TS[TOPE - 1].parametros = num_params;
+	while (num_params > 0){
+		TS[TOPE] = TS_paramf[num_params - 1];
+
+		num_params--;
+		incrementaTOPE();
+	}
 
 
 }
@@ -333,11 +367,9 @@ void TS_InsertaPARAMF(atributos atributo){
 
 	nueva_entrada.tipoDato = tipoTmp;
 
-	TS[TOPE] = nueva_entrada;
+	TS_paramf[TOPE_PARAMF] = nueva_entrada;
 
-	TS[subprog].parametros++;
-
-	incrementaTOPE();
+	TOPE_PARAMF++;
 
 }
 

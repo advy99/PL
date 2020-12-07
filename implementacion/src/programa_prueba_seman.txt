@@ -1,14 +1,20 @@
 principal(){
+
 	variable real hola;
 
-	entero as(){
+	entero as(entero asdr){
+		variable booleano asdr;
 
 	}
 
 
-	si (0.1) {
-		hola = 34.3;
+	si (verdadero) {
+		variable entero asdr;
+
+		hola = 34;
 
 	}
+
+	hola = 2.2;
 
 }
