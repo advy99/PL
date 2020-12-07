@@ -1,12 +1,17 @@
 principal(){
 
 	variable real hola;
+	variable entero hola;
+
+	variable  entero pe, pf, pc;
 
 	entero as(entero asdr){
 
 		entero ccc(){
 
 		}
+
+		ccc();
 
 	}
 
@@ -22,8 +27,13 @@ principal(){
 
 	}
 
+	si (3){}
+
 	aspwepewp();
 
 	hola = 2.2;
+	hola = 2;
+
+	$pe;
 
 }

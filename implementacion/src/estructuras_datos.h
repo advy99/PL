@@ -32,6 +32,7 @@ typedef struct {
 	tipoEntrada entrada;
 	string nombre;
 	dtipo tipoDato;
+	bool es_lista;
 	unsigned int parametros;
 	int tamDimen;
 } entradaTS ;
