@@ -5,6 +5,10 @@ principal(){
 
 	}
 
-	entrada as;
+
+	si (0.1) {
+		hola = 34.3;
+
+	}
 
 }

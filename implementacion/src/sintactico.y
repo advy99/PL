@@ -51,6 +51,8 @@ dtipo encontrarEntrada(string nombre, bool quiero_que_este);
 
 bool esFuncion(string nombre);
 void comprobarEsVarOParamametroFormal(atributos atrib);
+void comprobarEsTipo(dtipo tipo, atributos atrib);
+string tipoAstring(dtipo tipo);
 
 
 %}
@@ -181,11 +183,11 @@ sentencias                  : sentencias sentencia
                                 | ;
 
 sentencia                   : bloque
-                                | ID ASIGNACION expresion PYC { if ($1.tipo != $3.tipo) {printf("Error semantico en la linea %d: Los tipos son distintos\n", num_linea);}}
-                                | SI expresion sentencia
-                                | SI expresion sentencia SINO sentencia
-                                | MIENTRAS expresion sentencia
-                                | REPETIR sentencia MIENTRAS PARENTESIS_ABRE expresion PARENTESIS_CIERRA PYC
+                                | ID ASIGNACION expresion PYC { comprobarEsTipo($1.tipo, $3);}
+                                | SI PARENTESIS_ABRE expresion PARENTESIS_CIERRA sentencia {comprobarEsTipo(booleano, $2); }
+                                | SI PARENTESIS_ABRE expresion PARENTESIS_CIERRA sentencia SINO sentencia {comprobarEsTipo(booleano, $2); }
+                                | MIENTRAS PARENTESIS_ABRE expresion PARENTESIS_CIERRA sentencia {comprobarEsTipo(booleano, $2); }
+                                | REPETIR sentencia MIENTRAS PARENTESIS_ABRE expresion PARENTESIS_CIERRA PYC {comprobarEsTipo(booleano, $5); }
                                 | DEVUELVE expresion PYC
                                 | ID AVANZAR PYC
                                 | ID RETROCEDER PYC
@@ -406,4 +408,29 @@ void comprobarEsVarOParamametroFormal(atributos atrib) {
 	}
 }
 
+void comprobarEsTipo(dtipo tipo, atributos atrib){
+	if (atrib.tipo != tipo) {
+
+		printf("Error semantico en la linea %d: Esperado tipo %s, encontrado tipo %s\n", num_linea, tipoAstring(tipo).c_str(), tipoAstring(atrib.tipo).c_str());
+	}
+}
+
+string tipoAstring(dtipo tipo){
+
+	string tipo_str = "desconocido";
+
+	if ( tipo == real ) {
+		tipo_str = "real";
+	} else if (tipo == entero) {
+		tipo_str = "entero";
+	} else if ( tipo == booleano ) {
+		tipo_str = "booleano";
+	} else if ( tipo == caracter ) {
+		tipo_str = "caracter";
+	} else if ( tipo == lista ) {
+		tipo_str = "lista";
+	}
+
+	return tipo_str;
+}
 
