@@ -160,7 +160,7 @@ contenido_lista_preced      : contenido_lista_preced CONSTANTE_BASICA COMA
                                 | CONSTANTE_BASICA COMA ;
 
 
-llamada_subprograma         : ID PARENTESIS_ABRE lista_variables_constantes PARENTESIS_CIERRA;
+llamada_subprograma         : ID PARENTESIS_ABRE lista_variables_constantes PARENTESIS_CIERRA {dtipo t = encontrarEntrada($1.lexema, true);} ;
 
 
 
@@ -200,6 +200,7 @@ sentencia                   : bloque
                                 | ID RETROCEDER PYC
                                 | DOLAR ID PYC
                                 | ENTRADA lista_variables PYC
+										  | llamada_subprograma PYC
                                 | SALIDA lista_expresiones_o_cadena PYC ;
 
 lista_variables             : lista_variables COMA ID {comprobarEsVarOParamametroFormal($3);}
@@ -209,7 +210,8 @@ lista_variables             : lista_variables COMA ID {comprobarEsVarOParamametr
 lista_variables_constantes  : lista_variables_constantes COMA ID {comprobarEsVarOParamametroFormal($3);}
                                 | lista_variables_constantes COMA constante
                                 | constante
-                                | ID {comprobarEsVarOParamametroFormal($1);} ;
+                                | ID {comprobarEsVarOParamametroFormal($1);}
+										  | ;
 
 lista_expresiones_o_cadena  : lista_expresiones_o_cadena COMA CADENA
 									 	  | lista_expresiones_o_cadena COMA expresion

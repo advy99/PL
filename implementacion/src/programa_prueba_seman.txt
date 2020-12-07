@@ -3,7 +3,6 @@ principal(){
 	variable real hola;
 
 	entero as(entero asdr){
-		variable booleano asdr;
 
 		entero ccc(){
 
@@ -19,9 +18,11 @@ principal(){
 	si (verdadero) {
 		variable entero asdr;
 
-		hola = 34;
+		hola = 34.3;
 
 	}
+
+	aspwepewp();
 
 	hola = 2.2;
 
