@@ -249,7 +249,7 @@ void TS_InsertaIDENT(atributos atributo){
 		incrementaTOPE();
 
 	} else {
-		printf("Error sintactico: Redeclaración de %s en la linea %d\n", atributo.lexema.c_str(), num_linea);
+		printf("Error sintactico: Redeclaración de la variable '%s' en la linea %d\n", atributo.lexema.c_str(), num_linea);
 	}
 
 
