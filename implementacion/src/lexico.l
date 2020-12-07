@@ -1,8 +1,9 @@
 %{
-#include <stdlib.h>
-#include <string.h>
+#include <cstdlib>
+#include <string>
 #include <y.tab.h>
 
+using namespace std;
 
 %}
 
@@ -66,7 +67,7 @@ digito		[0-9]
 "\'"."\'"						yylval.atrib =  2; return(CONSTANTE_BASICA);
 ("verdadero"|"falso")		yylval.atrib =  3; return(CONSTANTE_BASICA);
 \'[^\']+\'						return(CADENA);
-{letra}({letra}|{digito})*	yylval.lexema = strdup (yytext); return(ID);
+{letra}({letra}|{digito})*	yylval.lexema = string(strdup (yytext)); return(ID);
 "\n"								num_linea++;
 [" ""\t"]+						;
 .							printf("Error lexico - símbolo erróneo: '%s' en línea %d\n",yytext, num_linea);

@@ -13,22 +13,22 @@ crear_carpetas:
 
 
 $(BIN)/prueba: $(OBJ)/main.o $(OBJ)/y.tab.o
-	gcc -o $@ $^
+	g++ -g -o $@ $^
 
 $(OBJ)/main.o: $(SRC)/main.c
-	gcc -c -o $(OBJ)/main.o $(SRC)/main.c -I$(SRC)
+	g++ -g -c -o $(OBJ)/main.o $(SRC)/main.c -I$(SRC)
 
 $(BIN)/lexico: $(SRC)/lex.yy.c
 	lex $^ -o $@ -I$(INCLUDE) -lfl
 
 $(OBJ)/y.tab.o: $(SRC)/y.tab.c
-	gcc -c -o $@ $(SRC)/y.tab.c -lfl -I$(SRC)
+	g++ -g -c -o $@ $(SRC)/y.tab.c -lfl -I$(SRC)
 
 $(SRC)/y.tab.c: $(SRC)/lexico.l $(SRC)/lex.yy.c
 	bison -v -d -o $@ $(SRC)/sintactico.y
 
 $(SRC)/lex.yy.c: $(SRC)/lexico.l
-	lex -o $@ $(SRC)/lexico.l
+	flex -o $@ $(SRC)/lexico.l
 
 
 #$(INCLUDE)/y.tab.h: $(SRC)/sintactico.y

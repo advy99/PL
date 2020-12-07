@@ -1,6 +1,9 @@
 principal() {
 
     variable real ve;
+	 variable real ve;
+
+
     variable real vf1, vf2, vf3, vf4;
     variable caracter vci, vc2;
     variable booleano vl;
@@ -8,6 +11,7 @@ principal() {
     variable listade real pf, pf2;
     variable listade caracter pc, pc2;
     variable listade booleano p1;
+
 
     entero funcionA (entero a1, real a2, caracter a3){
 
