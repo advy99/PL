@@ -1,10 +1,28 @@
 principal(){
+
 	variable real hola;
 
-	entero as(){
+	entero as(entero asdr){
+		variable booleano asdr;
+
+		entero ccc(){
+
+		}
 
 	}
 
-	entrada as;
+
+	entero ccc() {
+
+	}
+
+	si (verdadero) {
+		variable entero asdr;
+
+		hola = 34;
+
+	}
+
+	hola = 2.2;
 
 }
