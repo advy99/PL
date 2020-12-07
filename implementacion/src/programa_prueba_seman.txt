@@ -1,7 +1,10 @@
 principal(){
 	variable real hola;
 
+	entero as(){
 
-	hola = 1;
+	}
+
+	entrada as;
 
 }

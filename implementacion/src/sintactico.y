@@ -49,6 +49,9 @@ int incrementaTOPE();
 
 dtipo encontrarEntrada(string nombre, bool quiero_que_este);
 
+bool esFuncion(string nombre);
+void comprobarEsVarOParamametroFormal(atributos atrib);
+
 
 %}
 %error-verbose
@@ -190,11 +193,11 @@ sentencia                   : bloque
                                 | ENTRADA lista_variables PYC
                                 | SALIDA lista_expresiones_o_cadena PYC ;
 
-lista_variables             : lista_variables COMA ID
-                                | ID ;
+lista_variables             : lista_variables COMA ID {comprobarEsVarOParamametroFormal($3);}
+                                | ID {comprobarEsVarOParamametroFormal($1);} ;
 
 
-lista_variables_constantes  : lista_variables_constantes COMA ID
+lista_variables_constantes  : lista_variables_constantes COMA ID {comprobarEsVarOParamametroFormal($3);}
                                 | lista_variables_constantes COMA constante
                                 | constante
                                 | ID ;
@@ -264,6 +267,7 @@ void TS_InsertaMARCA(){
 	// metemos cadena vacia siempre al meter algo, por si encontramos sin querer
 	// por el tema de basura
 	nueva_entrada.nombre = "";
+	nueva_entrada.tipoDato = no_asignado;
 
 	TS[TOPE] = nueva_entrada;
 
@@ -373,6 +377,33 @@ int incrementaTOPE(){
 	}
 
 	return salida;
+}
+
+bool esFuncion(string nombre){
+	bool es_funcion = false;
+	bool encontrado = false;
+
+	int pos = TOPE - 1;
+
+	while ( pos > 0 && !encontrado ) {
+		if ( nombre == TS[pos].nombre ) {
+			encontrado = true;
+			es_funcion = TS[pos].entrada == funcion;
+		}
+
+		pos --;
+	}
+
+	return es_funcion;
+
+}
+
+void comprobarEsVarOParamametroFormal(atributos atrib) {
+	dtipo t = encontrarEntrada(atrib.lexema, true);
+
+	if ( t == desconocido || t == no_asignado || esFuncion(atrib.lexema) ){
+		printf("Error semantico en la linea %d: Solo se puede ejecutar la orden sobre variables o parametros formales.\n", num_linea);
+	}
 }
 
 
