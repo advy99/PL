@@ -124,7 +124,7 @@ cuerpo_declar_var			: VAR
 ident_variables             : ident_variables COMA ID { TS_InsertaIDENT($3); }
                                 | ident_variables COMA ID ASIGNACION expresion { TS_InsertaIDENT($3); }
                                 | ID { TS_InsertaIDENT($1); }
-                                | ID ASIGNACION expresion {  TS_InsertaIDENT($1); }
+                                | ID ASIGNACION expresion {  TS_InsertaIDENT($1);if ($1.tipo != $3.tipo) {printf("Error semantico en la linea %d: Los tipos son distintos\n", num_linea);} }
 										  | error ;
 
 expresion                   : PARENTESIS_ABRE expresion PARENTESIS_CIERRA
@@ -169,7 +169,7 @@ parametros                  : parametro
                                 | parametro_preced parametro
                                 | ;
 
-parametro                   : tipo ID { TS_InsertaPARAMF($2); };
+parametro                   : tipo ID { tipoTmp = $1.tipo; TS_InsertaPARAMF($2); };
 
 parametro_preced            : parametro_preced parametro COMA
                                 | parametro COMA;
@@ -178,7 +178,7 @@ sentencias                  : sentencias sentencia
                                 | ;
 
 sentencia                   : bloque
-                                | ID ASIGNACION expresion PYC
+                                | ID ASIGNACION expresion PYC { if ($1.tipo != $3.tipo) {printf("Error semantico en la linea %d: Los tipos son distintos\n", num_linea);}}
                                 | SI expresion sentencia
                                 | SI expresion sentencia SINO sentencia
                                 | MIENTRAS expresion sentencia
@@ -249,7 +249,7 @@ void TS_InsertaIDENT(atributos atributo){
 		incrementaTOPE();
 
 	} else {
-		printf("Error sintactico: Redeclaración de la variable '%s' en la linea %d\n", atributo.lexema.c_str(), num_linea);
+		printf("Error semantico: Redeclaración de la variable '%s' en la linea %d\n", atributo.lexema.c_str(), num_linea);
 	}
 
 
@@ -325,7 +325,7 @@ void TS_InsertaPARAMF(atributos atributo){
 
 	nueva_entrada.parametros = 0;
 
-	nueva_entrada.tipoDato = atributo.tipo;
+	nueva_entrada.tipoDato = tipoTmp;
 
 	TS[TOPE] = nueva_entrada;
 
