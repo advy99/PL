@@ -55,8 +55,11 @@ int incrementaTOPE();
 dtipo encontrarEntrada(string nombre, bool quiero_que_este);
 
 bool esFuncion(string nombre);
+
 void comprobarEsVarOParamametroFormal(atributos atrib);
+
 void comprobarEsTipo(dtipo tipo, atributos atrib);
+
 string tipoAstring(dtipo tipo);
 
 
@@ -226,31 +229,30 @@ void yyerror(const char *msg)
 }
 
 
+// Funcion para insertar un atributo en la tabla de simbolos
 void TS_InsertaIDENT(atributos atributo){
 
 	//printf("Identificador %s\n\n", atributo.lexema.c_str());
 
+	// preparamos la nueva entrada
 	entradaTS nueva_entrada;
 
+	// es de tipo variable
 	nueva_entrada.entrada = variable;
 
+	// y tiene el nombre del atributo dado
 	nueva_entrada.nombre = atributo.lexema;
 
+	// ponemos parametros a 0 porque no este a basura
 	nueva_entrada.parametros = 0;
 
+	// el tipo es el leido en la variable temporal en yacc
 	nueva_entrada.tipoDato = tipoTmp;
 
+	// pasamos a buscar si se ha declarado otro con el mismo nombre dentro de la
+	// misma marca
 	int pos_id_buscado = TOPE - 1;
 	bool encontrado = false;
-
-	int num_params = 0;
-
-	if (encontrado) {
-		int contador = 0;
-	}
-
-	encontrado = false;
-	pos_id_buscado = TOPE - 1;
 
 	while ( pos_id_buscado >= 0 && TS[pos_id_buscado].entrada != marca && !encontrado) {
 
@@ -261,6 +263,7 @@ void TS_InsertaIDENT(atributos atributo){
 		}
 	}
 
+	// si no se ha declarado, lo añadimos
 	if ( !encontrado ) {
 
 		TS[TOPE] = nueva_entrada;
@@ -268,14 +271,18 @@ void TS_InsertaIDENT(atributos atributo){
 		incrementaTOPE();
 
 	} else {
+		// si se ha declarado antes, mostramos un error
+		// como los parametros de funciones son añadidos tras la marca de bloque, se tendrá en cuenta sus redeclaraciones
 		printf("Error semantico: Redeclaración de '%s' en la linea %d\n", atributo.lexema.c_str(), num_linea);
 	}
 
 
 }
 
+// funcion para insertar el comienzo de bloque
 void TS_InsertaMARCA(){
 
+	// preparamos la nueva entrada, que sera una marca
 	entradaTS nueva_entrada;
 
 	nueva_entrada.entrada = marca;
@@ -285,14 +292,20 @@ void TS_InsertaMARCA(){
 	nueva_entrada.nombre = "";
 	nueva_entrada.tipoDato = no_asignado;
 
+	// la introducimos en la pila, y la incrementamos el tope
 	TS[TOPE] = nueva_entrada;
 
 	incrementaTOPE();
 
-
+	// si estamos en un subprograma, debemos añadir los parametros formales
+	// como variables. Tambien vaciamos la pila de parametros ya que es el
+	// ultimo paso en el que la usamos
 	if ( subprog ){
 
+		// mientras queden elementos en la pila
 		while (TOPE_PARAMF > 0){
+			// simplemente vamos volcandolos, decrementando un contador e
+			// incrementando otro
 			TS[TOPE] = TS_paramf[TOPE_PARAMF - 1];
 
 			TOPE_PARAMF--;
@@ -302,12 +315,11 @@ void TS_InsertaMARCA(){
 
 }
 
+// vaciar las entradas de la pila hasta la ultima marca
 void TS_VaciarENTRADAS(){
 
-	// lo mismo habria que comprobar si ha llegado a encontrar
-	// la marca, por el tema de error semantico si tenemos un cierra llave
-
-	while ( TS[TOPE].entrada != marca && TOPE > 0 ){
+	// simplemente decrementamos el tope hasta llegar a la marca
+	while ( TS[TOPE - 1].entrada != marca && TOPE > 0 ){
 		TOPE--;
 	}
 
@@ -316,12 +328,15 @@ void TS_VaciarENTRADAS(){
 
 }
 
+// funcion para añadir un subprograma
 void TS_InsertaSUBPROG(atributos atributo){
 
-
+	// buscamos si ya está añadida una entrada con el mismo lexema
 	dtipo tipo_buscar = encontrarEntrada(atributo.lexema, false);
 
+	// si no lo ha encontrado, lo añadimos
 	if ( tipo_buscar == desconocido ){
+		// sera una funcion, en principio con 0 parametros, y del tipo leido temporalmente
 		entradaTS nueva_entrada;
 
 		nueva_entrada.entrada = funcion;
@@ -337,12 +352,18 @@ void TS_InsertaSUBPROG(atributos atributo){
 		incrementaTOPE();
 
 	} else {
+		// si lo ha encontrado en la tabla de simbolos, imprime un error por la
+		// redefinicion
 		printf("\nError semantico en la linea %d. Redefinición de '%s'\n", num_linea, atributo.lexema.c_str());
 	}
 
 	// volcamos la pila de parametros, dejamos TOPE_PARAMF ya que necesitamos
 	// añadir los parametros como si fueran variables al comenzar el bloque
+	// la pila de paramtros se vaciará al meter la marca de bloque, ya que
+	// necesitamos meter los parametros como variables
 	int num_params = TOPE_PARAMF;
+	// TOPE-1 es la funcion, así que antes de meter los parametros establecemos
+	// el número de parámetros que tiene
 	TS[TOPE - 1].parametros = num_params;
 	while (num_params > 0){
 		TS[TOPE] = TS_paramf[num_params - 1];
@@ -354,31 +375,53 @@ void TS_InsertaSUBPROG(atributos atributo){
 
 }
 
+// insertamos un parametro formal, utilizaremos una pila auxiliar
+// ya que si no introducirá los parametros antes del subprograma
 void TS_InsertaPARAMF(atributos atributo){
-	// aqui hay que utilizar TOPE	- 1 porque es sobre la funcion que hemos añadido antes
 
-	entradaTS nueva_entrada;
+	bool encontrado = false;
 
-	nueva_entrada.entrada = parametro_formal;
+	int n_params = TOPE_PARAMF - 1;
 
-	nueva_entrada.nombre = atributo.lexema;
+	// buscamos si ya existe un parametro con ese nombre
+	while ( n_params > 0 && !encontrado ) {
 
-	nueva_entrada.parametros = 0;
+		encontrado = atributo.lexema == TS_paramf[n_params].nombre;
 
-	nueva_entrada.tipoDato = tipoTmp;
+		n_params--;
+	}
 
-	TS_paramf[TOPE_PARAMF] = nueva_entrada;
+	// si no existe lo añadimos
+	if ( !encontrado ) {
 
-	TOPE_PARAMF++;
+		entradaTS nueva_entrada;
+
+		nueva_entrada.entrada = parametro_formal;
+
+		nueva_entrada.nombre = atributo.lexema;
+
+		nueva_entrada.parametros = 0;
+
+		nueva_entrada.tipoDato = tipoTmp;
+
+		TS_paramf[TOPE_PARAMF] = nueva_entrada;
+
+		TOPE_PARAMF++;
+
+	} else {
+		// si existe lo añadimos
+		printf("Error semantico en la linea %d: El parámetro %s ya existe\n", num_linea, atributo.lexema.c_str());
+	}
 
 }
 
 
-
+// funcion para encontrar una entrada en toda la pila
+// muchas veces no la usamos porque solo buscamos hasta la marca anterior
 dtipo encontrarEntrada(string nombre, bool quiero_que_este) {
 	// devuelve la posicion de una entrada con mismo nombre, -1 si no la encuentra
 
-	int pos_actual = TOPE;
+	int pos_actual = TOPE - 1;
 	dtipo tipo = desconocido;
 
 	while ( TS[pos_actual].nombre != nombre && pos_actual >= 0 ) {
@@ -386,6 +429,7 @@ dtipo encontrarEntrada(string nombre, bool quiero_que_este) {
 		pos_actual-- ;
 	}
 
+	// si lo encontramos, devolvemos el tipo encontrado
 	if ( pos_actual != -1 ) {
 		tipo = TS[pos_actual].tipoDato;
 	} else if (quiero_que_este) {
@@ -396,7 +440,7 @@ dtipo encontrarEntrada(string nombre, bool quiero_que_este) {
 
 }
 
-
+// incrementar el tope de la pila contemplando que se puede llenar
 int incrementaTOPE(){
 
 	int salida = 1;
@@ -413,6 +457,7 @@ int incrementaTOPE(){
 	return salida;
 }
 
+// comprobamos si un lexema es de una función o no
 bool esFuncion(string nombre){
 	bool es_funcion = false;
 	bool encontrado = false;
@@ -432,14 +477,19 @@ bool esFuncion(string nombre){
 
 }
 
+// comprobamos si es una variable o parametro formal, si no lo es damos un error
 void comprobarEsVarOParamametroFormal(atributos atrib) {
+
+	// simplemente buscamos en la pila
 	dtipo t = encontrarEntrada(atrib.lexema, true);
 
+	// y si es desconocido, no asignado, o una funcion, damos el error
 	if ( t == desconocido || t == no_asignado || esFuncion(atrib.lexema) ){
 		printf("Error semantico en la linea %d: Solo se puede ejecutar la orden sobre variables o parametros formales.\n", num_linea);
 	}
 }
 
+// comprobamos si dos tipos coinciden, y si no mostramos un error
 void comprobarEsTipo(dtipo tipo, atributos atrib){
 	if (atrib.tipo != tipo) {
 
@@ -447,6 +497,7 @@ void comprobarEsTipo(dtipo tipo, atributos atrib){
 	}
 }
 
+// funcion para pasar el tipo a string, para usarlo en mensajes de salida
 string tipoAstring(dtipo tipo){
 
 	string tipo_str = "desconocido";

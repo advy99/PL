@@ -5,8 +5,16 @@ principal(){
 	entero as(entero asdr){
 		variable booleano asdr;
 
+		entero ccc(){
+
+		}
+
 	}
 
+
+	entero ccc() {
+
+	}
 
 	si (verdadero) {
 		variable entero asdr;
