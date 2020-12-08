@@ -62,7 +62,7 @@ bool esFuncion(string nombre);
 
 void comprobarEsVarOParamametroFormal(atributos atrib);
 
-void comprobarEsTipo(dtipo tipo, atributos atrib);
+void comprobarEsTipo(dtipo tipo, dtipo tipo2);
 
 void comprobarEsLista(atributos atrib);
 
@@ -74,6 +74,10 @@ void TS_subprog_inserta(atributos atrib);
 
 string tipoAstring(dtipo tipo);
 
+
+void comprobarOpBinario(atributos izq, atributos operador, atributos der);
+void comprobarOpBinarioMenos(atributos izq, atributos der);
+void comprobarEsEnteroReal (atributos atrib);
 
 %}
 %error-verbose
@@ -147,21 +151,21 @@ cuerpo_declar_var			: VAR tipo ident_variables PYC ;
 ident_variables             : ident_variables COMA ID { TS_InsertaIDENT($3); }
                                 | ident_variables COMA ID ASIGNACION expresion { TS_InsertaIDENT($3); }
                                 | ID { TS_InsertaIDENT($1); }
-                                | ID ASIGNACION expresion {  TS_InsertaIDENT($1); comprobarEsTipo($1.tipo, $3); }
+                                | ID ASIGNACION expresion {  TS_InsertaIDENT($1); comprobarEsTipo($1.tipo, $3.tipo); }
 										  | error ;
 
 expresion                   : PARENTESIS_ABRE expresion PARENTESIS_CIERRA {$$.tipo = $2.tipo;}
                                 | OP_EXC_UN expresion {$$.tipo = $2.tipo;}
-                                | expresion OP_EXC_BIN expresion	{comprobarEsTipo($1.tipo, $3); $$.tipo = $1.tipo;}
-                                | expresion MENOS expresion {comprobarEsTipo($1.tipo, $3); $$.tipo = $1.tipo;}
-                                | expresion MASMAS expresion ARROBA expresion {comprobarEsLista($1); comprobarEsTipo($1.tipo, $2); comprobarEsTipo(entero, $3); $$.tipo = $1.tipo;}
-                                | MENOS expresion { $$.tipo = $2.tipo;}
+                                | expresion OP_EXC_BIN expresion	{comprobarOpBinario($1, $2, $3); $$.tipo = $1.tipo;}
+                                | expresion MENOS expresion {comprobarOpBinarioMenos($1, $3); $$.tipo = $1.tipo;}
+                                | expresion MASMAS expresion ARROBA expresion {comprobarEsLista($1); comprobarEsTipo($1.tipo, $2.tipo); comprobarEsTipo(entero, $3.tipo); $$.tipo = $1.tipo;}
+                                | MENOS expresion { comprobarEsEnteroReal($2); $$.tipo = $2.tipo;}
                                 | llamada_subprograma {$$.tipo = $1.tipo;}
-                                | ID							{dtipo t = encontrarEntrada($1.lexema, true).tipoDato; $$.tipo = $1.tipo;}
+                                | ID							{dtipo t = encontrarEntrada($1.lexema, true).tipoDato; $$.tipo = t;}
                                 | constante {$$.tipo = $1.tipo;}
 										  | error ;
 
-constante                   : CONSTANTE_BASICA {tipoTmp = $1.tipo;}
+constante                   : CONSTANTE_BASICA {tipoTmp = $1.tipo; $$.tipo = $1.tipo; }
                                 | CORCHETE_ABRE contenido_lista CORCHETE_CIERRA { $$.tipo = $2.tipo;} ;
 
 contenido_lista             : contenido_lista_preced CONSTANTE_BASICA {$$.tipo = $1.tipo;}
@@ -202,11 +206,11 @@ sentencias                  : sentencias sentencia
                                 | ;
 
 sentencia                   : bloque
-                                | ID ASIGNACION expresion PYC { comprobarEsTipo(encontrarEntrada($1.lexema, true).tipoDato, $3);}
-                                | SI PARENTESIS_ABRE expresion PARENTESIS_CIERRA sentencia {comprobarEsTipo(booleano, $3); }
-                                | SI PARENTESIS_ABRE expresion PARENTESIS_CIERRA sentencia SINO sentencia {comprobarEsTipo(booleano, $3); }
-                                | MIENTRAS PARENTESIS_ABRE expresion PARENTESIS_CIERRA sentencia {comprobarEsTipo(booleano, $3); }
-                                | REPETIR sentencia MIENTRAS PARENTESIS_ABRE expresion PARENTESIS_CIERRA PYC {comprobarEsTipo(booleano, $5); }
+                                | ID ASIGNACION expresion PYC { comprobarEsTipo(encontrarEntrada($1.lexema, true).tipoDato, $3.tipo);}
+                                | SI PARENTESIS_ABRE expresion PARENTESIS_CIERRA sentencia {comprobarEsTipo(booleano, $3.tipo); }
+                                | SI PARENTESIS_ABRE expresion PARENTESIS_CIERRA sentencia SINO sentencia {comprobarEsTipo(booleano, $3.tipo); }
+                                | MIENTRAS PARENTESIS_ABRE expresion PARENTESIS_CIERRA sentencia {comprobarEsTipo(booleano, $3.tipo); }
+                                | REPETIR sentencia MIENTRAS PARENTESIS_ABRE expresion PARENTESIS_CIERRA PYC {comprobarEsTipo(booleano, $5.tipo); }
                                 | DEVUELVE expresion PYC {comprobarDevuelveSubprog($2);}
                                 | ID AVANZAR PYC		{ comprobarEsLista($1); }
                                 | ID RETROCEDER PYC { comprobarEsLista($1); }
@@ -442,7 +446,7 @@ entradaTS encontrarEntrada(string nombre, bool quiero_que_este) {
 
 	entrada.tipoDato = desconocido;
 
-	while ( TS[pos_actual].nombre != nombre && pos_actual >= 0 ) {
+	while ( (TS[pos_actual].nombre != nombre || TS[pos_actual].entrada == parametro_formal ) && pos_actual >= 0 ) {
 		// son distintos, seguimos buscando
 		pos_actual-- ;
 	}
@@ -508,13 +512,12 @@ void comprobarEsVarOParamametroFormal(atributos atrib) {
 }
 
 // comprobamos si dos tipos coinciden, y si no mostramos un error
-void comprobarEsTipo(dtipo tipo, atributos atrib){
+void comprobarEsTipo(dtipo tipo, dtipo tipo2){
 
-	entradaTS entrada = encontrarEntrada(atrib.lexema, false);
 
-	if (entrada.tipoDato != tipo) {
+	if (tipo != tipo2) {
 
-		printf("Error semantico en la linea %d: Esperado tipo %s, encontrado tipo %s\n", num_linea, tipoAstring(tipo).c_str(), tipoAstring(atrib.tipo).c_str());
+		printf("Error semantico en la linea %d: Esperado tipo %s, encontrado tipo %s\n", num_linea, tipoAstring(tipo).c_str(), tipoAstring(tipo2).c_str());
 	}
 }
 
@@ -647,10 +650,61 @@ void comprobarDevuelveSubprog(atributos atrib) {
 	if ( entrada == 0 ){
 		printf("Error semantico en la linea %d: No se puede devolver un valor en la seccion principal\n", num_linea);
 	} else {
-		comprobarEsTipo(TS[entrada].tipoDato, atrib);
+		comprobarEsTipo(TS[entrada].tipoDato, atrib.tipo);
 	}
 
 }
 
 
+void comprobarOpBinario(atributos izq, atributos operador, atributos der) {
+
+	string t_izq = tipoAstring(izq.tipo);
+	string t_der = tipoAstring(der.tipo);
+
+	// operadores de + * / y relacion
+	if ( (operador.atrib >= 0 && operador.atrib <= 2) ||
+		  ( operador.atrib >= 6 && operador.atrib <= 9  )) {
+
+		// tiene que ser entero o real y del mismo tipo
+		if ( (izq.tipo != entero && izq.tipo != real) || (der.tipo != entero && der.tipo != real) ) {
+			printf("Error semantico en la linea %d: Operador solo aplicable a enteros o reales, encontrados tipos %s y %s\n", num_linea, t_izq.c_str(), t_der.c_str());
+		} else {
+			// comprobamos que izq y der son del mismo tipo
+			comprobarEsTipo(izq.tipo, der.tipo);
+		}
+
+	} else if (operador.atrib == 10 || operador.atrib == 11){
+		// operaciones de comprobar si son iguales o distintos, aplicables a todos los tipos
+		comprobarEsTipo(izq.tipo, der.tipo);
+
+	} else if ( operador.atrib >= 3 && operador.atrib <= 5 ) {
+		if ( izq.tipo != booleano && der.tipo != booleano ){
+			printf("Error semantico en la linea %d: Operador solo aplicable a booleanos, encontrados tipos %s y %s\n", num_linea, t_izq.c_str(), t_der.c_str());
+		} else {
+			// comprobamos que izq y der son del mismo tipo
+			comprobarEsTipo(izq.tipo, der.tipo);
+		}
+
+	}
+
+
+}
+
+void comprobarOpBinarioMenos(atributos izq, atributos der) {
+	if ( (izq.tipo != entero && izq.tipo != real) || (der.tipo != entero && der.tipo != real) ){
+		string t_izq = tipoAstring(izq.tipo);
+		string t_der = tipoAstring(der.tipo);
+		printf("Error semantico en la linea %d: Operador solo aplicable a enteros o reales, encontrados tipos %s y %s\n", num_linea, t_izq.c_str(), t_der.c_str());
+	} else {
+		// comprobamos que izq y der son del mismo tipo
+		comprobarEsTipo(izq.tipo, der.tipo);
+	}
+}
+
+void comprobarEsEnteroReal (atributos atrib){
+	if ( atrib.tipo != entero && atrib.tipo != real){
+		string t = tipoAstring(atrib.tipo);
+		printf("Error semantico en la linea %d: Operador solo aplicable a enteros o reales, encontrado tipo %s\n", num_linea, t.c_str());
+	}
+}
 

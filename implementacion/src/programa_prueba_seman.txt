@@ -1,20 +1,31 @@
 principal(){
 
-	variable entero numentero;
-	variable real numreal;
-	variable booleano bool;
+	variable entero a, b;
+	variable real c, d;
+	variable booleano x, z;
 
 
 	entero as(entero asdr, real b){
 
 
-		devuelve numreal;
 	}
 
-	as(numentero, numreal);
+	a = -z;
+	a = a + d;
 
 
-	devuelve bool;
+	z = x ^ z;
 
+	a = a + b;
+
+	z = a + b;
+
+	a = 1 + 2;
+
+	a = 1 + a;
+
+	a = a + 1.0;
+
+	c = c + 1;
 
 }
