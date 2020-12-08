@@ -551,16 +551,44 @@ void comprobarLlamadaFuncion(atributos atrib) {
 
 	if ( existe != desconocido && entrada_funcion.entrada != funcion ){
 		printf("Error semantico en la linea %d: %s no es una funcion\n", num_linea, entrada_funcion.nombre.c_str());
+
 	} else if ( existe != desconocido ) {
+
 		int pos_entrada = TOPE - 1;
 
-		while ( entrada_funcion.nombre != TS[pos_entrada].nombre ) {
+		while ( entrada_funcion.nombre != TS[pos_entrada].nombre || TS[pos_entrada].entrada != funcion ) {
 			pos_entrada--;
 		}
 
-		if (TS[pos_entrada].parametros != TOPE_SUBPROG){
+		int pos_funcion = pos_entrada;
+
+		pos_entrada += TS[pos_funcion].parametros;
+
+
+		if (TS[pos_funcion].parametros != TOPE_SUBPROG){
 			printf("Error semantico en la linea %d: La funcion %s necesita %d parámetros y se han proporcionado %d\n", num_linea, entrada_funcion.nombre.c_str(), entrada_funcion.parametros, TOPE_SUBPROG);
 		} else {
+
+			// pasamos al primer parámetro
+			int num_parametros = 0;
+
+			while ( num_parametros < TOPE_SUBPROG ) {
+				entradaTS parametro_en_TS = encontrarEntrada(TS_llamadas_subprog[num_parametros].lexema, true);
+
+
+				if ( TS[pos_entrada].tipoDato != parametro_en_TS.tipoDato ){
+
+					string tipo_esperado = tipoAstring(TS[pos_entrada].tipoDato);
+					string tipo_encontrado = tipoAstring(parametro_en_TS.tipoDato);
+
+					printf("Error semantico en la linea %d: El parámetro %d, %s es de tipo %s pero se espera un tipo %s en la llamada a %s\n", num_linea + 1, num_parametros, TS_llamadas_subprog[num_parametros].lexema.c_str(), tipo_encontrado.c_str(), tipo_esperado.c_str(), entrada_funcion.nombre.c_str());
+				}
+
+				num_parametros++;
+				pos_entrada--;
+			}
+
+			TOPE_SUBPROG = 0;
 
 		}
 
