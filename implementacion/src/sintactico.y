@@ -549,11 +549,13 @@ void comprobarLlamadaFuncion(atributos atrib) {
 	entradaTS entrada_funcion = encontrarEntrada(atrib.lexema, true);
 	dtipo existe = entrada_funcion.tipoDato;
 
+	// si existe la entrada, y no es una funcion, sacamos un error de llamada
 	if ( existe != desconocido && entrada_funcion.entrada != funcion ){
 		printf("Error semantico en la linea %d: %s no es una funcion\n", num_linea, entrada_funcion.nombre.c_str());
 
 	} else if ( existe != desconocido ) {
 
+		// buscamos la posicion donde comiznan los parametros formales
 		int pos_entrada = TOPE - 1;
 
 		while ( entrada_funcion.nombre != TS[pos_entrada].nombre || TS[pos_entrada].entrada != funcion ) {
@@ -562,9 +564,11 @@ void comprobarLlamadaFuncion(atributos atrib) {
 
 		int pos_funcion = pos_entrada;
 
+		// comprobamos la pila al reves, porque al volcarla se le dio la vuelta
 		pos_entrada += TS[pos_funcion].parametros;
 
-
+		// si el numero de parámetros de la definicion no coincide con el numero
+		// de parametros dados en la llamada
 		if (TS[pos_funcion].parametros != TOPE_SUBPROG){
 			printf("Error semantico en la linea %d: La funcion %s necesita %d parámetros y se han proporcionado %d\n", num_linea, entrada_funcion.nombre.c_str(), entrada_funcion.parametros, TOPE_SUBPROG);
 		} else {
@@ -572,10 +576,14 @@ void comprobarLlamadaFuncion(atributos atrib) {
 			// pasamos al primer parámetro
 			int num_parametros = 0;
 
+			// para todos los parametros dados
 			while ( num_parametros < TOPE_SUBPROG ) {
+				// buscamos el parametro en la tabla de simbolos
+				// diciendo que es necesario que lo encuentre
 				entradaTS parametro_en_TS = encontrarEntrada(TS_llamadas_subprog[num_parametros].lexema, true);
 
-
+				// si el tipo encontrado no es del tipo esperado, sacamos el error
+				// por pantalla
 				if ( TS[pos_entrada].tipoDato != parametro_en_TS.tipoDato ){
 
 					string tipo_esperado = tipoAstring(TS[pos_entrada].tipoDato);
@@ -584,10 +592,12 @@ void comprobarLlamadaFuncion(atributos atrib) {
 					printf("Error semantico en la linea %d: El parámetro %d, %s es de tipo %s pero se espera un tipo %s en la llamada a %s\n", num_linea + 1, num_parametros, TS_llamadas_subprog[num_parametros].lexema.c_str(), tipo_encontrado.c_str(), tipo_esperado.c_str(), entrada_funcion.nombre.c_str());
 				}
 
+				// seguimos al siguiente parametro
 				num_parametros++;
 				pos_entrada--;
 			}
 
+			// una vez comprobados todos, vaciamos la pila de parametros
 			TOPE_SUBPROG = 0;
 
 		}
