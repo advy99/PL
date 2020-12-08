@@ -216,10 +216,10 @@ lista_variables             : lista_variables COMA ID {comprobarEsVarOParamametr
                                 | ID {comprobarEsVarOParamametroFormal($1);} ;
 
 
-lista_variables_constantes  : lista_variables_constantes COMA ID {comprobarEsVarOParamametroFormal($3); TS_subprog_inserta($3);}
+lista_variables_constantes  : lista_variables_constantes COMA ID { TS_subprog_inserta($3);}
                                 | lista_variables_constantes COMA constante {TS_subprog_inserta($3);}
                                 | constante {TS_subprog_inserta($1);}
-                                | ID {comprobarEsVarOParamametroFormal($1); TS_subprog_inserta($1);}
+                                | ID { TS_subprog_inserta($1);}
 										  | ;
 
 lista_expresiones_o_cadena  : lista_expresiones_o_cadena COMA CADENA
