@@ -1,39 +1,25 @@
 principal(){
 
-	variable real hola;
-	variable entero hola;
+	variable entero numentero;
+	variable real numreal;
+	variable booleano bool;
 
-	variable  entero pe, pf, pc;
 
-	entero as(entero asdr){
+	entero as(entero asdr, real b){
 
-		entero ccc(){
-
-		}
-
-		ccc();
 
 	}
 
+	as(numentero, numreal);
 
-	entero ccc() {
+	as(numreal, numreal);
 
-	}
+	as(numentero, bool);
 
-	si (verdadero) {
-		variable entero asdr;
+	as(numreal, bool);
 
-		hola = 34.3;
+	as(asdf, bool);
 
-	}
 
-	si (3){}
-
-	aspwepewp();
-
-	hola = 2.2;
-	hola = 2;
-
-	$pe;
 
 }

@@ -33,6 +33,9 @@ typedef struct {
 	dtipo tipo;
 } atributos;
 
+unsigned long TOPE_SUBPROG = 0;
+atributos TS_llamadas_subprog[MAX_TS];
+
 #define YYSTYPE atributos
 
 // falta funciones:
@@ -61,6 +64,10 @@ void comprobarEsVarOParamametroFormal(atributos atrib);
 void comprobarEsTipo(dtipo tipo, atributos atrib);
 
 void comprobarEsLista(atributos atrib);
+
+void comprobarLlamadaFuncion(atributos atrib);
+
+void TS_subprog_inserta(atributos atrib);
 
 string tipoAstring(dtipo tipo);
 
@@ -162,7 +169,7 @@ contenido_lista_preced      : contenido_lista_preced CONSTANTE_BASICA COMA
                                 | CONSTANTE_BASICA COMA ;
 
 
-llamada_subprograma         : ID PARENTESIS_ABRE lista_variables_constantes PARENTESIS_CIERRA {dtipo t = encontrarEntrada($1.lexema, true).tipoDato;} ;
+llamada_subprograma         : ID PARENTESIS_ABRE lista_variables_constantes PARENTESIS_CIERRA { comprobarLlamadaFuncion($1);} ;
 
 
 
@@ -209,10 +216,10 @@ lista_variables             : lista_variables COMA ID {comprobarEsVarOParamametr
                                 | ID {comprobarEsVarOParamametroFormal($1);} ;
 
 
-lista_variables_constantes  : lista_variables_constantes COMA ID {comprobarEsVarOParamametroFormal($3);}
-                                | lista_variables_constantes COMA constante
-                                | constante
-                                | ID {comprobarEsVarOParamametroFormal($1);}
+lista_variables_constantes  : lista_variables_constantes COMA ID { TS_subprog_inserta($3);}
+                                | lista_variables_constantes COMA constante {TS_subprog_inserta($3);}
+                                | constante {TS_subprog_inserta($1);}
+                                | ID { TS_subprog_inserta($1);}
 										  | ;
 
 lista_expresiones_o_cadena  : lista_expresiones_o_cadena COMA CADENA
@@ -493,7 +500,7 @@ void comprobarEsVarOParamametroFormal(atributos atrib) {
 
 	// y si es desconocido, no asignado, o una funcion, damos el error
 	if ( t == desconocido || t == no_asignado || esFuncion(atrib.lexema) ){
-		printf("Error semantico en la linea %d: Solo se puede ejecutar la orden sobre variables o parametros formales.\n", num_linea);
+		printf("Error semantico en la linea %d: Esperado variables, parametro formal o constante.\n", num_linea);
 	}
 }
 
@@ -536,4 +543,82 @@ void comprobarEsLista(atributos atrib) {
 
 }
 
+
+void comprobarLlamadaFuncion(atributos atrib) {
+	// comprobamos que el lexema existe en la tabla de simbolos
+	entradaTS entrada_funcion = encontrarEntrada(atrib.lexema, true);
+	dtipo existe = entrada_funcion.tipoDato;
+
+	// si existe la entrada, y no es una funcion, sacamos un error de llamada
+	if ( existe != desconocido && entrada_funcion.entrada != funcion ){
+		printf("Error semantico en la linea %d: %s no es una funcion\n", num_linea, entrada_funcion.nombre.c_str());
+
+	} else if ( existe != desconocido ) {
+
+		// buscamos la posicion donde comiznan los parametros formales
+		int pos_entrada = TOPE - 1;
+
+		while ( entrada_funcion.nombre != TS[pos_entrada].nombre || TS[pos_entrada].entrada != funcion ) {
+			pos_entrada--;
+		}
+
+		int pos_funcion = pos_entrada;
+
+		// comprobamos la pila al reves, porque al volcarla se le dio la vuelta
+		pos_entrada += TS[pos_funcion].parametros;
+
+		// si el numero de parámetros de la definicion no coincide con el numero
+		// de parametros dados en la llamada
+		if (TS[pos_funcion].parametros != TOPE_SUBPROG){
+			printf("Error semantico en la linea %d: La funcion %s necesita %d parámetros y se han proporcionado %d\n", num_linea, entrada_funcion.nombre.c_str(), entrada_funcion.parametros, TOPE_SUBPROG);
+		} else {
+
+			// pasamos al primer parámetro
+			int num_parametros = 0;
+
+			// para todos los parametros dados
+			while ( num_parametros < TOPE_SUBPROG ) {
+				// buscamos el parametro en la tabla de simbolos
+				// diciendo que es necesario que lo encuentre
+				entradaTS parametro_en_TS = encontrarEntrada(TS_llamadas_subprog[num_parametros].lexema, true);
+
+				// si el tipo encontrado no es del tipo esperado, sacamos el error
+				// por pantalla
+				if ( TS[pos_entrada].tipoDato != parametro_en_TS.tipoDato ){
+
+					string tipo_esperado = tipoAstring(TS[pos_entrada].tipoDato);
+					string tipo_encontrado = tipoAstring(parametro_en_TS.tipoDato);
+
+					printf("Error semantico en la linea %d: El parámetro %d, %s es de tipo %s pero se espera un tipo %s en la llamada a %s\n", num_linea + 1, num_parametros, TS_llamadas_subprog[num_parametros].lexema.c_str(), tipo_encontrado.c_str(), tipo_esperado.c_str(), entrada_funcion.nombre.c_str());
+				}
+
+				// seguimos al siguiente parametro
+				num_parametros++;
+				pos_entrada--;
+			}
+
+			// una vez comprobados todos, vaciamos la pila de parametros
+			TOPE_SUBPROG = 0;
+
+		}
+
+	}
+
+}
+
+
+void TS_subprog_inserta(atributos atrib) {
+
+	if ( TOPE_SUBPROG == MAX_TS ) {
+		printf("ERROR: Tope de la pila alcanzado. Demasiadas entradas en la tabla de símbolos. Abortando compilación");
+	} else {
+		TS_llamadas_subprog[TOPE_SUBPROG] = atrib;
+
+		TOPE_SUBPROG++;
+
+	}
+
+
+
+}
 
