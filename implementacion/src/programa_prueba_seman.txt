@@ -1,11 +1,10 @@
 principal(){
 
 	variable real hola;
-	variable entero hola;
 
 	variable  entero pe, pf, pc;
 
-	entero as(entero asdr){
+	entero as(entero asdr, entero b){
 
 		entero ccc(){
 
@@ -20,6 +19,10 @@ principal(){
 
 	}
 
+	hola();
+
+	as(pe);
+
 	si (verdadero) {
 		variable entero asdr;
 
@@ -27,13 +30,10 @@ principal(){
 
 	}
 
-	si (3){}
+	si (verdadero){}
 
-	aspwepewp();
 
 	hola = 2.2;
-	hola = 2;
 
-	$pe;
 
 }
