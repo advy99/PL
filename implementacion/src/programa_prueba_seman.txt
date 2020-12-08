@@ -8,18 +8,13 @@ principal(){
 	entero as(entero asdr, real b){
 
 
+		devuelve numreal;
 	}
 
 	as(numentero, numreal);
 
-	as(numreal, numreal);
 
-	as(numentero, bool);
-
-	as(numreal, bool);
-
-	as(asdf, bool);
-
+	devuelve bool;
 
 
 }

@@ -19,6 +19,7 @@ unsigned long int TOPE = 0;
 unsigned long int TOPE_PARAMF = 0;
 bool subprog = false;
 dtipo tipoTmp;
+dtipo tipoSubprog;
 bool listaTmp;
 
 entradaTS TS[MAX_TS];
@@ -66,6 +67,8 @@ void comprobarEsTipo(dtipo tipo, atributos atrib);
 void comprobarEsLista(atributos atrib);
 
 void comprobarLlamadaFuncion(atributos atrib);
+
+void comprobarDevuelveSubprog(atributos atrib);
 
 void TS_subprog_inserta(atributos atrib);
 
@@ -151,22 +154,22 @@ expresion                   : PARENTESIS_ABRE expresion PARENTESIS_CIERRA {$$.ti
                                 | OP_EXC_UN expresion {$$.tipo = $2.tipo;}
                                 | expresion OP_EXC_BIN expresion	{comprobarEsTipo($1.tipo, $3); $$.tipo = $1.tipo;}
                                 | expresion MENOS expresion {comprobarEsTipo($1.tipo, $3); $$.tipo = $1.tipo;}
-                                | expresion MASMAS expresion ARROBA expresion
+                                | expresion MASMAS expresion ARROBA expresion {comprobarEsLista($1); comprobarEsTipo($1.tipo, $2); comprobarEsTipo(entero, $3); $$.tipo = $1.tipo;}
                                 | MENOS expresion { $$.tipo = $2.tipo;}
-                                | llamada_subprograma
+                                | llamada_subprograma {$$.tipo = $1.tipo;}
                                 | ID							{dtipo t = encontrarEntrada($1.lexema, true).tipoDato; $$.tipo = $1.tipo;}
-                                | constante
+                                | constante {$$.tipo = $1.tipo;}
 										  | error ;
 
 constante                   : CONSTANTE_BASICA {tipoTmp = $1.tipo;}
-                                | CORCHETE_ABRE contenido_lista CORCHETE_CIERRA ;
+                                | CORCHETE_ABRE contenido_lista CORCHETE_CIERRA { $$.tipo = $2.tipo;} ;
 
-contenido_lista             : contenido_lista_preced CONSTANTE_BASICA
-                                | CONSTANTE_BASICA
+contenido_lista             : contenido_lista_preced CONSTANTE_BASICA {$$.tipo = $1.tipo;}
+                                | CONSTANTE_BASICA {$$.tipo = $1.tipo;}
                                 | ;
 
-contenido_lista_preced      : contenido_lista_preced CONSTANTE_BASICA COMA
-                                | CONSTANTE_BASICA COMA ;
+contenido_lista_preced      : contenido_lista_preced CONSTANTE_BASICA COMA {$$.tipo = $2.tipo;}
+                                | CONSTANTE_BASICA COMA {$$.tipo = $1.tipo;};
 
 
 llamada_subprograma         : ID PARENTESIS_ABRE lista_variables_constantes PARENTESIS_CIERRA { comprobarLlamadaFuncion($1);} ;
@@ -179,7 +182,7 @@ declar_subprogramas         : declar_subprogramas declar_subp
 declar_subp                 : cabecera_subp {subprog = true;}
 									 	bloque  {subprog = false;} ;
 
-cabecera_subp               : tipo ID PARENTESIS_ABRE parametros PARENTESIS_CIERRA { TS_InsertaSUBPROG($2);  }
+cabecera_subp               : tipo ID PARENTESIS_ABRE parametros PARENTESIS_CIERRA {tipoSubprog = $1.tipo; TS_InsertaSUBPROG($2);  }
 									 | error;
 
 tipo                        : TIPO_BASICO {listaTmp = false; tipoTmp = $1.tipo; }
@@ -204,7 +207,7 @@ sentencia                   : bloque
                                 | SI PARENTESIS_ABRE expresion PARENTESIS_CIERRA sentencia SINO sentencia {comprobarEsTipo(booleano, $3); }
                                 | MIENTRAS PARENTESIS_ABRE expresion PARENTESIS_CIERRA sentencia {comprobarEsTipo(booleano, $3); }
                                 | REPETIR sentencia MIENTRAS PARENTESIS_ABRE expresion PARENTESIS_CIERRA PYC {comprobarEsTipo(booleano, $5); }
-                                | DEVUELVE expresion PYC
+                                | DEVUELVE expresion PYC {comprobarDevuelveSubprog($2);}
                                 | ID AVANZAR PYC		{ comprobarEsLista($1); }
                                 | ID RETROCEDER PYC { comprobarEsLista($1); }
                                 | DOLAR ID PYC { comprobarEsLista($2); }
@@ -358,7 +361,7 @@ void TS_InsertaSUBPROG(atributos atributo){
 
 		nueva_entrada.parametros = 0;
 
-		nueva_entrada.tipoDato = tipoTmp;
+		nueva_entrada.tipoDato = tipoSubprog;
 
 		TS[TOPE] = nueva_entrada;
 
@@ -506,7 +509,10 @@ void comprobarEsVarOParamametroFormal(atributos atrib) {
 
 // comprobamos si dos tipos coinciden, y si no mostramos un error
 void comprobarEsTipo(dtipo tipo, atributos atrib){
-	if (atrib.tipo != tipo) {
+
+	entradaTS entrada = encontrarEntrada(atrib.lexema, false);
+
+	if (entrada.tipoDato != tipo) {
 
 		printf("Error semantico en la linea %d: Esperado tipo %s, encontrado tipo %s\n", num_linea, tipoAstring(tipo).c_str(), tipoAstring(atrib.tipo).c_str());
 	}
@@ -618,7 +624,33 @@ void TS_subprog_inserta(atributos atrib) {
 
 	}
 
+}
 
+void comprobarDevuelveSubprog(atributos atrib) {
+
+	entradaTS funcion_actual;
+
+	int entrada = TOPE - 1;
+
+	// nos vamos hasta la ultima marca
+	while ( entrada > 0 && TS[entrada].entrada != marca) {
+		entrada--;
+	}
+
+	// nos vamos a la funcion de justo antes la marca
+	while ( entrada > 0 && TS[entrada].entrada != funcion) {
+		entrada--;
+	}
+
+
+
+	if ( entrada == 0 ){
+		printf("Error semantico en la linea %d: No se puede devolver un valor en la seccion principal\n", num_linea);
+	} else {
+		comprobarEsTipo(TS[entrada].tipoDato, atrib);
+	}
 
 }
+
+
 
