@@ -623,13 +623,14 @@ dtipo comprobarLlamadaFuncion(atributos atrib) {
 				pos_entrada--;
 			}
 
-			// una vez comprobados todos, vaciamos la pila de parametros
-			TOPE_SUBPROG = 0;
 			tipo_funcion = entrada_funcion.tipoDato;
 
 		}
 
 	}
+
+	// una vez comprobados todos, vaciamos la pila de parametros
+	TOPE_SUBPROG = 0;
 
 	return tipo_funcion;
 
