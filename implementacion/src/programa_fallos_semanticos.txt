@@ -1,6 +1,6 @@
 principal() {
 
-    variable real ve;
+    variable ~/34 ve;
 
 	 variable entero xe;
 
@@ -14,6 +14,8 @@ principal() {
 
 
     entero funcionA (entero a1, real a2, caracter a3){
+
+		  variable real a1;
 
         variable entero x1, x2;
 		  variable real ve;
@@ -89,13 +91,23 @@ principal() {
 
    }
 
-    pe=pe++10@0;
-    pf=pf++10.0@0;
+	funcionA();
+
+	funcionA(12);
+
+	funcionA(12, verdadero, 21.1);
+
+	xe = 0.4 + 1;
+	xe = 12+1;
+
+    pe=pe++verdadero@0;
+    pf=pf++10@0;
     pc=pc++'#'@0;
 
-    si (?pe == 20)
+    si (?pe == 20) {
         xe = ?pe;
-
+		  ve = #pf;
+	 }
     sino{
         pe = pe * pe2;
         pe = pe++10*(20/2000)@?pe;
