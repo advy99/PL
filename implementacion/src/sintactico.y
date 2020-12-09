@@ -66,7 +66,7 @@ void comprobarEsTipo(dtipo tipo, dtipo tipo2);
 
 void comprobarEsLista(atributos atrib);
 
-void comprobarLlamadaFuncion(atributos atrib);
+dtipo comprobarLlamadaFuncion(atributos atrib);
 
 void comprobarDevuelveSubprog(atributos atrib);
 
@@ -75,9 +75,10 @@ void TS_subprog_inserta(atributos atrib);
 string tipoAstring(dtipo tipo);
 
 
-void comprobarOpBinario(atributos izq, atributos operador, atributos der);
-void comprobarOpBinarioMenos(atributos izq, atributos der);
-void comprobarEsEnteroReal (atributos atrib);
+dtipo comprobarOpBinario(atributos izq, atributos operador, atributos der);
+dtipo comprobarOpBinarioMenos(atributos izq, atributos der);
+dtipo comprobarEsEnteroReal (atributos atrib);
+dtipo comprobarOpUnarios( atributos atrib );
 
 %}
 %error-verbose
@@ -155,17 +156,17 @@ ident_variables             : ident_variables COMA ID { TS_InsertaIDENT($3); }
 										  | error ;
 
 expresion                   : PARENTESIS_ABRE expresion PARENTESIS_CIERRA {$$.tipo = $2.tipo;}
-                                | OP_EXC_UN expresion {$$.tipo = $2.tipo;}
-                                | expresion OP_EXC_BIN expresion	{comprobarOpBinario($1, $2, $3); $$.tipo = $1.tipo;}
-                                | expresion MENOS expresion {comprobarOpBinarioMenos($1, $3); $$.tipo = $1.tipo;}
-                                | expresion MASMAS expresion ARROBA expresion {comprobarEsLista($1); comprobarEsTipo($1.tipo, $2.tipo); comprobarEsTipo(entero, $3.tipo); $$.tipo = $1.tipo;}
+                                | OP_EXC_UN expresion {$$.tipo = comprobarOpUnarios($2);}
+                                | expresion OP_EXC_BIN expresion	{$$.tipo = comprobarOpBinario($1, $2, $3); }
+                                | expresion MENOS expresion {$$.tipo = comprobarOpBinarioMenos($1, $3);}
+                                | expresion MASMAS expresion ARROBA expresion {comprobarEsLista($1); comprobarEsTipo($1.tipo, $3.tipo); comprobarEsTipo(entero, $5.tipo); $$.tipo = $1.tipo;}
                                 | MENOS expresion { comprobarEsEnteroReal($2); $$.tipo = $2.tipo;}
                                 | llamada_subprograma {$$.tipo = $1.tipo;}
                                 | ID							{dtipo t = encontrarEntrada($1.lexema, true).tipoDato; $$.tipo = t;}
                                 | constante {$$.tipo = $1.tipo;}
 										  | error ;
 
-constante                   : CONSTANTE_BASICA {tipoTmp = $1.tipo; $$.tipo = $1.tipo; }
+constante                   : CONSTANTE_BASICA {tipoTmp = $1.tipo; $$.tipo = $1.tipo;}
                                 | CORCHETE_ABRE contenido_lista CORCHETE_CIERRA { $$.tipo = $2.tipo;} ;
 
 contenido_lista             : contenido_lista_preced CONSTANTE_BASICA {$$.tipo = $1.tipo;}
@@ -176,7 +177,7 @@ contenido_lista_preced      : contenido_lista_preced CONSTANTE_BASICA COMA {$$.t
                                 | CONSTANTE_BASICA COMA {$$.tipo = $1.tipo;};
 
 
-llamada_subprograma         : ID PARENTESIS_ABRE lista_variables_constantes PARENTESIS_CIERRA { comprobarLlamadaFuncion($1);} ;
+llamada_subprograma         : ID PARENTESIS_ABRE lista_variables_constantes PARENTESIS_CIERRA { $$.tipo =  comprobarLlamadaFuncion($1);} ;
 
 
 
@@ -190,7 +191,7 @@ cabecera_subp               : tipo ID PARENTESIS_ABRE parametros PARENTESIS_CIER
 									 | error;
 
 tipo                        : TIPO_BASICO {listaTmp = false; tipoTmp = $1.tipo; }
-                                | LISTADE TIPO_BASICO {listaTmp = true; tipoTmp = $1.tipo;}
+                                | LISTADE TIPO_BASICO {listaTmp = true; tipoTmp = $2.tipo;}
 										  | error ;
 
 parametros                  : parametro
@@ -224,8 +225,8 @@ lista_variables             : lista_variables COMA ID {comprobarEsVarOParamametr
 
 
 lista_variables_constantes  : lista_variables_constantes COMA ID { TS_subprog_inserta($3);}
-                                | lista_variables_constantes COMA constante {TS_subprog_inserta($3);}
-                                | constante {TS_subprog_inserta($1);}
+                                | lista_variables_constantes COMA constante { TS_subprog_inserta($3);}
+                                | constante { TS_subprog_inserta($1);}
                                 | ID { TS_subprog_inserta($1);}
 										  | ;
 
@@ -268,6 +269,7 @@ void TS_InsertaIDENT(atributos atributo){
 
 	// el tipo es el leido en la variable temporal en yacc
 	nueva_entrada.tipoDato = tipoTmp;
+
 
 	// pasamos a buscar si se ha declarado otro con el mismo nombre dentro de la
 	// misma marca
@@ -326,7 +328,11 @@ void TS_InsertaMARCA(){
 		while (TOPE_PARAMF > 0){
 			// simplemente vamos volcandolos, decrementando un contador e
 			// incrementando otro
-			TS[TOPE] = TS_paramf[TOPE_PARAMF - 1];
+
+			// lo ponemos como variable, como nos pide el guion
+			entradaTS entrada_tmp = TS_paramf[TOPE_PARAMF - 1];
+			entrada_tmp.entrada = variable;
+			TS[TOPE] = entrada_tmp;
 
 			TOPE_PARAMF--;
 			incrementaTOPE();
@@ -534,8 +540,6 @@ string tipoAstring(dtipo tipo){
 		tipo_str = "booleano";
 	} else if ( tipo == caracter ) {
 		tipo_str = "caracter";
-	} else if ( tipo == lista ) {
-		tipo_str = "lista";
 	}
 
 	return tipo_str;
@@ -543,6 +547,7 @@ string tipoAstring(dtipo tipo){
 
 
 void comprobarEsLista(atributos atrib) {
+
 
 	entradaTS entrada = encontrarEntrada(atrib.lexema, true);
 
@@ -553,7 +558,10 @@ void comprobarEsLista(atributos atrib) {
 }
 
 
-void comprobarLlamadaFuncion(atributos atrib) {
+dtipo comprobarLlamadaFuncion(atributos atrib) {
+
+	dtipo tipo_funcion = desconocido;
+
 	// comprobamos que el lexema existe en la tabla de simbolos
 	entradaTS entrada_funcion = encontrarEntrada(atrib.lexema, true);
 	dtipo existe = entrada_funcion.tipoDato;
@@ -571,6 +579,7 @@ void comprobarLlamadaFuncion(atributos atrib) {
 			pos_entrada--;
 		}
 
+
 		int pos_funcion = pos_entrada;
 
 		// comprobamos la pila al reves, porque al volcarla se le dio la vuelta
@@ -587,9 +596,17 @@ void comprobarLlamadaFuncion(atributos atrib) {
 
 			// para todos los parametros dados
 			while ( num_parametros < TOPE_SUBPROG ) {
-				// buscamos el parametro en la tabla de simbolos
-				// diciendo que es necesario que lo encuentre
-				entradaTS parametro_en_TS = encontrarEntrada(TS_llamadas_subprog[num_parametros].lexema, true);
+
+				entradaTS parametro_en_TS;
+
+				parametro_en_TS.tipoDato = TS_llamadas_subprog[num_parametros].tipo;
+
+				if ( TS_llamadas_subprog[num_parametros].lexema != "" ){
+					// buscamos el parametro en la tabla de simbolos
+					// diciendo que es necesario que lo encuentre
+					parametro_en_TS = encontrarEntrada(TS_llamadas_subprog[num_parametros].lexema, true);
+
+				}
 
 				// si el tipo encontrado no es del tipo esperado, sacamos el error
 				// por pantalla
@@ -598,7 +615,7 @@ void comprobarLlamadaFuncion(atributos atrib) {
 					string tipo_esperado = tipoAstring(TS[pos_entrada].tipoDato);
 					string tipo_encontrado = tipoAstring(parametro_en_TS.tipoDato);
 
-					printf("Error semantico en la linea %d: El parámetro %d, %s es de tipo %s pero se espera un tipo %s en la llamada a %s\n", num_linea + 1, num_parametros, TS_llamadas_subprog[num_parametros].lexema.c_str(), tipo_encontrado.c_str(), tipo_esperado.c_str(), entrada_funcion.nombre.c_str());
+					printf("Error semantico en la linea %d: El parámetro %d es de tipo %s pero se espera un tipo %s en la llamada a %s\n", num_linea , num_parametros + 1, tipo_encontrado.c_str(), tipo_esperado.c_str(), entrada_funcion.nombre.c_str());
 				}
 
 				// seguimos al siguiente parametro
@@ -608,10 +625,13 @@ void comprobarLlamadaFuncion(atributos atrib) {
 
 			// una vez comprobados todos, vaciamos la pila de parametros
 			TOPE_SUBPROG = 0;
+			tipo_funcion = entrada_funcion.tipoDato;
 
 		}
 
 	}
+
+	return tipo_funcion;
 
 }
 
@@ -656,7 +676,9 @@ void comprobarDevuelveSubprog(atributos atrib) {
 }
 
 
-void comprobarOpBinario(atributos izq, atributos operador, atributos der) {
+dtipo comprobarOpBinario(atributos izq, atributos operador, atributos der) {
+
+	dtipo tipo_exp = desconocido;
 
 	string t_izq = tipoAstring(izq.tipo);
 	string t_der = tipoAstring(der.tipo);
@@ -687,10 +709,19 @@ void comprobarOpBinario(atributos izq, atributos operador, atributos der) {
 
 	}
 
+	if ( operador.atrib >= 3 && operador.atrib <= 11 ){
+		tipo_exp = booleano;
+
+	} else {
+		tipo_exp = izq.tipo;
+
+	}
+
+	return tipo_exp;
 
 }
 
-void comprobarOpBinarioMenos(atributos izq, atributos der) {
+dtipo comprobarOpBinarioMenos(atributos izq, atributos der) {
 	if ( (izq.tipo != entero && izq.tipo != real) || (der.tipo != entero && der.tipo != real) ){
 		string t_izq = tipoAstring(izq.tipo);
 		string t_der = tipoAstring(der.tipo);
@@ -699,12 +730,40 @@ void comprobarOpBinarioMenos(atributos izq, atributos der) {
 		// comprobamos que izq y der son del mismo tipo
 		comprobarEsTipo(izq.tipo, der.tipo);
 	}
+
+	return izq.tipo;
+
 }
 
-void comprobarEsEnteroReal (atributos atrib){
+dtipo comprobarEsEnteroReal (atributos atrib){
 	if ( atrib.tipo != entero && atrib.tipo != real){
 		string t = tipoAstring(atrib.tipo);
 		printf("Error semantico en la linea %d: Operador solo aplicable a enteros o reales, encontrado tipo %s\n", num_linea, t.c_str());
 	}
+	return atrib.tipo;
 }
+
+dtipo comprobarOpUnarios( atributos exp ){
+
+	entradaTS entrada;
+	dtipo tipo_a_devolver;
+
+	if ( exp.lexema != "" ) {
+		entrada = encontrarEntrada(exp.lexema, true);
+	}
+
+	// operador !
+	if ( exp.atrib == 0 ) {
+		comprobarEsTipo(booleano, exp.tipo);
+		tipo_a_devolver = booleano;
+	// operador # y ?
+	} else {
+		comprobarEsLista(exp);
+		tipo_a_devolver = exp.tipo;
+	}
+
+	return tipo_a_devolver;
+
+}
+
 

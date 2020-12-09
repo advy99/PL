@@ -23,7 +23,6 @@ typedef enum {
 	caracter,
 	booleano,
 	vacio,
-	lista,
 	desconocido,
 	no_asignado
 } dtipo;
