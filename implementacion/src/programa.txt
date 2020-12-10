@@ -95,11 +95,13 @@ principal() {
 
 	 pe = (pe * (#pe / ?pe));
 
+	 pe = [1, 2, 3];
+
     si (?pe == 20)
         xe = ?pe;
 
     sino{
-        pe = pe * pe2;
+        pe = pe * ?pe2;
         pe = pe++10*(20/2000)@?pe;
     }
 

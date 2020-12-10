@@ -71,6 +71,8 @@ dtipo comprobarLlamadaFuncion(atributos atrib);
 
 void comprobarDevuelveSubprog(atributos atrib);
 
+void comprobarAsignacionListas(atributos id, atributos exp);
+
 void TS_subprog_inserta(atributos atrib);
 
 string tipoAstring(dtipo tipo);
@@ -153,7 +155,7 @@ cuerpo_declar_var			: VAR tipo ident_variables PYC ;
 ident_variables             : ident_variables COMA ID { TS_InsertaIDENT($3); }
                                 | ident_variables COMA ID ASIGNACION expresion { TS_InsertaIDENT($3); }
                                 | ID { TS_InsertaIDENT($1); }
-                                | ID ASIGNACION expresion {  TS_InsertaIDENT($1); comprobarEsTipo($1.tipo, $3.tipo); }
+                             	  | ID ASIGNACION expresion {  TS_InsertaIDENT($1); comprobarEsTipo($1.tipo, $3.tipo); comprobarAsignacionListas($1, $3); }
 										  | error ;
 
 
@@ -165,11 +167,11 @@ expresion                   : PARENTESIS_ABRE expresion PARENTESIS_CIERRA {$$.ti
                                 | MENOS expresion { comprobarEsEnteroReal($2); $$.tipo = $2.tipo;}
                                 | llamada_subprograma {$$.tipo = $1.tipo;}
                                 | ID							{entradaTS ent = encontrarEntrada($1.lexema, true); $$.tipo = ent.tipoDato; $$.lista = ent.es_lista;}
-                                | constante {$$.tipo = $1.tipo;}
+                                | constante {$$.tipo = $1.tipo; $$.lista = $1.lista;}
 										  | error ;
 
-constante                   : CONSTANTE_BASICA {tipoTmp = $1.tipo; $$.tipo = $1.tipo;}
-                                | CORCHETE_ABRE contenido_lista CORCHETE_CIERRA {listaTmp = true; tipoTmp = $2.tipo; $$.tipo = $2.tipo;} ;
+constante                   : CONSTANTE_BASICA {tipoTmp = $1.tipo; $$.tipo = $1.tipo; $$.lista = false;}
+                                | CORCHETE_ABRE contenido_lista CORCHETE_CIERRA {tipoTmp = $2.tipo; $$.tipo = $2.tipo; $$.lista = true;} ;
 
 contenido_lista             : contenido_lista_preced CONSTANTE_BASICA {comprobarEsTipo($2.tipo, $1.tipo); $$.tipo = $1.tipo;}
                                 | CONSTANTE_BASICA {$$.tipo = $1.tipo;}
@@ -209,7 +211,7 @@ sentencias                  : sentencias sentencia
                                 | ;
 
 sentencia                   : bloque
-                                | ID ASIGNACION expresion PYC { comprobarEsTipo(encontrarEntrada($1.lexema, true).tipoDato, $3.tipo);}
+                                | ID ASIGNACION expresion PYC { comprobarEsTipo(encontrarEntrada($1.lexema, true).tipoDato, $3.tipo); comprobarAsignacionListas($1, $3);}
                                 | SI PARENTESIS_ABRE expresion PARENTESIS_CIERRA sentencia {comprobarEsTipo(booleano, $3.tipo); }
                                 | SI PARENTESIS_ABRE expresion PARENTESIS_CIERRA sentencia SINO sentencia {comprobarEsTipo(booleano, $3.tipo); }
                                 | MIENTRAS PARENTESIS_ABRE expresion PARENTESIS_CIERRA sentencia {comprobarEsTipo(booleano, $3.tipo); }
@@ -792,5 +794,18 @@ dtipo comprobarOpUnarios( atributos exp ){
 	return tipo_a_devolver;
 
 }
+
+
+void comprobarAsignacionListas(atributos id, atributos exp){
+	entradaTS entrada_id = encontrarEntrada(id.lexema, true);
+
+	if ( entrada_id.es_lista && !exp.lista ){
+		printf("Error semantico en la linea %d: Asignando tipo basico a una lista\n", num_linea);
+	} else if ( !entrada_id.es_lista && exp.lista ){
+		printf("Error semantico en la linea %d: Asignando lista a un tipo basico\n", num_linea);
+	}
+
+}
+
 
 

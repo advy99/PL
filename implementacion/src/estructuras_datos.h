@@ -29,9 +29,9 @@ typedef enum {
 
 typedef struct {
 	tipoEntrada entrada;
-	string nombre;
-	dtipo tipoDato;
-	bool es_lista;
+	string nombre = "";
+	dtipo tipoDato = no_asignado;
+	bool es_lista = false;
 	unsigned int parametros;
 	int tamDimen;
 } entradaTS ;
