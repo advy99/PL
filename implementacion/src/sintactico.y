@@ -29,9 +29,10 @@ entradaTS TS[MAX_TS];
 entradaTS TS_paramf[MAX_TS];
 
 typedef struct {
-	int atrib;
-	string lexema;
-	dtipo tipo;
+	int atrib = 0;
+	string lexema = "";
+	bool lista = false;
+	dtipo tipo = desconocido;
 } atributos;
 
 unsigned long TOPE_SUBPROG = 0;
@@ -155,25 +156,26 @@ ident_variables             : ident_variables COMA ID { TS_InsertaIDENT($3); }
                                 | ID ASIGNACION expresion {  TS_InsertaIDENT($1); comprobarEsTipo($1.tipo, $3.tipo); }
 										  | error ;
 
-expresion                   : PARENTESIS_ABRE expresion PARENTESIS_CIERRA {$$.tipo = $2.tipo;}
-                                | OP_EXC_UN expresion {$$.tipo = comprobarOpUnarios($2);}
-                                | expresion OP_EXC_BIN expresion	{$$.tipo = comprobarOpBinario($1, $2, $3); }
-                                | expresion MENOS expresion {$$.tipo = comprobarOpBinarioMenos($1, $3);}
-                                | expresion MASMAS expresion ARROBA expresion {comprobarEsLista($1); comprobarEsTipo($1.tipo, $3.tipo); comprobarEsTipo(entero, $5.tipo); $$.tipo = $1.tipo;}
+
+expresion                   : PARENTESIS_ABRE expresion PARENTESIS_CIERRA {$$.tipo = $2.tipo; $$.lista = $2.lista;}
+                                | OP_EXC_UN expresion {$$.tipo = comprobarOpUnarios($2); $$.lista = false;}
+                                | expresion OP_EXC_BIN expresion	{$$.tipo = comprobarOpBinario($1, $2, $3); $$.lista = $1.lista || $3.lista; }
+                                | expresion MENOS expresion {$$.tipo = comprobarOpBinarioMenos($1, $3); $$.lista = $1.lista || $3.lista;}
+                                | expresion MASMAS expresion ARROBA expresion {comprobarEsLista($1); comprobarEsTipo($1.tipo, $3.tipo); comprobarEsTipo(entero, $5.tipo); $$.tipo = $1.tipo; $$.lista = $1.lista;}
                                 | MENOS expresion { comprobarEsEnteroReal($2); $$.tipo = $2.tipo;}
                                 | llamada_subprograma {$$.tipo = $1.tipo;}
-                                | ID							{dtipo t = encontrarEntrada($1.lexema, true).tipoDato; $$.tipo = t;}
+                                | ID							{entradaTS ent = encontrarEntrada($1.lexema, true); $$.tipo = ent.tipoDato; $$.lista = ent.es_lista;}
                                 | constante {$$.tipo = $1.tipo;}
 										  | error ;
 
 constante                   : CONSTANTE_BASICA {tipoTmp = $1.tipo; $$.tipo = $1.tipo;}
-                                | CORCHETE_ABRE contenido_lista CORCHETE_CIERRA { $$.tipo = $2.tipo;} ;
+                                | CORCHETE_ABRE contenido_lista CORCHETE_CIERRA {listaTmp = true; tipoTmp = $2.tipo; $$.tipo = $2.tipo;} ;
 
-contenido_lista             : contenido_lista_preced CONSTANTE_BASICA {$$.tipo = $1.tipo;}
+contenido_lista             : contenido_lista_preced CONSTANTE_BASICA {comprobarEsTipo($2.tipo, $1.tipo); $$.tipo = $1.tipo;}
                                 | CONSTANTE_BASICA {$$.tipo = $1.tipo;}
                                 | ;
 
-contenido_lista_preced      : contenido_lista_preced CONSTANTE_BASICA COMA {$$.tipo = $2.tipo;}
+contenido_lista_preced      : contenido_lista_preced CONSTANTE_BASICA COMA {comprobarEsTipo($2.tipo, $1.tipo); $$.tipo = $2.tipo;}
                                 | CONSTANTE_BASICA COMA {$$.tipo = $1.tipo;};
 
 
@@ -382,6 +384,7 @@ void TS_InsertaSUBPROG(atributos atributo){
 		// redefinicion
 		printf("\nError semantico en la linea %d. Redefinición de '%s'\n", num_linea, atributo.lexema.c_str());
 	}
+
 
 	// volcamos la pila de parametros, dejamos TOPE_PARAMF ya que necesitamos
 	// añadir los parametros como si fueran variables al comenzar el bloque
@@ -601,6 +604,7 @@ dtipo comprobarLlamadaFuncion(atributos atrib) {
 
 				parametro_en_TS.tipoDato = TS_llamadas_subprog[num_parametros].tipo;
 
+
 				if ( TS_llamadas_subprog[num_parametros].lexema != "" ){
 					// buscamos el parametro en la tabla de simbolos
 					// diciendo que es necesario que lo encuentre
@@ -688,12 +692,27 @@ dtipo comprobarOpBinario(atributos izq, atributos operador, atributos der) {
 	if ( (operador.atrib >= 0 && operador.atrib <= 2) ||
 		  ( operador.atrib >= 6 && operador.atrib <= 9  )) {
 
-		// tiene que ser entero o real y del mismo tipo
-		if ( (izq.tipo != entero && izq.tipo != real) || (der.tipo != entero && der.tipo != real) ) {
-			printf("Error semantico en la linea %d: Operador solo aplicable a enteros o reales, encontrados tipos %s y %s\n", num_linea, t_izq.c_str(), t_der.c_str());
+		if ( izq.lista ) {
+			if ( der.lista ) {
+				printf("Error semantico en la linea %d: No se puede aplicar el operador entre dos listas\n", num_linea);
+			} if ( der.tipo != entero && der.tipo != real) {
+				printf("Error semantico en la linea %d: Operador solo aplicable a enteros o reales, encontrados tipos lista de %s y %s\n", num_linea, t_izq.c_str(), t_der.c_str());
+			}
+
+		} else if ( der.lista ){
+
+			 if ( izq.tipo != entero && izq.tipo != real ) {
+				printf("Error semantico en la linea %d: Operador solo aplicable a enteros o reales, encontrados tipos %s y lista de %s\n", num_linea, t_izq.c_str(), t_der.c_str());
+			}
+
 		} else {
-			// comprobamos que izq y der son del mismo tipo
-			comprobarEsTipo(izq.tipo, der.tipo);
+			// tiene que ser entero o real y del mismo tipo
+			if ( (izq.tipo != entero && izq.tipo != real) || (der.tipo != entero && der.tipo != real) ) {
+				printf("Error semantico en la linea %d: Operador solo aplicable a enteros o reales, encontrados tipos %s y %s\n", num_linea, t_izq.c_str(), t_der.c_str());
+			} else {
+				// comprobamos que izq y der son del mismo tipo
+				comprobarEsTipo(izq.tipo, der.tipo);
+			}
 		}
 
 	} else if (operador.atrib == 10 || operador.atrib == 11){
@@ -708,6 +727,13 @@ dtipo comprobarOpBinario(atributos izq, atributos operador, atributos der) {
 			comprobarEsTipo(izq.tipo, der.tipo);
 		}
 
+	// operador l--x l%x
+	} else if ( operador.atrib == 12 || operador.atrib == 13){
+		comprobarEsLista(izq);
+		comprobarEsTipo(entero, der.tipo);
+	} else if ( operador.atrib == 14 ) {
+		comprobarEsLista(izq);
+		comprobarEsLista(der);
 	}
 
 	if ( operador.atrib >= 3 && operador.atrib <= 11 ){

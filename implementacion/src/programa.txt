@@ -93,6 +93,8 @@ principal() {
     pf=pf++10.0@0;
     pc=pc++'#'@0;
 
+	 pe = (pe * (#pe / ?pe));
+
     si (?pe == 20)
         xe = ?pe;
 
