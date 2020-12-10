@@ -100,9 +100,11 @@ principal() {
 	xe = 0.4 + 1;
 	xe = 12+1;
 
-    pe=pe++verdadero@0;
+    pe=pe++10@0;
     pf=pf++10@0;
     pc=pc++'#'@0;
+
+	 pe = (pe * (pe / ?pe));
 
     si (?pe == 20) {
         xe = ?pe;

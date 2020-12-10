@@ -1,31 +1,8 @@
 principal(){
 
-	variable entero a, b;
-	variable real c, d;
-	variable booleano x, z;
 
+    variable listade entero pe, pe2;
 
-	entero as(entero asdr, real b){
-
-
-	}
-
-	a = -z;
-	a = a + d;
-
-
-	z = x ^ z;
-
-	a = a + b;
-
-	z = a + b;
-
-	a = 1 + 2;
-
-	a = 1 + a;
-
-	a = a + 1.0;
-
-	c = c + 1;
+	 pe = (pe * (#pe / ?pe));
 
 }
