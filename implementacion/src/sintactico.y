@@ -6,14 +6,20 @@
 
 using namespace std;
 
+FILE * fichero_salida;
 
 FILE * principal = NULL;
 FILE * dec_fun = NULL;
 FILE * dec_data = NULL;
 
+int num_etiqueta = 0;
 int num_var_temporal = 0;
 bool variables_principal = true;
 
+string codigoTmp = "";
+
+int num_llaves = 0;
+int num_llaves_subprog = 0;
 
 int yylex();
 void yyerror(const char * mensaje);
@@ -26,7 +32,7 @@ int num_linea = 1;
 
 unsigned long int TOPE = 0;
 unsigned long int TOPE_PARAMF = 0;
-bool subprog = false;
+int subprog = 0;
 dtipo tipoTmp;
 dtipo tipoSubprog;
 bool listaTmp;
@@ -43,6 +49,7 @@ typedef struct {
 	bool lista = false;
 	dtipo tipo = desconocido;
 	bool es_constante = false;
+	bool es_hoja = true;
 } atributos;
 
 unsigned long TOPE_SUBPROG = 0;
@@ -95,13 +102,18 @@ dtipo comprobarOpUnarios( atributos atrib );
 
 
 
-
-
+string tipoAtipoC(dtipo tipo);
 
 void abrirFicherosTraduccion();
 void cerrarFicherosTraduccion();
 
 void generarCodigoVariable(atributos tipo, atributos identificador);
+
+void traducirDeclarSubprog(atributos tipo, atributos identificador);
+void introducirTabs(string & resultado);
+
+string generarCodigoOPBinarios(atributos izq, atributos operador, atributos der);
+string generarCodigoOPUnarios( atributos operador, atributos der);
 
 
 %}
@@ -158,11 +170,12 @@ programa					: PRINCIPAL {abrirFicherosTraduccion(); variables_principal = true;
 				 			  bloque { cerrarFicherosTraduccion(); };
 
 
-bloque						: LLAVE_ABRE  { TS_InsertaMARCA(); if ( !variables_principal ) {fputs("{", principal); }; }
-								  variables { if ( variables_principal ) { fputs("int main() {  \n", principal); variables_principal = false;}; }
+bloque						: LLAVE_ABRE  { TS_InsertaMARCA(); if ( !variables_principal && subprog == 0 ) {fputs("{\n", principal);num_llaves++;  } else if (subprog != 0) {fputs("{\n ", dec_fun); num_llaves_subprog++; }; }
+								  variables { if ( variables_principal ) { fputs("\nint main() {  \n", principal); fputs(codigoTmp.c_str(), principal); codigoTmp = "";  variables_principal = false;}; }
 								  declar_subprogramas
 								  sentencias
-								  LLAVE_CIERRA { TS_VaciarENTRADAS(); fputs("}", principal); };
+								  LLAVE_CIERRA { TS_VaciarENTRADAS(); string resul = "\n";if ( subprog == 0 ) {num_llaves--;} else { num_llaves_subprog--;} introducirTabs(resul); resul += "}\n"; fputs(resul.c_str(), fichero_salida); };
+
 
 
 
@@ -172,27 +185,27 @@ variables					: declar_variables
 declar_variables			: declar_variables cuerpo_declar_var
 						 		| cuerpo_declar_var ;
 
-cuerpo_declar_var			: VAR tipo ident_variables PYC {generarCodigoVariable($2, $3); } ;
+cuerpo_declar_var			: VAR tipo ident_variables PYC {generarCodigoVariable($2, $3); if ( !variables_principal ) {fputs( codigoTmp.c_str(), fichero_salida); codigoTmp = ""; }; };
 
 ident_variables             : ident_variables COMA ID { TS_InsertaIDENT($3); $$.lexema = $1.lexema + ", " + $3.lexema; }
-                                | ident_variables COMA ID ASIGNACION expresion { TS_InsertaIDENT($3); $$.lexema = $1.lexema + ", " + $3.lexema + " = " + $5.lexema; }
+                                | ident_variables COMA ID ASIGNACION expresion { TS_InsertaIDENT($3); $$.lexema = $1.lexema + ", " + $3.lexema; codigoTmp += $1.lexema + " = " + $5.lexema + ";\n";  }
                                 | ID { TS_InsertaIDENT($1); $$.lexema = $1.lexema; }
-                             	  | ID ASIGNACION expresion {  TS_InsertaIDENT($1); comprobarEsTipo($1.tipo, $3.tipo); comprobarAsignacionListas($1, $3); $$.lexema = $1.lexema + " = " + $3.lexema; }
+										  | ID ASIGNACION expresion {  TS_InsertaIDENT($1); comprobarEsTipo($1.tipo, $3.tipo); comprobarAsignacionListas($1, $3); $$.lexema = $1.lexema; codigoTmp += $1.lexema + " = " + $3.lexema + ";\n";  }
 										  | error ;
 
 
 expresion                   : PARENTESIS_ABRE expresion PARENTESIS_CIERRA {$$.tipo = $2.tipo; $$.lista = $2.lista; $$.lexema = "( " + $2.lexema + " )";}
-                                | OP_EXC_UN expresion {$$.tipo = comprobarOpUnarios($2); $$.lista = false; $$.lexema = $1.lexema + $2.lexema;}
-                                | expresion OP_EXC_BIN expresion	{$$.tipo = comprobarOpBinario($1, $2, $3); $$.lista = $1.lista || $3.lista; $$.lexema = $1.lexema + $2.lexema + $3.lexema;}
-                                | expresion MENOS expresion {$$.tipo = comprobarOpBinarioMenos($1, $3); $$.lista = $1.lista || $3.lista; $$.lexema = $1.lexema + " - " + $2.lexema;}
+                                | OP_EXC_UN expresion {$$.tipo = comprobarOpUnarios($2); $$.lista = false; $$.lexema = generarCodigoOPUnarios($1, $2);}
+                                | expresion OP_EXC_BIN expresion	{$$.tipo = comprobarOpBinario($1, $2, $3); $$.lista = $1.lista || $3.lista; $$.lexema = generarCodigoOPBinarios($1, $2, $3);}
+                                | expresion MENOS expresion {$$.tipo = comprobarOpBinarioMenos($1, $3); $$.lista = $1.lista || $3.lista;$$.lexema = generarCodigoOPBinarios($1, $2, $3); }
                                 | expresion MASMAS expresion ARROBA expresion {comprobarEsLista($1); comprobarEsTipo($1.tipo, $3.tipo); comprobarEsTipo(entero, $5.tipo); $$.tipo = $1.tipo; $$.lista = $1.lista; /*FALTA TRADUCIR LISTA*/ }
-                                | MENOS expresion { comprobarEsEnteroReal($2); $$.tipo = $2.tipo;}
-                                | llamada_subprograma {$$.tipo = $1.tipo;}
-                                | ID							{entradaTS ent = encontrarEntrada($1.lexema, true); $$.tipo = ent.tipoDato; $$.lista = ent.es_lista;}
-                                | constante {$$.tipo = $1.tipo; $$.lista = $1.lista;}
+                                | MENOS expresion { comprobarEsEnteroReal($2); $$.tipo = $2.tipo; $$.lexema = "-" + $2.lexema;}
+                                | llamada_subprograma {$$.tipo = $1.tipo; codigoTmp += $1.lexema + "\n"; }
+                                | ID							{entradaTS ent = encontrarEntrada($1.lexema, true); $$.tipo = ent.tipoDato; $$.lista = ent.es_lista; $$.lexema = $1.lexema;}
+                                | constante {$$.tipo = $1.tipo; $$.lista = $1.lista; $$.lexema = $1.lexema;}
 										  | error ;
 
-constante                   : CONSTANTE_BASICA {tipoTmp = $1.tipo; $$.tipo = $1.tipo; $$.lista = false;}
+constante                   : CONSTANTE_BASICA {tipoTmp = $1.tipo; $$.tipo = $1.tipo; $$.lista = false; $$.lexema = $1.lexema;}
                                 | CORCHETE_ABRE contenido_lista CORCHETE_CIERRA {tipoTmp = $2.tipo; $$.tipo = $2.tipo; $$.lista = true;} ;
 
 contenido_lista             : contenido_lista_preced CONSTANTE_BASICA {comprobarEsTipo($2.tipo, $1.tipo); $$.tipo = $1.tipo;}
@@ -203,20 +216,20 @@ contenido_lista_preced      : contenido_lista_preced CONSTANTE_BASICA COMA {comp
                                 | CONSTANTE_BASICA COMA {$$.tipo = $1.tipo;};
 
 
-llamada_subprograma         : ID PARENTESIS_ABRE lista_variables_constantes PARENTESIS_CIERRA { $$.tipo =  comprobarLlamadaFuncion($1);} ;
+llamada_subprograma         : ID PARENTESIS_ABRE lista_variables_constantes PARENTESIS_CIERRA { $$.tipo =  comprobarLlamadaFuncion($1); $$.lexema = $1.lexema + "( " + $2.lexema + " )";} ;
 
 
 
 declar_subprogramas         : declar_subprogramas declar_subp
                                 | ;
 
-declar_subp                 : cabecera_subp {subprog = true;}
-									 	bloque  {subprog = false;} ;
+declar_subp                 : cabecera_subp {subprog += 1; fichero_salida = dec_fun;}
+									 	bloque  {subprog -= 1; if(subprog == 0) { fichero_salida = principal; };} ;
 
-cabecera_subp               : tipo ID PARENTESIS_ABRE parametros PARENTESIS_CIERRA {tipoSubprog = $1.tipo; TS_InsertaSUBPROG($2);  }
+cabecera_subp               : tipo ID PARENTESIS_ABRE parametros PARENTESIS_CIERRA {tipoSubprog = $1.tipo; traducirDeclarSubprog($1, $2); TS_InsertaSUBPROG($2);  }
 									 | error;
 
-tipo                        : TIPO_BASICO {listaTmp = false; tipoTmp = $1.tipo; }
+tipo                        : TIPO_BASICO {listaTmp = false; tipoTmp = $1.tipo; $$.lexema = $1.lexema; }
                                 | LISTADE TIPO_BASICO {listaTmp = true; tipoTmp = $2.tipo;}
 										  | error ;
 
@@ -233,7 +246,7 @@ sentencias                  : sentencias sentencia
                                 | ;
 
 sentencia                   : bloque
-                                | ID ASIGNACION expresion PYC { comprobarEsTipo(encontrarEntrada($1.lexema, true).tipoDato, $3.tipo); comprobarAsignacionListas($1, $3);}
+                                | ID ASIGNACION expresion PYC { comprobarEsTipo(encontrarEntrada($1.lexema, true).tipoDato, $3.tipo); comprobarAsignacionListas($1, $3);codigoTmp += $1.lexema + " = " + $3.lexema + ";\n"; fputs(codigoTmp.c_str(), fichero_salida); codigoTmp = ""; }
                                 | SI PARENTESIS_ABRE expresion PARENTESIS_CIERRA sentencia {comprobarEsTipo(booleano, $3.tipo); }
                                 | SI PARENTESIS_ABRE expresion PARENTESIS_CIERRA sentencia SINO sentencia {comprobarEsTipo(booleano, $3.tipo); }
                                 | MIENTRAS PARENTESIS_ABRE expresion PARENTESIS_CIERRA sentencia {comprobarEsTipo(booleano, $3.tipo); }
@@ -250,10 +263,10 @@ lista_variables             : lista_variables COMA ID {comprobarEsVarOParamametr
                                 | ID {comprobarEsVarOParamametroFormal($1);} ;
 
 
-lista_variables_constantes  : lista_variables_constantes COMA ID { TS_subprog_inserta($3);}
-                                | lista_variables_constantes COMA constante { TS_subprog_inserta($3);}
-                                | constante { TS_subprog_inserta($1);}
-                                | ID { TS_subprog_inserta($1);}
+lista_variables_constantes  : lista_variables_constantes COMA ID { TS_subprog_inserta($3); $$.lexema = $1.lexema + ", " + $3.lexema;}
+                                | lista_variables_constantes COMA constante { TS_subprog_inserta($3); $$.lexema = $1.lexema + ", " + $3.lexema;}
+                                | constante { TS_subprog_inserta($1); $$.lexema = $1.lexema;}
+                                | ID { TS_subprog_inserta($1); $$.lexema = $1.lexema;}
 										  | ;
 
 lista_expresiones_o_cadena  : lista_expresiones_o_cadena COMA CADENA
@@ -348,7 +361,7 @@ void TS_InsertaMARCA(){
 	// si estamos en un subprograma, debemos añadir los parametros formales
 	// como variables. Tambien vaciamos la pila de parametros ya que es el
 	// ultimo paso en el que la usamos
-	if ( subprog ){
+	if ( subprog != 0 ){
 
 		// mientras queden elementos en la pila
 		while (TOPE_PARAMF > 0){
@@ -844,6 +857,8 @@ void abrirFicherosTraduccion() {
 	dec_fun = fopen("salida/dec_fun.h", "w");
 	dec_data = fopen("salida/dec_data.c", "w");
 
+	fichero_salida = principal;
+
 	// incluimos las bibliotecas básicas que usaremos
 	fputs("#include <stdio.h>\n", principal);
 	fputs("#include <stdlib.h>\n", principal);
@@ -853,32 +868,147 @@ void abrirFicherosTraduccion() {
 	fputs("#include \"dec_fun.h\"\n\n\n", principal);
 
 
+	fputs("#ifndef FUNCIONES\n", dec_fun);
+	fputs("#define FUNCIONES\n\n", dec_fun);
+
+
 }
 
 void cerrarFicherosTraduccion() {
+	fputs("\n", principal);
+	fputs("#endif\n", dec_fun);
+	fputs("\n", dec_data);
+
 	fclose(principal);
 	fclose(dec_fun);
 	fclose(dec_data);
 }
 
+string tipoAtipoC( dtipo tipo ) {
+	string resultado;
+
+	if ( tipo == entero ) {
+		resultado = "int ";
+	} else if ( tipo == real ) {
+		resultado = "float ";
+	} else if ( tipo == booleano ) {
+		resultado = "bool ";
+	} else if ( tipo == caracter ) {
+		resultado = "char ";
+	} else if ( tipo == vacio ) {
+		resultado = "void ";
+	}
+
+	return resultado;
+
+}
+
+
+string generarEtiqueta(){
+	string resultado = "etiqueta" + to_string(num_etiqueta);
+	num_etiqueta++;
+
+	return resultado;
+}
+
+string generarVariableTemporal() {
+	string resultado = "tmp" + to_string(num_var_temporal);
+	num_var_temporal++;
+	return resultado;
+}
+
+void introducirTabs(string & resultado) {
+	int num_tabs = 0;
+
+	if (subprog == 0){
+		num_tabs = num_llaves;
+	} else {
+		num_tabs = num_llaves_subprog;
+	}
+
+	for ( int i = 0; i < num_tabs; i++ ) {
+		resultado += "\t";
+	}
+}
+
 void generarCodigoVariable(atributos tipo, atributos identificador) {
 	string resultado = "";
 
-	if ( tipo.tipo == entero ) {
-		resultado += "int ";
-	} else if ( tipo.tipo == real ) {
-		resultado += "float ";
-	} else if ( tipo.tipo == booleano ) {
-		resultado += "bool ";
-	} else if ( tipo.tipo == caracter ) {
-		resultado += "char ";
-	}
+	introducirTabs(resultado);
+
+	resultado += tipoAtipoC(tipo.tipo);
+
+	int pos_igual = identificador.lexema.find("=");
 
 	resultado += identificador.lexema;
 
 	resultado += " ; \n";
 
-	fputs(resultado.c_str(), principal);
+	fputs(resultado.c_str(), fichero_salida);
 }
+
+
+void traducirDeclarSubprog(atributos tipo, atributos identificador){
+
+	string resultado = "\n";
+
+	introducirTabs(resultado);
+
+	resultado += tipoAtipoC(tipo.tipo);
+
+	resultado += identificador.lexema;
+
+	resultado += "( ";
+
+	for ( int i = 0; i < TOPE_PARAMF; i++) {
+		resultado += tipoAtipoC(TS_paramf[i].tipoDato);
+		resultado += TS_paramf[i].nombre;
+		if ( i < TOPE_PARAMF - 1 ){
+			resultado += ", ";
+		}
+	}
+
+	resultado += ") ";
+
+	fputs(resultado.c_str(), dec_fun);
+
+}
+
+
+string generarCodigoOPBinarios(atributos izq, atributos operador, atributos der) {
+	string resultado = generarVariableTemporal();
+
+	string tipo_resultado;
+	if ( (operador.atrib >= 0 && operador.atrib <= 2) || operador.lexema == "-" ) {
+		tipo_resultado = tipoAtipoC(izq.tipo);
+	} else if( operador.atrib >= 3 && operador.atrib <= 11  ) {
+		tipo_resultado = "bool ";
+	}
+
+	codigoTmp += tipo_resultado + " " + resultado + "; \n";
+	codigoTmp += resultado + " = " + izq.lexema + " " + operador.lexema + " " + der.lexema + " ; \n";
+
+
+
+	return resultado;
+
+}
+
+string generarCodigoOPUnarios( atributos operador, atributos der) {
+
+	string resultado = generarVariableTemporal();
+	string tipo_resultado;
+
+	if( operador.atrib == 0  ) {
+		tipo_resultado = "bool ";
+	}
+
+	codigoTmp += tipo_resultado + " " + resultado + ";\n";
+	codigoTmp += resultado + " = " + operador.lexema + " " + der.lexema + " ; \n";
+
+	return resultado;
+
+}
+
 
 
