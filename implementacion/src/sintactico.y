@@ -12,6 +12,7 @@ FILE * dec_fun = NULL;
 FILE * dec_data = NULL;
 
 int num_var_temporal = 0;
+bool variables_principal = true;
 
 
 int yylex();
@@ -41,6 +42,7 @@ typedef struct {
 	string lexema = "";
 	bool lista = false;
 	dtipo tipo = desconocido;
+	bool es_constante = false;
 } atributos;
 
 unsigned long TOPE_SUBPROG = 0;
@@ -99,6 +101,7 @@ dtipo comprobarOpUnarios( atributos atrib );
 void abrirFicherosTraduccion();
 void cerrarFicherosTraduccion();
 
+void generarCodigoVariable(atributos tipo, atributos identificador);
 
 
 %}
@@ -151,15 +154,15 @@ void cerrarFicherosTraduccion();
 
 %%
 
-programa					: PRINCIPAL {abrirFicherosTraduccion();}
+programa					: PRINCIPAL {abrirFicherosTraduccion(); variables_principal = true; }
 				 			  bloque { cerrarFicherosTraduccion(); };
 
 
-bloque						: LLAVE_ABRE  { TS_InsertaMARCA(); }
-								  variables
+bloque						: LLAVE_ABRE  { TS_InsertaMARCA(); if ( !variables_principal ) {fputs("{", principal); }; }
+								  variables { if ( variables_principal ) { fputs("int main() {  \n", principal); variables_principal = false;}; }
 								  declar_subprogramas
 								  sentencias
-								  LLAVE_CIERRA { TS_VaciarENTRADAS(); };
+								  LLAVE_CIERRA { TS_VaciarENTRADAS(); fputs("}", principal); };
 
 
 
@@ -169,20 +172,20 @@ variables					: declar_variables
 declar_variables			: declar_variables cuerpo_declar_var
 						 		| cuerpo_declar_var ;
 
-cuerpo_declar_var			: VAR tipo ident_variables PYC ;
+cuerpo_declar_var			: VAR tipo ident_variables PYC {generarCodigoVariable($2, $3); } ;
 
-ident_variables             : ident_variables COMA ID { TS_InsertaIDENT($3); }
-                                | ident_variables COMA ID ASIGNACION expresion { TS_InsertaIDENT($3); }
-                                | ID { TS_InsertaIDENT($1); }
-                             	  | ID ASIGNACION expresion {  TS_InsertaIDENT($1); comprobarEsTipo($1.tipo, $3.tipo); comprobarAsignacionListas($1, $3); }
+ident_variables             : ident_variables COMA ID { TS_InsertaIDENT($3); $$.lexema = $1.lexema + ", " + $3.lexema; }
+                                | ident_variables COMA ID ASIGNACION expresion { TS_InsertaIDENT($3); $$.lexema = $1.lexema + ", " + $3.lexema + " = " + $5.lexema; }
+                                | ID { TS_InsertaIDENT($1); $$.lexema = $1.lexema; }
+                             	  | ID ASIGNACION expresion {  TS_InsertaIDENT($1); comprobarEsTipo($1.tipo, $3.tipo); comprobarAsignacionListas($1, $3); $$.lexema = $1.lexema + " = " + $3.lexema; }
 										  | error ;
 
 
-expresion                   : PARENTESIS_ABRE expresion PARENTESIS_CIERRA {$$.tipo = $2.tipo; $$.lista = $2.lista;}
-                                | OP_EXC_UN expresion {$$.tipo = comprobarOpUnarios($2); $$.lista = false;}
-                                | expresion OP_EXC_BIN expresion	{$$.tipo = comprobarOpBinario($1, $2, $3); $$.lista = $1.lista || $3.lista; }
-                                | expresion MENOS expresion {$$.tipo = comprobarOpBinarioMenos($1, $3); $$.lista = $1.lista || $3.lista;}
-                                | expresion MASMAS expresion ARROBA expresion {comprobarEsLista($1); comprobarEsTipo($1.tipo, $3.tipo); comprobarEsTipo(entero, $5.tipo); $$.tipo = $1.tipo; $$.lista = $1.lista;}
+expresion                   : PARENTESIS_ABRE expresion PARENTESIS_CIERRA {$$.tipo = $2.tipo; $$.lista = $2.lista; $$.lexema = "( " + $2.lexema + " )";}
+                                | OP_EXC_UN expresion {$$.tipo = comprobarOpUnarios($2); $$.lista = false; $$.lexema = $1.lexema + $2.lexema;}
+                                | expresion OP_EXC_BIN expresion	{$$.tipo = comprobarOpBinario($1, $2, $3); $$.lista = $1.lista || $3.lista; $$.lexema = $1.lexema + $2.lexema + $3.lexema;}
+                                | expresion MENOS expresion {$$.tipo = comprobarOpBinarioMenos($1, $3); $$.lista = $1.lista || $3.lista; $$.lexema = $1.lexema + " - " + $2.lexema;}
+                                | expresion MASMAS expresion ARROBA expresion {comprobarEsLista($1); comprobarEsTipo($1.tipo, $3.tipo); comprobarEsTipo(entero, $5.tipo); $$.tipo = $1.tipo; $$.lista = $1.lista; /*FALTA TRADUCIR LISTA*/ }
                                 | MENOS expresion { comprobarEsEnteroReal($2); $$.tipo = $2.tipo;}
                                 | llamada_subprograma {$$.tipo = $1.tipo;}
                                 | ID							{entradaTS ent = encontrarEntrada($1.lexema, true); $$.tipo = ent.tipoDato; $$.lista = ent.es_lista;}
@@ -626,7 +629,7 @@ dtipo comprobarLlamadaFuncion(atributos atrib) {
 				parametro_en_TS.tipoDato = TS_llamadas_subprog[num_parametros].tipo;
 
 
-				if ( TS_llamadas_subprog[num_parametros].lexema != "" ){
+				if ( !TS_llamadas_subprog[num_parametros].es_constante ){
 					// buscamos el parametro en la tabla de simbolos
 					// diciendo que es necesario que lo encuentre
 					parametro_en_TS = encontrarEntrada(TS_llamadas_subprog[num_parametros].lexema, true);
@@ -796,7 +799,7 @@ dtipo comprobarOpUnarios( atributos exp ){
 	entradaTS entrada;
 	dtipo tipo_a_devolver;
 
-	if ( exp.lexema != "" ) {
+	if ( !exp.es_constante ) {
 		entrada = encontrarEntrada(exp.lexema, true);
 	}
 
@@ -847,7 +850,7 @@ void abrirFicherosTraduccion() {
 	fputs("#include <string.h>\n", principal);
 	fputs("#include <stdbool.h>\n", principal);
 	fputs("\n", principal);
-	fputs("#include \"dec_fun.h\"\n", principal);
+	fputs("#include \"dec_fun.h\"\n\n\n", principal);
 
 
 }
@@ -858,5 +861,24 @@ void cerrarFicherosTraduccion() {
 	fclose(dec_data);
 }
 
+void generarCodigoVariable(atributos tipo, atributos identificador) {
+	string resultado = "";
+
+	if ( tipo.tipo == entero ) {
+		resultado += "int ";
+	} else if ( tipo.tipo == real ) {
+		resultado += "float ";
+	} else if ( tipo.tipo == booleano ) {
+		resultado += "bool ";
+	} else if ( tipo.tipo == caracter ) {
+		resultado += "char ";
+	}
+
+	resultado += identificador.lexema;
+
+	resultado += " ; \n";
+
+	fputs(resultado.c_str(), principal);
+}
 
 
