@@ -95,13 +95,14 @@ dtipo comprobarOpUnarios( atributos atrib );
 
 
 
-
-
+string tipoAtipoC(dtipo tipo);
 
 void abrirFicherosTraduccion();
 void cerrarFicherosTraduccion();
 
 void generarCodigoVariable(atributos tipo, atributos identificador);
+
+void traducirDeclarSubprog(atributos tipo, atributos identificador);
 
 
 %}
@@ -158,11 +159,11 @@ programa					: PRINCIPAL {abrirFicherosTraduccion(); variables_principal = true;
 				 			  bloque { cerrarFicherosTraduccion(); };
 
 
-bloque						: LLAVE_ABRE  { TS_InsertaMARCA(); if ( !variables_principal ) {fputs("{", principal); }; }
+bloque						: LLAVE_ABRE  { TS_InsertaMARCA(); if ( !variables_principal && !subprog ) {fputs("{", principal); }; }
 								  variables { if ( variables_principal ) { fputs("int main() {  \n", principal); variables_principal = false;}; }
 								  declar_subprogramas
 								  sentencias
-								  LLAVE_CIERRA { TS_VaciarENTRADAS(); fputs("}", principal); };
+								  LLAVE_CIERRA { TS_VaciarENTRADAS(); if ( !subprog ) {fputs("}", principal);}; };
 
 
 
@@ -213,7 +214,7 @@ declar_subprogramas         : declar_subprogramas declar_subp
 declar_subp                 : cabecera_subp {subprog = true;}
 									 	bloque  {subprog = false;} ;
 
-cabecera_subp               : tipo ID PARENTESIS_ABRE parametros PARENTESIS_CIERRA {tipoSubprog = $1.tipo; TS_InsertaSUBPROG($2);  }
+cabecera_subp               : tipo ID PARENTESIS_ABRE parametros PARENTESIS_CIERRA {tipoSubprog = $1.tipo; traducirDeclarSubprog($1, $2); TS_InsertaSUBPROG($2);  }
 									 | error;
 
 tipo                        : TIPO_BASICO {listaTmp = false; tipoTmp = $1.tipo; }
@@ -853,26 +854,44 @@ void abrirFicherosTraduccion() {
 	fputs("#include \"dec_fun.h\"\n\n\n", principal);
 
 
+	fputs("#ifndef FUNCIONES\n", dec_fun);
+	fputs("#define FUNCIONES\n\n", dec_fun);
+
+
 }
 
 void cerrarFicherosTraduccion() {
+	fputs("\n", principal);
+	fputs("#endif\n", dec_fun);
+	fputs("\n", dec_data);
+
 	fclose(principal);
 	fclose(dec_fun);
 	fclose(dec_data);
 }
 
-void generarCodigoVariable(atributos tipo, atributos identificador) {
-	string resultado = "";
+string tipoAtipoC( dtipo tipo ) {
+	string resultado;
 
-	if ( tipo.tipo == entero ) {
-		resultado += "int ";
-	} else if ( tipo.tipo == real ) {
-		resultado += "float ";
-	} else if ( tipo.tipo == booleano ) {
-		resultado += "bool ";
-	} else if ( tipo.tipo == caracter ) {
-		resultado += "char ";
+	if ( tipo == entero ) {
+		resultado = "int ";
+	} else if ( tipo == real ) {
+		resultado = "float ";
+	} else if ( tipo == booleano ) {
+		resultado = "bool ";
+	} else if ( tipo == caracter ) {
+		resultado = "char ";
+	} else if ( tipo == vacio ) {
+		resultado = "void ";
 	}
+
+	return resultado;
+
+}
+
+void generarCodigoVariable(atributos tipo, atributos identificador) {
+	string resultado = tipoAtipoC(tipo.tipo);
+
 
 	resultado += identificador.lexema;
 
@@ -880,5 +899,30 @@ void generarCodigoVariable(atributos tipo, atributos identificador) {
 
 	fputs(resultado.c_str(), principal);
 }
+
+
+void traducirDeclarSubprog(atributos tipo, atributos identificador){
+
+	string resultado = tipoAtipoC(tipo.tipo);
+
+	resultado += identificador.lexema;
+
+	resultado += "( ";
+
+	for ( int i = 0; i < TOPE_PARAMF; i++) {
+		resultado += tipoAtipoC(TS_paramf[i].tipoDato);
+		resultado += TS_paramf[i].nombre;
+		if ( i < TOPE_PARAMF - 1 ){
+			resultado += ", ";
+		}
+	}
+
+	resultado += ") ;\n\n";
+
+	fputs(resultado.c_str(), dec_fun);
+
+}
+
+
 
 

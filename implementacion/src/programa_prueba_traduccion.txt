@@ -1,8 +1,11 @@
 principal(){
 
-	variable entero a;
+	variable entero a = 1;
 	variable real b;
 	variable booleano x, z;
 
+	entero funcionA(booleano parametro1, real parametro2){
+
+	}
 
 }
