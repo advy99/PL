@@ -1,6 +1,6 @@
 principal() {
 
-    variable real ve;
+    variable entero ve;
 
 	 variable entero xe;
 
@@ -51,6 +51,7 @@ principal() {
 
             variable caracter dato ;
             variable entero valor ;
+				variable booleano z, z1;
 
             caracter funcionE (caracter e1, caracter e2){
                 salida 'introduzca dos caracteres: ';
@@ -89,9 +90,12 @@ principal() {
 
    }
 
+
     pe=pe++10@0;
     pf=pf++10.0@0;
     pc=pc++'#'@0;
+
+	 ve = 0;
 
 	 pe = (pe * (#pe / ?pe));
 

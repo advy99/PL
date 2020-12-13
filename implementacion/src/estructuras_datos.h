@@ -36,6 +36,12 @@ typedef struct {
 	int tamDimen;
 } entradaTS ;
 
+typedef struct {
+	string etiquetaEntrada;
+	string etiquetaSalida;
+	string etiquetaElse;
+	string nombreVarControl;
+} descriptorInstruccionesControl;
 
 #endif
 
