@@ -854,7 +854,7 @@ void abrirFicherosTraduccion() {
 
 	// abrimos la cabecera
 	principal = fopen("salida/principal.c", "w");
-	dec_fun = fopen("salida/dec_fun.h", "w");
+	dec_fun = fopen("salida/dec_fun.c", "w");
 	dec_data = fopen("salida/dec_data.c", "w");
 
 	fichero_salida = principal;
@@ -865,7 +865,7 @@ void abrirFicherosTraduccion() {
 	fputs("#include <string.h>\n", principal);
 	fputs("#include <stdbool.h>\n", principal);
 	fputs("\n", principal);
-	fputs("#include \"dec_fun.h\"\n\n\n", principal);
+	fputs("#include \"dec_fun.c\"\n\n\n", principal);
 
 
 	fputs("#ifndef FUNCIONES\n", dec_fun);
