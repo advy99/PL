@@ -1,11 +1,21 @@
 principal(){
 
-	variable entero a = 1;
+	variable entero a = 3 + (45 + 2);
 	variable real b;
 	variable booleano x, z;
 
 	entero funcionA(booleano parametro1, real parametro2){
+		variable real zsd = 0.3 + (5.45 * 4.0);
+		vacio funcionZ(  ) {
+
+		}
 
 	}
+
+	vacio funcionB() {
+
+	}
+
+	a = 23;
 
 }
