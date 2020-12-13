@@ -6,6 +6,14 @@
 
 using namespace std;
 
+
+FILE * principal = NULL;
+FILE * dec_fun = NULL;
+FILE * dec_data = NULL;
+
+int num_var_temporal = 0;
+
+
 int yylex();
 void yyerror(const char * mensaje);
 
@@ -83,6 +91,16 @@ dtipo comprobarOpBinarioMenos(atributos izq, atributos der);
 dtipo comprobarEsEnteroReal (atributos atrib);
 dtipo comprobarOpUnarios( atributos atrib );
 
+
+
+
+
+
+void abrirFicherosTraduccion();
+void cerrarFicherosTraduccion();
+
+
+
 %}
 %error-verbose
 
@@ -133,7 +151,8 @@ dtipo comprobarOpUnarios( atributos atrib );
 
 %%
 
-programa					: PRINCIPAL bloque ;
+programa					: PRINCIPAL {abrirFicherosTraduccion();}
+				 			  bloque { cerrarFicherosTraduccion(); };
 
 
 bloque						: LLAVE_ABRE  { TS_InsertaMARCA(); }
@@ -805,6 +824,38 @@ void comprobarAsignacionListas(atributos id, atributos exp){
 		printf("Error semantico en la linea %d: Asignando lista a un tipo basico\n", num_linea);
 	}
 
+}
+
+
+//
+//
+// FUNCIONES GENERACION CODIGO INTERMEDIO
+//
+//
+
+
+void abrirFicherosTraduccion() {
+
+	// abrimos la cabecera
+	principal = fopen("salida/principal.c", "w");
+	dec_fun = fopen("salida/dec_fun.h", "w");
+	dec_data = fopen("salida/dec_data.c", "w");
+
+	// incluimos las bibliotecas básicas que usaremos
+	fputs("#include <stdio.h>\n", principal);
+	fputs("#include <stdlib.h>\n", principal);
+	fputs("#include <string.h>\n", principal);
+	fputs("#include <stdbool.h>\n", principal);
+	fputs("\n", principal);
+	fputs("#include \"dec_fun.h\"\n", principal);
+
+
+}
+
+void cerrarFicherosTraduccion() {
+	fclose(principal);
+	fclose(dec_fun);
+	fclose(dec_data);
 }
 
 
