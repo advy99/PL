@@ -113,6 +113,7 @@ void traducirDeclarSubprog(atributos tipo, atributos identificador);
 void introducirTabs(string & resultado);
 
 string generarCodigoOPBinarios(atributos izq, atributos operador, atributos der);
+string generarCodigoOPUnarios( atributos operador, atributos der);
 
 
 %}
@@ -187,24 +188,24 @@ declar_variables			: declar_variables cuerpo_declar_var
 cuerpo_declar_var			: VAR tipo ident_variables PYC {generarCodigoVariable($2, $3); if ( !variables_principal ) {fputs( codigoTmp.c_str(), fichero_salida); codigoTmp = ""; }; };
 
 ident_variables             : ident_variables COMA ID { TS_InsertaIDENT($3); $$.lexema = $1.lexema + ", " + $3.lexema; }
-                                | ident_variables COMA ID ASIGNACION expresion { TS_InsertaIDENT($3); $$.lexema = $1.lexema + ", " + $3.lexema;codigoTmp += $1.lexema + " = " + $5.lexema + ";\n";  }
+                                | ident_variables COMA ID ASIGNACION expresion { TS_InsertaIDENT($3); $$.lexema = $1.lexema + ", " + $3.lexema; codigoTmp += $1.lexema + " = " + $5.lexema + ";\n";  }
                                 | ID { TS_InsertaIDENT($1); $$.lexema = $1.lexema; }
 										  | ID ASIGNACION expresion {  TS_InsertaIDENT($1); comprobarEsTipo($1.tipo, $3.tipo); comprobarAsignacionListas($1, $3); $$.lexema = $1.lexema; codigoTmp += $1.lexema + " = " + $3.lexema + ";\n";  }
 										  | error ;
 
 
 expresion                   : PARENTESIS_ABRE expresion PARENTESIS_CIERRA {$$.tipo = $2.tipo; $$.lista = $2.lista; $$.lexema = "( " + $2.lexema + " )";}
-                                | OP_EXC_UN expresion {$$.tipo = comprobarOpUnarios($2); $$.lista = false; $$.lexema = $1.lexema + $2.lexema;}
+                                | OP_EXC_UN expresion {$$.tipo = comprobarOpUnarios($2); $$.lista = false; $$.lexema = generarCodigoOPUnarios($1, $2);}
                                 | expresion OP_EXC_BIN expresion	{$$.tipo = comprobarOpBinario($1, $2, $3); $$.lista = $1.lista || $3.lista; $$.lexema = generarCodigoOPBinarios($1, $2, $3);}
-                                | expresion MENOS expresion {$$.tipo = comprobarOpBinarioMenos($1, $3); $$.lista = $1.lista || $3.lista; $$.lexema = $1.lexema + " - " + $2.lexema;}
+                                | expresion MENOS expresion {$$.tipo = comprobarOpBinarioMenos($1, $3); $$.lista = $1.lista || $3.lista;$$.lexema = generarCodigoOPBinarios($1, $2, $3); }
                                 | expresion MASMAS expresion ARROBA expresion {comprobarEsLista($1); comprobarEsTipo($1.tipo, $3.tipo); comprobarEsTipo(entero, $5.tipo); $$.tipo = $1.tipo; $$.lista = $1.lista; /*FALTA TRADUCIR LISTA*/ }
-                                | MENOS expresion { comprobarEsEnteroReal($2); $$.tipo = $2.tipo;}
-                                | llamada_subprograma {$$.tipo = $1.tipo;}
-                                | ID							{entradaTS ent = encontrarEntrada($1.lexema, true); $$.tipo = ent.tipoDato; $$.lista = ent.es_lista;}
-                                | constante {$$.tipo = $1.tipo; $$.lista = $1.lista;}
+                                | MENOS expresion { comprobarEsEnteroReal($2); $$.tipo = $2.tipo; $$.lexema = "-" + $2.lexema;}
+                                | llamada_subprograma {$$.tipo = $1.tipo; codigoTmp += $1.lexema + "\n"; }
+                                | ID							{entradaTS ent = encontrarEntrada($1.lexema, true); $$.tipo = ent.tipoDato; $$.lista = ent.es_lista; $$.lexema = $1.lexema;}
+                                | constante {$$.tipo = $1.tipo; $$.lista = $1.lista; $$.lexema = $1.lexema;}
 										  | error ;
 
-constante                   : CONSTANTE_BASICA {tipoTmp = $1.tipo; $$.tipo = $1.tipo; $$.lista = false;}
+constante                   : CONSTANTE_BASICA {tipoTmp = $1.tipo; $$.tipo = $1.tipo; $$.lista = false; $$.lexema = $1.lexema;}
                                 | CORCHETE_ABRE contenido_lista CORCHETE_CIERRA {tipoTmp = $2.tipo; $$.tipo = $2.tipo; $$.lista = true;} ;
 
 contenido_lista             : contenido_lista_preced CONSTANTE_BASICA {comprobarEsTipo($2.tipo, $1.tipo); $$.tipo = $1.tipo;}
@@ -215,7 +216,7 @@ contenido_lista_preced      : contenido_lista_preced CONSTANTE_BASICA COMA {comp
                                 | CONSTANTE_BASICA COMA {$$.tipo = $1.tipo;};
 
 
-llamada_subprograma         : ID PARENTESIS_ABRE lista_variables_constantes PARENTESIS_CIERRA { $$.tipo =  comprobarLlamadaFuncion($1);} ;
+llamada_subprograma         : ID PARENTESIS_ABRE lista_variables_constantes PARENTESIS_CIERRA { $$.tipo =  comprobarLlamadaFuncion($1); $$.lexema = $1.lexema + "( " + $2.lexema + " )";} ;
 
 
 
@@ -228,7 +229,7 @@ declar_subp                 : cabecera_subp {subprog += 1; fichero_salida = dec_
 cabecera_subp               : tipo ID PARENTESIS_ABRE parametros PARENTESIS_CIERRA {tipoSubprog = $1.tipo; traducirDeclarSubprog($1, $2); TS_InsertaSUBPROG($2);  }
 									 | error;
 
-tipo                        : TIPO_BASICO {listaTmp = false; tipoTmp = $1.tipo; }
+tipo                        : TIPO_BASICO {listaTmp = false; tipoTmp = $1.tipo; $$.lexema = $1.lexema; }
                                 | LISTADE TIPO_BASICO {listaTmp = true; tipoTmp = $2.tipo;}
 										  | error ;
 
@@ -245,7 +246,7 @@ sentencias                  : sentencias sentencia
                                 | ;
 
 sentencia                   : bloque
-                                | ID ASIGNACION expresion PYC { comprobarEsTipo(encontrarEntrada($1.lexema, true).tipoDato, $3.tipo); comprobarAsignacionListas($1, $3);}
+                                | ID ASIGNACION expresion PYC { comprobarEsTipo(encontrarEntrada($1.lexema, true).tipoDato, $3.tipo); comprobarAsignacionListas($1, $3);codigoTmp += $1.lexema + " = " + $3.lexema + ";\n"; fputs(codigoTmp.c_str(), fichero_salida); codigoTmp = ""; }
                                 | SI PARENTESIS_ABRE expresion PARENTESIS_CIERRA sentencia {comprobarEsTipo(booleano, $3.tipo); }
                                 | SI PARENTESIS_ABRE expresion PARENTESIS_CIERRA sentencia SINO sentencia {comprobarEsTipo(booleano, $3.tipo); }
                                 | MIENTRAS PARENTESIS_ABRE expresion PARENTESIS_CIERRA sentencia {comprobarEsTipo(booleano, $3.tipo); }
@@ -262,10 +263,10 @@ lista_variables             : lista_variables COMA ID {comprobarEsVarOParamametr
                                 | ID {comprobarEsVarOParamametroFormal($1);} ;
 
 
-lista_variables_constantes  : lista_variables_constantes COMA ID { TS_subprog_inserta($3);}
-                                | lista_variables_constantes COMA constante { TS_subprog_inserta($3);}
-                                | constante { TS_subprog_inserta($1);}
-                                | ID { TS_subprog_inserta($1);}
+lista_variables_constantes  : lista_variables_constantes COMA ID { TS_subprog_inserta($3); $$.lexema = $1.lexema + ", " + $3.lexema;}
+                                | lista_variables_constantes COMA constante { TS_subprog_inserta($3); $$.lexema = $1.lexema + ", " + $3.lexema;}
+                                | constante { TS_subprog_inserta($1); $$.lexema = $1.lexema;}
+                                | ID { TS_subprog_inserta($1); $$.lexema = $1.lexema;}
 										  | ;
 
 lista_expresiones_o_cadena  : lista_expresiones_o_cadena COMA CADENA
@@ -978,7 +979,7 @@ string generarCodigoOPBinarios(atributos izq, atributos operador, atributos der)
 	string resultado = generarVariableTemporal();
 
 	string tipo_resultado;
-	if ( (operador.atrib >= 0 && operador.atrib <= 2) ) {
+	if ( (operador.atrib >= 0 && operador.atrib <= 2) || operador.lexema == "-" ) {
 		tipo_resultado = tipoAtipoC(izq.tipo);
 	} else if( operador.atrib >= 3 && operador.atrib <= 11  ) {
 		tipo_resultado = "bool ";
@@ -992,4 +993,22 @@ string generarCodigoOPBinarios(atributos izq, atributos operador, atributos der)
 	return resultado;
 
 }
+
+string generarCodigoOPUnarios( atributos operador, atributos der) {
+
+	string resultado = generarVariableTemporal();
+	string tipo_resultado;
+
+	if( operador.atrib == 0  ) {
+		tipo_resultado = "bool ";
+	}
+
+	codigoTmp += tipo_resultado + " " + resultado + ";\n";
+	codigoTmp += resultado + " = " + operador.lexema + " " + der.lexema + " ; \n";
+
+	return resultado;
+
+}
+
+
 
