@@ -1,0 +1,8 @@
+principal(){
+
+	variable entero a;
+	variable real b;
+	variable booleano x, z;
+
+
+}

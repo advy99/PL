@@ -30,6 +30,7 @@ typedef enum {
 typedef struct {
 	tipoEntrada entrada;
 	string nombre = "";
+	string valor = "";
 	dtipo tipoDato = no_asignado;
 	bool es_lista = false;
 	unsigned int parametros;
