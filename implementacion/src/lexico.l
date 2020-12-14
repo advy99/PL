@@ -65,7 +65,7 @@ digito		[0-9]
 {digito}+						yylval.atrib =  0; yylval.tipo = entero; yylval.es_constante = true; yylval.lexema = string(strdup(yytext)); return(CONSTANTE_BASICA);
 {digito}+"."{digito}+		yylval.atrib =  1; yylval.tipo = real;  yylval.es_constante = true; yylval.lexema =  string(strdup(yytext)); return(CONSTANTE_BASICA);
 "\'"."\'"						yylval.atrib =  2; yylval.tipo = caracter;  yylval.es_constante = true; yylval.lexema = string(strdup(yytext)); return(CONSTANTE_BASICA);
-("verdadero"|"falso")		yylval.atrib =  3; yylval.tipo = booleano;  yylval.es_constante = true; yylval.lexema = string(strdup(yytext)); return(CONSTANTE_BASICA);
+("verdadero"|"falso")		yylval.atrib =  3; yylval.tipo = booleano;  yylval.es_constante = true; if ( string(strdup(yytext)) == "verdadero" ) {yylval.lexema = "true";} else {yylval.lexema = "false";}; return(CONSTANTE_BASICA);
 \'[^\']+\'						yylval.lexema = string(strdup(yytext)); return(CADENA);
 {letra}({letra}|{digito})*	yylval.lexema = string(strdup (yytext)); return(ID);
 "\n"								num_linea++;

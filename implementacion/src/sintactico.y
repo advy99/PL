@@ -17,6 +17,7 @@ int num_var_temporal = 0;
 bool variables_principal = true;
 
 string codigoTmp = "";
+string declaracionVar = "";
 
 int num_llaves = 0;
 int num_llaves_subprog = 0;
@@ -50,6 +51,7 @@ typedef struct {
 	dtipo tipo = desconocido;
 	bool es_constante = false;
 	bool es_hoja = true;
+	string codigo = "";
 } atributos;
 
 unsigned long TOPE_SUBPROG = 0;
@@ -107,14 +109,23 @@ string tipoAtipoC(dtipo tipo);
 void abrirFicherosTraduccion();
 void cerrarFicherosTraduccion();
 
-void generarCodigoVariable(atributos tipo, atributos identificador);
+string generarCodigoVariable(atributos tipo, atributos identificador);
 
 void traducirDeclarSubprog(atributos tipo, atributos identificador);
 void introducirTabs(string & resultado);
 
-string generarCodigoOPBinarios(atributos izq, atributos operador, atributos der);
-string generarCodigoOPUnarios( atributos operador, atributos der);
+string generarCodigoOPBinarios(atributos * izq, atributos operador, atributos der);
+string generarCodigoOPUnarios( atributos operador, atributos * der);
 
+#define MAX_IC 500
+
+unsigned long TOPE_IC = 0;
+
+descriptorInstruccionesControl IC[MAX_IC];
+
+string generarCodigoIf(atributos expresion, atributos sentencia);
+string generarCodigoIfElse(atributos expresion, atributos sentencia, atributos sentencia_sino);
+void incrementarTopeIC();
 
 %}
 %error-verbose
@@ -167,40 +178,69 @@ string generarCodigoOPUnarios( atributos operador, atributos der);
 %%
 
 programa					: PRINCIPAL {abrirFicherosTraduccion(); variables_principal = true; }
-				 			  bloque { cerrarFicherosTraduccion(); };
+				 			  bloque { fputs($3.codigo.c_str(), fichero_salida); cerrarFicherosTraduccion(); };
 
 
-bloque						: LLAVE_ABRE  { TS_InsertaMARCA(); if ( !variables_principal && subprog == 0 ) {fputs("{\n", principal);num_llaves++;  } else if (subprog != 0) {fputs("{\n ", dec_fun); num_llaves_subprog++; }; }
-								  variables { if ( variables_principal ) { fputs("\nint main() {  \n", principal); fputs(codigoTmp.c_str(), principal); codigoTmp = "";  variables_principal = false;}; }
+bloque						: LLAVE_ABRE  {
+										TS_InsertaMARCA();
+										if ( !variables_principal ) {
+											$$.codigo += "{\n";
+											num_llaves++;
+										} else if (subprog != 0) {
+											$$.codigo += "{\n ";
+											num_llaves_subprog++;
+										};
+									}
+								  variables {
+								  		if ( variables_principal ) {
+											$$.codigo += declaracionVar;
+											$$.codigo += "\nint main() {  \n";
+											$$.codigo += codigoTmp;
+											variables_principal = false;
+										} else {
+											$$.codigo += declaracionVar;
+											$$.codigo += codigoTmp;
+
+										};
+										declaracionVar = "";
+										codigoTmp = "";
+
+									}
 								  declar_subprogramas
 								  sentencias
-								  LLAVE_CIERRA { TS_VaciarENTRADAS(); string resul = "\n";if ( subprog == 0 ) {num_llaves--;} else { num_llaves_subprog--;} introducirTabs(resul); resul += "}\n"; fputs(resul.c_str(), fichero_salida); };
+								  LLAVE_CIERRA {
+								  		TS_VaciarENTRADAS();
+										$$.codigo += $2.codigo + $4.codigo + $6.codigo +  "}\n";
+										$2.codigo = "";
+										$4.codigo = "";
+										$6.codigo = "";
+									};
 
 
-
-
-variables					: declar_variables
+variables					: declar_variables {$$.codigo = $1.codigo; printf("%s", $$.codigo.c_str());}
 				 				| ;
 
-declar_variables			: declar_variables cuerpo_declar_var
-						 		| cuerpo_declar_var ;
+declar_variables			: declar_variables cuerpo_declar_var {$$.codigo += $2.codigo; }
+						 		| cuerpo_declar_var {$$.codigo += $1.codigo; } ;
 
-cuerpo_declar_var			: VAR tipo ident_variables PYC {generarCodigoVariable($2, $3); if ( !variables_principal ) {fputs( codigoTmp.c_str(), fichero_salida); codigoTmp = ""; }; };
+cuerpo_declar_var			: VAR tipo ident_variables PYC {
+						  				declaracionVar += generarCodigoVariable($2, $3);
+									};
 
 ident_variables             : ident_variables COMA ID { TS_InsertaIDENT($3); $$.lexema = $1.lexema + ", " + $3.lexema; }
-                                | ident_variables COMA ID ASIGNACION expresion { TS_InsertaIDENT($3); $$.lexema = $1.lexema + ", " + $3.lexema; codigoTmp += $1.lexema + " = " + $5.lexema + ";\n";  }
+                                | ident_variables COMA ID ASIGNACION expresion { TS_InsertaIDENT($3); $$.lexema = $1.lexema + ", " + $3.lexema; codigoTmp += $5.codigo + "\n" +  $1.lexema + " = " + $5.lexema + ";\n";  }
                                 | ID { TS_InsertaIDENT($1); $$.lexema = $1.lexema; }
-										  | ID ASIGNACION expresion {  TS_InsertaIDENT($1); comprobarEsTipo($1.tipo, $3.tipo); comprobarAsignacionListas($1, $3); $$.lexema = $1.lexema; codigoTmp += $1.lexema + " = " + $3.lexema + ";\n";  }
+										  | ID ASIGNACION expresion {  TS_InsertaIDENT($1); comprobarEsTipo($1.tipo, $3.tipo); comprobarAsignacionListas($1, $3); $$.lexema = $1.lexema; codigoTmp += $3.codigo + "\n" + $1.lexema + " = " + $3.lexema + ";\n"; }
 										  | error ;
 
 
-expresion                   : PARENTESIS_ABRE expresion PARENTESIS_CIERRA {$$.tipo = $2.tipo; $$.lista = $2.lista; $$.lexema = "( " + $2.lexema + " )";}
-                                | OP_EXC_UN expresion {$$.tipo = comprobarOpUnarios($2); $$.lista = false; $$.lexema = generarCodigoOPUnarios($1, $2);}
-                                | expresion OP_EXC_BIN expresion	{$$.tipo = comprobarOpBinario($1, $2, $3); $$.lista = $1.lista || $3.lista; $$.lexema = generarCodigoOPBinarios($1, $2, $3);}
-                                | expresion MENOS expresion {$$.tipo = comprobarOpBinarioMenos($1, $3); $$.lista = $1.lista || $3.lista;$$.lexema = generarCodigoOPBinarios($1, $2, $3); }
+expresion                   : PARENTESIS_ABRE expresion PARENTESIS_CIERRA {$$.tipo = $2.tipo; $$.lista = $2.lista; $$.lexema = "( " + $2.lexema + " )"; $$.codigo += $2.codigo;}
+                                | OP_EXC_UN expresion {$$.tipo = comprobarOpUnarios($2); $$.lista = false; $$.lexema = generarCodigoOPUnarios($1, &$2); $$.codigo += $2.codigo;}
+                                | expresion OP_EXC_BIN expresion	{$$.tipo = comprobarOpBinario($1, $2, $3); $$.lista = $1.lista || $3.lista; $$.lexema = generarCodigoOPBinarios(&$1, $2, $3); $$.codigo += $1.codigo;}
+                                | expresion MENOS expresion {$$.tipo = comprobarOpBinarioMenos($1, $3); $$.lista = $1.lista || $3.lista;$$.lexema = generarCodigoOPBinarios(&$1, $2, $3); $$.codigo += $1.codigo; }
                                 | expresion MASMAS expresion ARROBA expresion {comprobarEsLista($1); comprobarEsTipo($1.tipo, $3.tipo); comprobarEsTipo(entero, $5.tipo); $$.tipo = $1.tipo; $$.lista = $1.lista; /*FALTA TRADUCIR LISTA*/ }
-                                | MENOS expresion { comprobarEsEnteroReal($2); $$.tipo = $2.tipo; $$.lexema = "-" + $2.lexema;}
-                                | llamada_subprograma {$$.tipo = $1.tipo; codigoTmp += $1.lexema + "\n"; }
+                                | MENOS expresion { comprobarEsEnteroReal($2); $$.tipo = $2.tipo; $$.lexema = "-" + $2.lexema; $$.codigo += $2.codigo;}
+                                | llamada_subprograma {$$.tipo = $1.tipo; $$.codigo += $1.lexema + "\n"; }
                                 | ID							{entradaTS ent = encontrarEntrada($1.lexema, true); $$.tipo = ent.tipoDato; $$.lista = ent.es_lista; $$.lexema = $1.lexema;}
                                 | constante {$$.tipo = $1.tipo; $$.lista = $1.lista; $$.lexema = $1.lexema;}
 										  | error ;
@@ -242,13 +282,13 @@ parametro                   : tipo ID { TS_InsertaPARAMF($2); };
 parametro_preced            : parametro_preced parametro COMA
                                 | parametro COMA;
 
-sentencias                  : sentencias sentencia
+sentencias                  : sentencias sentencia { $$.codigo += $2.codigo; }
                                 | ;
 
-sentencia                   : bloque
-                                | ID ASIGNACION expresion PYC { comprobarEsTipo(encontrarEntrada($1.lexema, true).tipoDato, $3.tipo); comprobarAsignacionListas($1, $3);codigoTmp += $1.lexema + " = " + $3.lexema + ";\n"; fputs(codigoTmp.c_str(), fichero_salida); codigoTmp = ""; }
-                                | SI PARENTESIS_ABRE expresion PARENTESIS_CIERRA sentencia {comprobarEsTipo(booleano, $3.tipo); }
-                                | SI PARENTESIS_ABRE expresion PARENTESIS_CIERRA sentencia SINO sentencia {comprobarEsTipo(booleano, $3.tipo); }
+sentencia                   : bloque {$$.codigo = $1.codigo; }
+                                | ID ASIGNACION expresion PYC { comprobarEsTipo(encontrarEntrada($1.lexema, true).tipoDato, $3.tipo); comprobarAsignacionListas($1, $3);$$.codigo += $3.codigo + $1.lexema + " = " + $3.lexema + ";\n";}
+                                | SI PARENTESIS_ABRE expresion PARENTESIS_CIERRA sentencia {comprobarEsTipo(booleano, $3.tipo); $$.codigo += generarCodigoIf($3, $5);}
+                                | SI PARENTESIS_ABRE expresion PARENTESIS_CIERRA sentencia SINO sentencia {comprobarEsTipo(booleano, $3.tipo); $$.codigo += generarCodigoIfElse($3, $5, $7); }
                                 | MIENTRAS PARENTESIS_ABRE expresion PARENTESIS_CIERRA sentencia {comprobarEsTipo(booleano, $3.tipo); }
                                 | REPETIR sentencia MIENTRAS PARENTESIS_ABRE expresion PARENTESIS_CIERRA PYC {comprobarEsTipo(booleano, $5.tipo); }
                                 | DEVUELVE expresion PYC {comprobarDevuelveSubprog($2);}
@@ -931,20 +971,19 @@ void introducirTabs(string & resultado) {
 	}
 }
 
-void generarCodigoVariable(atributos tipo, atributos identificador) {
+string generarCodigoVariable(atributos tipo, atributos identificador) {
 	string resultado = "";
 
 	introducirTabs(resultado);
 
 	resultado += tipoAtipoC(tipo.tipo);
 
-	int pos_igual = identificador.lexema.find("=");
 
 	resultado += identificador.lexema;
 
 	resultado += " ; \n";
 
-	fputs(resultado.c_str(), fichero_salida);
+	return resultado;
 }
 
 
@@ -975,26 +1014,25 @@ void traducirDeclarSubprog(atributos tipo, atributos identificador){
 }
 
 
-string generarCodigoOPBinarios(atributos izq, atributos operador, atributos der) {
+string generarCodigoOPBinarios(atributos * izq, atributos operador, atributos der) {
 	string resultado = generarVariableTemporal();
 
 	string tipo_resultado;
 	if ( (operador.atrib >= 0 && operador.atrib <= 2) || operador.lexema == "-" ) {
-		tipo_resultado = tipoAtipoC(izq.tipo);
+		tipo_resultado = tipoAtipoC(izq->tipo);
 	} else if( operador.atrib >= 3 && operador.atrib <= 11  ) {
 		tipo_resultado = "bool ";
 	}
 
-	codigoTmp += tipo_resultado + " " + resultado + "; \n";
-	codigoTmp += resultado + " = " + izq.lexema + " " + operador.lexema + " " + der.lexema + " ; \n";
-
-
+	izq->codigo += der.codigo;
+	izq->codigo += tipo_resultado + " " + resultado + "; \n";
+	izq->codigo += resultado + " = " + izq->lexema + " " + operador.lexema + " " + der.lexema + " ; \n";
 
 	return resultado;
 
 }
 
-string generarCodigoOPUnarios( atributos operador, atributos der) {
+string generarCodigoOPUnarios( atributos operador, atributos * der) {
 
 	string resultado = generarVariableTemporal();
 	string tipo_resultado;
@@ -1003,12 +1041,70 @@ string generarCodigoOPUnarios( atributos operador, atributos der) {
 		tipo_resultado = "bool ";
 	}
 
-	codigoTmp += tipo_resultado + " " + resultado + ";\n";
-	codigoTmp += resultado + " = " + operador.lexema + " " + der.lexema + " ; \n";
+	der->codigo += tipo_resultado + " " + resultado + ";\n";
+	der->codigo += resultado + " = " + operador.lexema + " " + der->lexema + " ; \n";
 
 	return resultado;
 
 }
 
+string generarCodigoIf(atributos expresion, atributos sentencia) {
+
+	descriptorInstruccionesControl nueva_entrada;
+
+	nueva_entrada.etiquetaSalida = generarEtiqueta();
+
+	string resultado;
+
+	resultado += expresion.codigo;
+
+	resultado += "if (!" + expresion.lexema + " ) goto " + nueva_entrada.etiquetaSalida + " ;\n";
+
+	resultado += sentencia.codigo;
+
+	resultado += "\n" + nueva_entrada.etiquetaSalida + ": \n;\n";
+
+	return resultado;
+
+}
+
+string generarCodigoIfElse(atributos expresion, atributos sentencia, atributos sentencia_sino) {
+
+	descriptorInstruccionesControl nueva_entrada;
+
+	nueva_entrada.etiquetaSalida = generarEtiqueta();
+	nueva_entrada.etiquetaElse = generarEtiqueta();
+
+	string resultado;
+
+	resultado += expresion.codigo;
+
+	resultado += "if (!" + expresion.lexema + " ) goto " + nueva_entrada.etiquetaElse + " ;\n";
+
+	resultado += sentencia.codigo;
+
+	resultado += "\n goto "+  nueva_entrada.etiquetaSalida + ";\n";
+
+	resultado += "\n" + nueva_entrada.etiquetaElse + ": \n;\n";
+
+	resultado += sentencia_sino.codigo;
+
+	resultado += "\n" + nueva_entrada.etiquetaSalida + ": \n;\n";
+
+	return resultado;
+
+}
+
+void incrementarTopeIC() {
+
+	if (TOPE_IC == MAX_IC) {
+		printf("ERROR: Tope de la pila alcanzado. Demasiadas entradas en la tabla de símbolos. Abortando compilación");
+
+
+	} else {
+		TOPE_IC++;
+	}
+
+}
 
 

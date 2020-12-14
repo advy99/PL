@@ -38,10 +38,10 @@ typedef struct {
 } entradaTS ;
 
 typedef struct {
-	string etiquetaEntrada;
-	string etiquetaSalida;
-	string etiquetaElse;
-	string nombreVarControl;
+	string etiquetaEntrada = "";
+	string etiquetaSalida = "";
+	string etiquetaElse = "";
+	string nombreVarControl = "";
 } descriptorInstruccionesControl;
 
 #endif
