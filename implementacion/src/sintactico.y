@@ -300,7 +300,7 @@ sentencia                   : bloque {$$.codigo = $1.codigo; }
                                 | SI PARENTESIS_ABRE expresion PARENTESIS_CIERRA sentencia SINO sentencia {comprobarEsTipo(booleano, $3.tipo); $$.codigo += generarCodigoIfElse($3, $5, $7); }
                                 | MIENTRAS PARENTESIS_ABRE expresion PARENTESIS_CIERRA sentencia {comprobarEsTipo(booleano, $3.tipo); }
                                 | REPETIR sentencia MIENTRAS PARENTESIS_ABRE expresion PARENTESIS_CIERRA PYC {comprobarEsTipo(booleano, $5.tipo); }
-                                | DEVUELVE expresion PYC {comprobarDevuelveSubprog($2);}
+                                | DEVUELVE expresion PYC {comprobarDevuelveSubprog($2); $$.codigo += $2.codigo + "\nreturn " + $2.lexema + ";\n "; }
                                 | ID AVANZAR PYC		{ comprobarEsLista($1); }
                                 | ID RETROCEDER PYC { comprobarEsLista($1); }
                                 | DOLAR ID PYC { comprobarEsLista($2); }

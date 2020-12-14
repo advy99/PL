@@ -12,6 +12,8 @@ principal(){
 			p = ' ';
 		}
 
+		devuelve 1 + 2;
+
 	}
 
 	a = 23;
