@@ -19,6 +19,10 @@ bool variables_principal = true;
 string codigoTmp = "";
 string declaracionVar = "";
 
+
+string codigoPrincipal = "";
+string codigoFunc = "";
+
 int num_llaves = 0;
 int num_llaves_subprog = 0;
 
@@ -178,7 +182,7 @@ void incrementarTopeIC();
 %%
 
 programa					: PRINCIPAL {abrirFicherosTraduccion(); variables_principal = true; }
-				 			  bloque { fputs($3.codigo.c_str(), fichero_salida); cerrarFicherosTraduccion(); };
+				 			  bloque { fputs(codigoPrincipal.c_str(), principal); fputs(codigoFunc.c_str(), dec_fun);  cerrarFicherosTraduccion(); };
 
 
 bloque						: LLAVE_ABRE  {
@@ -210,6 +214,11 @@ bloque						: LLAVE_ABRE  {
 								  sentencias
 								  LLAVE_CIERRA {
 								  		TS_VaciarENTRADAS();
+										if ( subprog == 0 ) {
+											codigoPrincipal = $2.codigo + $4.codigo + $6.codigo +  "}\n";
+										} else {
+											codigoFunc = $2.codigo + $4.codigo + $6.codigo +  "}\n";
+										}
 										$$.codigo += $2.codigo + $4.codigo + $6.codigo +  "}\n";
 										$2.codigo = "";
 										$4.codigo = "";

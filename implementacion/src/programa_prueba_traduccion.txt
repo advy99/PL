@@ -3,6 +3,17 @@ principal(){
 	variable entero a = 23 + (3 * 3);
 	variable booleano z, x;
 
+	entero funcionA( booleano re ) {
+		variable caracter p;
+
+		p = 'a';
+
+		si ( p == 'z' ) {
+			p = ' ';
+		}
+
+	}
+
 	a = 23;
 
 	si ( a>0 ) {
