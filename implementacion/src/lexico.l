@@ -70,6 +70,6 @@ digito		[0-9]
 {letra}({letra}|{digito})*	yylval.lexema = string(strdup (yytext)); return(ID);
 "\n"								num_linea++;
 [" ""\t"]+						;
-.							printf("Error lexico - símbolo erróneo: '%s' en línea %d\n",yytext, num_linea);
+.							printf("Error lexico - símbolo erróneo: '%s' en línea %d\n",yytext, num_linea); num_errores++;
 
 %%

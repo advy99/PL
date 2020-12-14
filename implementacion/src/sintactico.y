@@ -6,6 +6,8 @@
 
 using namespace std;
 
+int num_errores;
+
 FILE * fichero_salida;
 
 FILE * principal = NULL;
@@ -182,7 +184,7 @@ void incrementarTopeIC();
 %%
 
 programa					: PRINCIPAL {abrirFicherosTraduccion(); variables_principal = true; }
-				 			  bloque { fputs(codigoPrincipal.c_str(), principal); fputs(codigoFunc.c_str(), dec_fun);  cerrarFicherosTraduccion(); };
+				 			  bloque { if ( num_errores == 0 ) { fputs(codigoPrincipal.c_str(), principal); fputs(codigoFunc.c_str(), dec_fun);};  cerrarFicherosTraduccion(); };
 
 
 bloque						: LLAVE_ABRE  {
@@ -226,7 +228,7 @@ bloque						: LLAVE_ABRE  {
 									};
 
 
-variables					: declar_variables {$$.codigo = $1.codigo; printf("%s", $$.codigo.c_str());}
+variables					: declar_variables {$$.codigo = $1.codigo; }
 				 				| ;
 
 declar_variables			: declar_variables cuerpo_declar_var {$$.codigo += $2.codigo; }
@@ -333,6 +335,7 @@ lista_expresiones_o_cadena  : lista_expresiones_o_cadena COMA CADENA
 void yyerror(const char *msg)
 {
     fprintf(stderr,"[Linea %d]: %s\n", num_linea, msg) ;
+	 num_errores++;
 }
 
 
@@ -384,6 +387,7 @@ void TS_InsertaIDENT(atributos atributo){
 		// si se ha declarado antes, mostramos un error
 		// como los parametros de funciones son añadidos tras la marca de bloque, se tendrá en cuenta sus redeclaraciones
 		printf("Error semantico en la linea %d: Redeclaración de '%s'\n", num_linea, atributo.lexema.c_str());
+	 	num_errores++;
 	}
 
 
@@ -469,6 +473,7 @@ void TS_InsertaSUBPROG(atributos atributo){
 		// si lo ha encontrado en la tabla de simbolos, imprime un error por la
 		// redefinicion
 		printf("\nError semantico en la linea %d. Redefinición de '%s'\n", num_linea, atributo.lexema.c_str());
+	 	num_errores++;
 	}
 
 
@@ -526,6 +531,7 @@ void TS_InsertaPARAMF(atributos atributo){
 	} else {
 		// si existe lo añadimos
 		printf("Error semantico en la linea %d: El parámetro %s ya existe\n", num_linea, atributo.lexema.c_str());
+	 	num_errores++;
 	}
 
 }
@@ -551,6 +557,7 @@ entradaTS encontrarEntrada(string nombre, bool quiero_que_este) {
 		entrada = TS[pos_actual];
 	} else if (quiero_que_este) {
 		printf("\nError semantico en la linea %d. Identificador '%s' no declarado\n", num_linea, nombre.c_str());
+	 	num_errores++;
 	}
 
 	return entrada;
@@ -564,6 +571,7 @@ int incrementaTOPE(){
 
 	if (TOPE == MAX_TS) {
 		printf("ERROR: Tope de la pila alcanzado. Demasiadas entradas en la tabla de símbolos. Abortando compilación");
+	 	num_errores++;
 
 		salida = 0;
 
@@ -603,6 +611,7 @@ void comprobarEsVarOParamametroFormal(atributos atrib) {
 	// y si es desconocido, no asignado, o una funcion, damos el error
 	if ( t == desconocido || t == no_asignado || esFuncion(atrib.lexema) ){
 		printf("Error semantico en la linea %d: Esperado variables, parametro formal o constante.\n", num_linea);
+	 	num_errores++;
 	}
 }
 
@@ -613,6 +622,7 @@ void comprobarEsTipo(dtipo tipo, dtipo tipo2){
 	if (tipo != tipo2) {
 
 		printf("Error semantico en la linea %d: Esperado tipo %s, encontrado tipo %s\n", num_linea, tipoAstring(tipo).c_str(), tipoAstring(tipo2).c_str());
+	 	num_errores++;
 	}
 }
 
@@ -642,6 +652,7 @@ void comprobarEsLista(atributos atrib) {
 
 	if ( !entrada.es_lista ) {
 		printf("Error semantico en la linea %d: Operación solo aplicable a una lista.\n", num_linea);
+	 	num_errores++;
 	}
 
 }
@@ -658,6 +669,7 @@ dtipo comprobarLlamadaFuncion(atributos atrib) {
 	// si existe la entrada, y no es una funcion, sacamos un error de llamada
 	if ( existe != desconocido && entrada_funcion.entrada != funcion ){
 		printf("Error semantico en la linea %d: %s no es una funcion\n", num_linea, entrada_funcion.nombre.c_str());
+	 	num_errores++;
 
 	} else if ( existe != desconocido ) {
 
@@ -678,6 +690,7 @@ dtipo comprobarLlamadaFuncion(atributos atrib) {
 		// de parametros dados en la llamada
 		if (TS[pos_funcion].parametros != TOPE_SUBPROG){
 			printf("Error semantico en la linea %d: La funcion %s necesita %d parámetros y se han proporcionado %d\n", num_linea, entrada_funcion.nombre.c_str(), entrada_funcion.parametros, TOPE_SUBPROG);
+	 		num_errores++;
 		} else {
 
 			// pasamos al primer parámetro
@@ -706,6 +719,7 @@ dtipo comprobarLlamadaFuncion(atributos atrib) {
 					string tipo_encontrado = tipoAstring(parametro_en_TS.tipoDato);
 
 					printf("Error semantico en la linea %d: El parámetro %d es de tipo %s pero se espera un tipo %s en la llamada a %s\n", num_linea , num_parametros + 1, tipo_encontrado.c_str(), tipo_esperado.c_str(), entrada_funcion.nombre.c_str());
+	 				num_errores++;
 				}
 
 				// seguimos al siguiente parametro
@@ -731,6 +745,7 @@ void TS_subprog_inserta(atributos atrib) {
 
 	if ( TOPE_SUBPROG == MAX_TS ) {
 		printf("ERROR: Tope de la pila alcanzado. Demasiadas entradas en la tabla de símbolos. Abortando compilación");
+	 	num_errores++;
 	} else {
 		TS_llamadas_subprog[TOPE_SUBPROG] = atrib;
 
@@ -760,6 +775,7 @@ void comprobarDevuelveSubprog(atributos atrib) {
 
 	if ( entrada == 0 ){
 		printf("Error semantico en la linea %d: No se puede devolver un valor en la seccion principal\n", num_linea);
+	 	num_errores++;
 	} else {
 		comprobarEsTipo(TS[entrada].tipoDato, atrib.tipo);
 	}
@@ -781,20 +797,24 @@ dtipo comprobarOpBinario(atributos izq, atributos operador, atributos der) {
 		if ( izq.lista ) {
 			if ( der.lista ) {
 				printf("Error semantico en la linea %d: No se puede aplicar el operador entre dos listas\n", num_linea);
+	 			num_errores++;
 			} if ( der.tipo != entero && der.tipo != real) {
 				printf("Error semantico en la linea %d: Operador solo aplicable a enteros o reales, encontrados tipos lista de %s y %s\n", num_linea, t_izq.c_str(), t_der.c_str());
+	 			num_errores++;
 			}
 
 		} else if ( der.lista ){
 
 			 if ( izq.tipo != entero && izq.tipo != real ) {
 				printf("Error semantico en la linea %d: Operador solo aplicable a enteros o reales, encontrados tipos %s y lista de %s\n", num_linea, t_izq.c_str(), t_der.c_str());
+	 			num_errores++;
 			}
 
 		} else {
 			// tiene que ser entero o real y del mismo tipo
 			if ( (izq.tipo != entero && izq.tipo != real) || (der.tipo != entero && der.tipo != real) ) {
 				printf("Error semantico en la linea %d: Operador solo aplicable a enteros o reales, encontrados tipos %s y %s\n", num_linea, t_izq.c_str(), t_der.c_str());
+	 			num_errores++;
 			} else {
 				// comprobamos que izq y der son del mismo tipo
 				comprobarEsTipo(izq.tipo, der.tipo);
@@ -808,6 +828,7 @@ dtipo comprobarOpBinario(atributos izq, atributos operador, atributos der) {
 	} else if ( operador.atrib >= 3 && operador.atrib <= 5 ) {
 		if ( izq.tipo != booleano && der.tipo != booleano ){
 			printf("Error semantico en la linea %d: Operador solo aplicable a booleanos, encontrados tipos %s y %s\n", num_linea, t_izq.c_str(), t_der.c_str());
+	 		num_errores++;
 		} else {
 			// comprobamos que izq y der son del mismo tipo
 			comprobarEsTipo(izq.tipo, der.tipo);
@@ -839,6 +860,7 @@ dtipo comprobarOpBinarioMenos(atributos izq, atributos der) {
 		string t_izq = tipoAstring(izq.tipo);
 		string t_der = tipoAstring(der.tipo);
 		printf("Error semantico en la linea %d: Operador solo aplicable a enteros o reales, encontrados tipos %s y %s\n", num_linea, t_izq.c_str(), t_der.c_str());
+	 	num_errores++;
 	} else {
 		// comprobamos que izq y der son del mismo tipo
 		comprobarEsTipo(izq.tipo, der.tipo);
@@ -852,6 +874,7 @@ dtipo comprobarEsEnteroReal (atributos atrib){
 	if ( atrib.tipo != entero && atrib.tipo != real){
 		string t = tipoAstring(atrib.tipo);
 		printf("Error semantico en la linea %d: Operador solo aplicable a enteros o reales, encontrado tipo %s\n", num_linea, t.c_str());
+	 	num_errores++;
 	}
 	return atrib.tipo;
 }
@@ -885,8 +908,10 @@ void comprobarAsignacionListas(atributos id, atributos exp){
 
 	if ( entrada_id.es_lista && !exp.lista ){
 		printf("Error semantico en la linea %d: Asignando tipo basico a una lista\n", num_linea);
+	 	num_errores++;
 	} else if ( !entrada_id.es_lista && exp.lista ){
 		printf("Error semantico en la linea %d: Asignando lista a un tipo basico\n", num_linea);
+	 	num_errores++;
 	}
 
 }
@@ -1108,6 +1133,7 @@ void incrementarTopeIC() {
 
 	if (TOPE_IC == MAX_IC) {
 		printf("ERROR: Tope de la pila alcanzado. Demasiadas entradas en la tabla de símbolos. Abortando compilación");
+	 	num_errores++;
 
 
 	} else {
