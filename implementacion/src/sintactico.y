@@ -25,8 +25,7 @@ string declaracionVar = "";
 string codigoPrincipal = "";
 string codigoFunc = "";
 
-int num_llaves = 0;
-int num_llaves_subprog = 0;
+string cabeceraTmp = "";
 
 int yylex();
 void yyerror(const char * mensaje);
@@ -117,8 +116,7 @@ void cerrarFicherosTraduccion();
 
 string generarCodigoVariable(atributos tipo, atributos identificador);
 
-void traducirDeclarSubprog(atributos tipo, atributos identificador);
-void introducirTabs(string & resultado);
+string traducirDeclarSubprog(atributos tipo, atributos identificador);
 
 string generarCodigoOPBinarios(atributos * izq, atributos operador, atributos der);
 string generarCodigoOPUnarios( atributos operador, atributos * der);
@@ -184,23 +182,19 @@ void incrementarTopeIC();
 %%
 
 programa					: PRINCIPAL {abrirFicherosTraduccion(); variables_principal = true; }
-				 			  bloque { if ( num_errores == 0 ) { fputs(codigoPrincipal.c_str(), principal); fputs(codigoFunc.c_str(), dec_fun);};  cerrarFicherosTraduccion(); };
+				 			  bloque { if ( num_errores != 0 ) { codigoPrincipal = "" ; codigoFunc = ""; }; fputs(codigoPrincipal.c_str(), principal); fputs(codigoFunc.c_str(), dec_fun);  cerrarFicherosTraduccion(); };
 
 
 bloque						: LLAVE_ABRE  {
 										TS_InsertaMARCA();
 										if ( !variables_principal ) {
 											$$.codigo += "{\n";
-											num_llaves++;
-										} else if (subprog != 0) {
-											$$.codigo += "{\n ";
-											num_llaves_subprog++;
 										};
 									}
 								  variables {
 								  		if ( variables_principal ) {
 											$$.codigo += declaracionVar;
-											$$.codigo += "\nint main() {  \n";
+											$$.codigo += "\n#include \"dec_fun.c\"\nint main() {  \n";
 											$$.codigo += codigoTmp;
 											variables_principal = false;
 										} else {
@@ -224,6 +218,7 @@ bloque						: LLAVE_ABRE  {
 										$$.codigo += $2.codigo + $4.codigo + $6.codigo +  "}\n";
 										$2.codigo = "";
 										$4.codigo = "";
+										$5.codigo = "";
 										$6.codigo = "";
 									};
 
@@ -275,9 +270,9 @@ declar_subprogramas         : declar_subprogramas declar_subp
                                 | ;
 
 declar_subp                 : cabecera_subp {subprog += 1; fichero_salida = dec_fun;}
-									 	bloque  {subprog -= 1; if(subprog == 0) { fichero_salida = principal; };} ;
+									 	bloque  {subprog -= 1; $$.codigo = ""; if(subprog == 0) { codigoFunc = $1.codigo + codigoFunc; fichero_salida = principal; } else { $$.codigo = $1.codigo + $3.codigo;  }; } ;
 
-cabecera_subp               : tipo ID PARENTESIS_ABRE parametros PARENTESIS_CIERRA {tipoSubprog = $1.tipo; traducirDeclarSubprog($1, $2); TS_InsertaSUBPROG($2);  }
+cabecera_subp               : tipo ID PARENTESIS_ABRE parametros PARENTESIS_CIERRA {tipoSubprog = $1.tipo; $$.codigo = traducirDeclarSubprog($1, $2); TS_InsertaSUBPROG($2);  }
 									 | error;
 
 tipo                        : TIPO_BASICO {listaTmp = false; tipoTmp = $1.tipo; $$.lexema = $1.lexema; }
@@ -939,7 +934,6 @@ void abrirFicherosTraduccion() {
 	fputs("#include <string.h>\n", principal);
 	fputs("#include <stdbool.h>\n", principal);
 	fputs("\n", principal);
-	fputs("#include \"dec_fun.c\"\n\n\n", principal);
 
 
 	fputs("#ifndef FUNCIONES\n", dec_fun);
@@ -991,24 +985,10 @@ string generarVariableTemporal() {
 	return resultado;
 }
 
-void introducirTabs(string & resultado) {
-	int num_tabs = 0;
-
-	if (subprog == 0){
-		num_tabs = num_llaves;
-	} else {
-		num_tabs = num_llaves_subprog;
-	}
-
-	for ( int i = 0; i < num_tabs; i++ ) {
-		resultado += "\t";
-	}
-}
 
 string generarCodigoVariable(atributos tipo, atributos identificador) {
 	string resultado = "";
 
-	introducirTabs(resultado);
 
 	resultado += tipoAtipoC(tipo.tipo);
 
@@ -1021,11 +1001,10 @@ string generarCodigoVariable(atributos tipo, atributos identificador) {
 }
 
 
-void traducirDeclarSubprog(atributos tipo, atributos identificador){
+string traducirDeclarSubprog(atributos tipo, atributos identificador){
 
 	string resultado = "\n";
 
-	introducirTabs(resultado);
 
 	resultado += tipoAtipoC(tipo.tipo);
 
@@ -1043,7 +1022,7 @@ void traducirDeclarSubprog(atributos tipo, atributos identificador){
 
 	resultado += ") ";
 
-	fputs(resultado.c_str(), dec_fun);
+	return resultado;
 
 }
 
