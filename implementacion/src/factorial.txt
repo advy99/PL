@@ -1,0 +1,22 @@
+principal() {
+
+	variable entero n, sol;
+
+	entero f( entero x ) {
+		si ( x == 1 ) {
+			devuelve 1;
+		} sino {
+			variable entero siguiente = x - 1;
+			devuelve  f(siguiente) * x;
+		}
+	}
+
+	salida 'Introduce un numero: ';
+	entrada n;
+
+	sol = f(n);
+
+	salida 'El factorial de ', n, ' es ', sol;
+
+
+}

@@ -27,6 +27,9 @@ string codigoFunc = "";
 
 string cabeceraTmp = "";
 
+string parametros_printf = "";
+string parametros_scanf = "";
+
 int yylex();
 void yyerror(const char * mensaje);
 
@@ -55,7 +58,6 @@ typedef struct {
 	bool lista = false;
 	dtipo tipo = desconocido;
 	bool es_constante = false;
-	bool es_hoja = true;
 	string codigo = "";
 } atributos;
 
@@ -121,15 +123,11 @@ string traducirDeclarSubprog(atributos tipo, atributos identificador);
 string generarCodigoOPBinarios(atributos * izq, atributos operador, atributos der);
 string generarCodigoOPUnarios( atributos operador, atributos * der);
 
-#define MAX_IC 500
 
-unsigned long TOPE_IC = 0;
-
-descriptorInstruccionesControl IC[MAX_IC];
 
 string generarCodigoIf(atributos expresion, atributos sentencia);
 string generarCodigoIfElse(atributos expresion, atributos sentencia, atributos sentencia_sino);
-void incrementarTopeIC();
+string tipoAprintf(dtipo tipo);
 
 %}
 %error-verbose
@@ -246,7 +244,7 @@ expresion                   : PARENTESIS_ABRE expresion PARENTESIS_CIERRA {$$.ti
                                 | expresion MENOS expresion {$$.tipo = comprobarOpBinarioMenos($1, $3); $$.lista = $1.lista || $3.lista;$$.lexema = generarCodigoOPBinarios(&$1, $2, $3); $$.codigo += $1.codigo; }
                                 | expresion MASMAS expresion ARROBA expresion {comprobarEsLista($1); comprobarEsTipo($1.tipo, $3.tipo); comprobarEsTipo(entero, $5.tipo); $$.tipo = $1.tipo; $$.lista = $1.lista; /*FALTA TRADUCIR LISTA*/ }
                                 | MENOS expresion { comprobarEsEnteroReal($2); $$.tipo = $2.tipo; $$.lexema = "-" + $2.lexema; $$.codigo += $2.codigo;}
-                                | llamada_subprograma {$$.tipo = $1.tipo; $$.codigo += $1.lexema + "\n"; }
+                                | llamada_subprograma {$$.tipo = $1.tipo; $$.codigo += ""; }
                                 | ID							{entradaTS ent = encontrarEntrada($1.lexema, true); $$.tipo = ent.tipoDato; $$.lista = ent.es_lista; $$.lexema = $1.lexema;}
                                 | constante {$$.tipo = $1.tipo; $$.lista = $1.lista; $$.lexema = $1.lexema;}
 										  | error ;
@@ -262,7 +260,7 @@ contenido_lista_preced      : contenido_lista_preced CONSTANTE_BASICA COMA {comp
                                 | CONSTANTE_BASICA COMA {$$.tipo = $1.tipo;};
 
 
-llamada_subprograma         : ID PARENTESIS_ABRE lista_variables_constantes PARENTESIS_CIERRA { $$.tipo =  comprobarLlamadaFuncion($1); $$.lexema = $1.lexema + "( " + $2.lexema + " )";} ;
+llamada_subprograma         : ID PARENTESIS_ABRE lista_variables_constantes PARENTESIS_CIERRA { $$.tipo =  comprobarLlamadaFuncion($1); $$.lexema = $1.lexema + "( " + $3.lexema + " )"; $$.codigo = ""; } ;
 
 
 
@@ -301,24 +299,24 @@ sentencia                   : bloque {$$.codigo = $1.codigo; }
                                 | ID AVANZAR PYC		{ comprobarEsLista($1); }
                                 | ID RETROCEDER PYC { comprobarEsLista($1); }
                                 | DOLAR ID PYC { comprobarEsLista($2); }
-                                | ENTRADA lista_variables PYC
-										  | llamada_subprograma PYC
-                                | SALIDA lista_expresiones_o_cadena PYC ;
+                                | ENTRADA lista_variables PYC { $$.codigo = "scanf(\" "  + $2.codigo + "\"," + parametros_scanf + ");\n"; parametros_scanf = ""; }
+										  | llamada_subprograma PYC { $$.codigo += $1.lexema + ";\n"; }
+                                | SALIDA lista_expresiones_o_cadena PYC { $$.codigo = "printf(\"" + $2.codigo + "\"" + parametros_printf + ");\n" ; parametros_printf = ""; } ;
 
-lista_variables             : lista_variables COMA ID {comprobarEsVarOParamametroFormal($3);}
-                                | ID {comprobarEsVarOParamametroFormal($1);} ;
+lista_variables             : lista_variables COMA ID {comprobarEsVarOParamametroFormal($3); parametros_scanf = ", &" + $3.lexema; $$.codigo = $1.codigo + tipoAprintf($3.tipo);}
+                                | ID {comprobarEsVarOParamametroFormal($1); parametros_scanf = "&" + $1.lexema; $$.codigo =  tipoAprintf($1.tipo) + $$.codigo; } ;
 
 
 lista_variables_constantes  : lista_variables_constantes COMA ID { TS_subprog_inserta($3); $$.lexema = $1.lexema + ", " + $3.lexema;}
                                 | lista_variables_constantes COMA constante { TS_subprog_inserta($3); $$.lexema = $1.lexema + ", " + $3.lexema;}
-                                | constante { TS_subprog_inserta($1); $$.lexema = $1.lexema;}
+                                | constante { TS_subprog_inserta($1); $$.lexema = $1.lexema; }
                                 | ID { TS_subprog_inserta($1); $$.lexema = $1.lexema;}
 										  | ;
 
-lista_expresiones_o_cadena  : lista_expresiones_o_cadena COMA CADENA
-									 	  | lista_expresiones_o_cadena COMA expresion
-                                | CADENA
-                                | expresion ;
+lista_expresiones_o_cadena  : lista_expresiones_o_cadena COMA CADENA {$$.codigo += $3.lexema ;}
+									 	  | lista_expresiones_o_cadena COMA ID {  $$.codigo = $1.codigo + tipoAprintf($3.tipo); parametros_printf += ", " + $3.lexema; }
+                                | CADENA 		{ $$.codigo = $1.lexema + $$.codigo; }
+                                | ID { $$.codigo =  tipoAprintf($1.tipo) + $$.codigo; parametros_printf = $1.lexema;  };
 
 %%
 
@@ -1108,16 +1106,21 @@ string generarCodigoIfElse(atributos expresion, atributos sentencia, atributos s
 
 }
 
-void incrementarTopeIC() {
 
-	if (TOPE_IC == MAX_IC) {
-		printf("ERROR: Tope de la pila alcanzado. Demasiadas entradas en la tabla de símbolos. Abortando compilación");
-	 	num_errores++;
+string tipoAprintf(dtipo tipo) {
+	string resultado;
 
-
-	} else {
-		TOPE_IC++;
+	if ( tipo == entero ) {
+		resultado = "%d";
+	} else if ( tipo == real ) {
+		resultado = "%f";
+	} else if ( tipo == booleano ) {
+		resultado = "%d";
+	} else if ( tipo == caracter ) {
+		resultado = "%c";
 	}
+
+	return resultado;
 
 }
 
