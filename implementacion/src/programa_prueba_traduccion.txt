@@ -1,38 +1,10 @@
 principal(){
 
-	variable entero a = 23 + (3 * 3);
-	variable booleano z, x;
+	variable entero a = 10;
 
-	entero funcionA( booleano re ) {
-		variable caracter p;
-
-		booleano funcionB() {
-			x = falso;
-		}
-
-		p = 'a';
-
-		si ( p == 'z' ) {
-			p = ' ';
-		}
-
-		devuelve 1 + 2;
-
+	mientras ( a > 0 ) {
+		salida a, '\n';
+		a = a - 1;
 	}
 
-	a = 23;
-
-	si ( a>0 ) {
-		variable real b = 0.3;
-
-		si ( b == 0.0 ) {
-			a = 4;
-		}
-
-		a = 0;
-
-
-	} sino {
-		a = 40;
-	}
 }

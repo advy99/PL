@@ -123,7 +123,8 @@ string traducirDeclarSubprog(atributos tipo, atributos identificador);
 string generarCodigoOPBinarios(atributos * izq, atributos operador, atributos der);
 string generarCodigoOPUnarios( atributos operador, atributos * der);
 
-
+string generarCodigoMientrasRepetir(atributos expresion, atributos sentencias);
+string generarCodigoRepetirMientras(atributos sentencias, atributos expresion);
 
 string generarCodigoIf(atributos expresion, atributos sentencia);
 string generarCodigoIfElse(atributos expresion, atributos sentencia, atributos sentencia_sino);
@@ -293,15 +294,15 @@ sentencia                   : bloque {$$.codigo = $1.codigo; }
                                 | ID ASIGNACION expresion PYC { comprobarEsTipo(encontrarEntrada($1.lexema, true).tipoDato, $3.tipo); comprobarAsignacionListas($1, $3);$$.codigo += $3.codigo + $1.lexema + " = " + $3.lexema + ";\n";}
                                 | SI PARENTESIS_ABRE expresion PARENTESIS_CIERRA sentencia {comprobarEsTipo(booleano, $3.tipo); $$.codigo += generarCodigoIf($3, $5);}
                                 | SI PARENTESIS_ABRE expresion PARENTESIS_CIERRA sentencia SINO sentencia {comprobarEsTipo(booleano, $3.tipo); $$.codigo += generarCodigoIfElse($3, $5, $7); }
-                                | MIENTRAS PARENTESIS_ABRE expresion PARENTESIS_CIERRA sentencia {comprobarEsTipo(booleano, $3.tipo); }
-                                | REPETIR sentencia MIENTRAS PARENTESIS_ABRE expresion PARENTESIS_CIERRA PYC {comprobarEsTipo(booleano, $5.tipo); }
+                                | MIENTRAS PARENTESIS_ABRE expresion PARENTESIS_CIERRA sentencia {comprobarEsTipo(booleano, $3.tipo); $$.codigo += generarCodigoMientrasRepetir($3, $5); }
+                                | REPETIR sentencia MIENTRAS PARENTESIS_ABRE expresion PARENTESIS_CIERRA PYC {comprobarEsTipo(booleano, $5.tipo); $$.codigo += generarCodigoRepetirMientras($2, $5); }
                                 | DEVUELVE expresion PYC {comprobarDevuelveSubprog($2); $$.codigo += $2.codigo + "\nreturn " + $2.lexema + ";\n "; }
                                 | ID AVANZAR PYC		{ comprobarEsLista($1); }
                                 | ID RETROCEDER PYC { comprobarEsLista($1); }
                                 | DOLAR ID PYC { comprobarEsLista($2); }
                                 | ENTRADA lista_variables PYC { $$.codigo = "scanf(\" "  + $2.codigo + "\"," + parametros_scanf + ");\n"; parametros_scanf = ""; }
 										  | llamada_subprograma PYC { $$.codigo += $1.lexema + ";\n"; }
-                                | SALIDA lista_expresiones_o_cadena PYC { $$.codigo = "printf(\"" + $2.codigo + "\"" + parametros_printf + ");\n" ; parametros_printf = ""; } ;
+                                | SALIDA lista_expresiones_o_cadena PYC { $$.codigo = "printf(\"" + $2.codigo + "\" " + parametros_printf + ");\n" ; parametros_printf = ""; } ;
 
 lista_variables             : lista_variables COMA ID {comprobarEsVarOParamametroFormal($3); parametros_scanf = ", &" + $3.lexema; $$.codigo = $1.codigo + tipoAprintf($3.tipo);}
                                 | ID {comprobarEsVarOParamametroFormal($1); parametros_scanf = "&" + $1.lexema; $$.codigo =  tipoAprintf($1.tipo) + $$.codigo; } ;
@@ -315,8 +316,8 @@ lista_variables_constantes  : lista_variables_constantes COMA ID { TS_subprog_in
 
 lista_expresiones_o_cadena  : lista_expresiones_o_cadena COMA CADENA {$$.codigo += $3.lexema ;}
 									 	  | lista_expresiones_o_cadena COMA ID {  $$.codigo = $1.codigo + tipoAprintf($3.tipo); parametros_printf += ", " + $3.lexema; }
-                                | CADENA 		{ $$.codigo = $1.lexema + $$.codigo; }
-                                | ID { $$.codigo =  tipoAprintf($1.tipo) + $$.codigo; parametros_printf = $1.lexema;  };
+                                | CADENA 		{ $$.codigo = $1.lexema; }
+                                | ID { $$.codigo =  tipoAprintf($1.tipo); parametros_printf = ", " +  $1.lexema;  };
 
 %%
 
@@ -1119,6 +1120,58 @@ string tipoAprintf(dtipo tipo) {
 	} else if ( tipo == caracter ) {
 		resultado = "%c";
 	}
+
+	return resultado;
+
+}
+
+string generarCodigoMientrasRepetir(atributos expresion, atributos sentencias) {
+
+	descriptorInstruccionesControl nueva_entrada;
+
+	nueva_entrada.etiquetaEntrada = generarEtiqueta();
+	nueva_entrada.etiquetaSalida = generarEtiqueta();
+
+	string resultado;
+
+	resultado += nueva_entrada.etiquetaEntrada + ": \n;\n";
+
+	resultado += expresion.codigo;
+
+	resultado += "if (!" + expresion.lexema + " ) goto " + nueva_entrada.etiquetaSalida + " ;\n";
+
+	resultado += sentencias.codigo;
+
+
+	resultado += "goto " + nueva_entrada.etiquetaEntrada + "; \n";
+
+	resultado += "\n" + nueva_entrada.etiquetaSalida + ": \n;\n";
+
+	return resultado;
+
+}
+
+
+string generarCodigoRepetirMientras(atributos sentencias, atributos expresion) {
+
+	descriptorInstruccionesControl nueva_entrada;
+
+	nueva_entrada.etiquetaEntrada = generarEtiqueta();
+	nueva_entrada.etiquetaSalida = generarEtiqueta();
+
+	string resultado;
+
+	resultado += nueva_entrada.etiquetaEntrada + ": \n;\n";
+
+	resultado += sentencias.codigo;
+
+	resultado += expresion.codigo;
+
+	resultado += "if (!" + expresion.lexema + " ) goto " + nueva_entrada.etiquetaSalida + " ;\n";
+
+	resultado += "goto " + nueva_entrada.etiquetaEntrada + "; \n";
+
+	resultado += "\n" + nueva_entrada.etiquetaSalida + ": \n;\n";
 
 	return resultado;
 
