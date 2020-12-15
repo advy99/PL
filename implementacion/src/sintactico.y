@@ -6,6 +6,8 @@
 
 using namespace std;
 
+int num_errores;
+
 FILE * fichero_salida;
 
 FILE * principal = NULL;
@@ -23,8 +25,10 @@ string declaracionVar = "";
 string codigoPrincipal = "";
 string codigoFunc = "";
 
-int num_llaves = 0;
-int num_llaves_subprog = 0;
+string cabeceraTmp = "";
+
+string parametros_printf = "";
+string parametros_scanf = "";
 
 int yylex();
 void yyerror(const char * mensaje);
@@ -54,7 +58,6 @@ typedef struct {
 	bool lista = false;
 	dtipo tipo = desconocido;
 	bool es_constante = false;
-	bool es_hoja = true;
 	string codigo = "";
 } atributos;
 
@@ -115,21 +118,16 @@ void cerrarFicherosTraduccion();
 
 string generarCodigoVariable(atributos tipo, atributos identificador);
 
-void traducirDeclarSubprog(atributos tipo, atributos identificador);
-void introducirTabs(string & resultado);
+string traducirDeclarSubprog(atributos tipo, atributos identificador);
 
 string generarCodigoOPBinarios(atributos * izq, atributos operador, atributos der);
 string generarCodigoOPUnarios( atributos operador, atributos * der);
 
-#define MAX_IC 500
 
-unsigned long TOPE_IC = 0;
-
-descriptorInstruccionesControl IC[MAX_IC];
 
 string generarCodigoIf(atributos expresion, atributos sentencia);
 string generarCodigoIfElse(atributos expresion, atributos sentencia, atributos sentencia_sino);
-void incrementarTopeIC();
+string tipoAprintf(dtipo tipo);
 
 %}
 %error-verbose
@@ -182,23 +180,19 @@ void incrementarTopeIC();
 %%
 
 programa					: PRINCIPAL {abrirFicherosTraduccion(); variables_principal = true; }
-				 			  bloque { fputs(codigoPrincipal.c_str(), principal); fputs(codigoFunc.c_str(), dec_fun);  cerrarFicherosTraduccion(); };
+				 			  bloque { if ( num_errores != 0 ) { codigoPrincipal = "" ; codigoFunc = ""; }; fputs(codigoPrincipal.c_str(), principal); fputs(codigoFunc.c_str(), dec_fun);  cerrarFicherosTraduccion(); };
 
 
 bloque						: LLAVE_ABRE  {
 										TS_InsertaMARCA();
 										if ( !variables_principal ) {
 											$$.codigo += "{\n";
-											num_llaves++;
-										} else if (subprog != 0) {
-											$$.codigo += "{\n ";
-											num_llaves_subprog++;
 										};
 									}
 								  variables {
 								  		if ( variables_principal ) {
 											$$.codigo += declaracionVar;
-											$$.codigo += "\nint main() {  \n";
+											$$.codigo += "\n#include \"dec_fun.c\"\nint main() {  \n";
 											$$.codigo += codigoTmp;
 											variables_principal = false;
 										} else {
@@ -222,11 +216,12 @@ bloque						: LLAVE_ABRE  {
 										$$.codigo += $2.codigo + $4.codigo + $6.codigo +  "}\n";
 										$2.codigo = "";
 										$4.codigo = "";
+										$5.codigo = "";
 										$6.codigo = "";
 									};
 
 
-variables					: declar_variables {$$.codigo = $1.codigo; printf("%s", $$.codigo.c_str());}
+variables					: declar_variables {$$.codigo = $1.codigo; }
 				 				| ;
 
 declar_variables			: declar_variables cuerpo_declar_var {$$.codigo += $2.codigo; }
@@ -249,7 +244,7 @@ expresion                   : PARENTESIS_ABRE expresion PARENTESIS_CIERRA {$$.ti
                                 | expresion MENOS expresion {$$.tipo = comprobarOpBinarioMenos($1, $3); $$.lista = $1.lista || $3.lista;$$.lexema = generarCodigoOPBinarios(&$1, $2, $3); $$.codigo += $1.codigo; }
                                 | expresion MASMAS expresion ARROBA expresion {comprobarEsLista($1); comprobarEsTipo($1.tipo, $3.tipo); comprobarEsTipo(entero, $5.tipo); $$.tipo = $1.tipo; $$.lista = $1.lista; /*FALTA TRADUCIR LISTA*/ }
                                 | MENOS expresion { comprobarEsEnteroReal($2); $$.tipo = $2.tipo; $$.lexema = "-" + $2.lexema; $$.codigo += $2.codigo;}
-                                | llamada_subprograma {$$.tipo = $1.tipo; $$.codigo += $1.lexema + "\n"; }
+                                | llamada_subprograma {$$.tipo = $1.tipo; $$.codigo += ""; }
                                 | ID							{entradaTS ent = encontrarEntrada($1.lexema, true); $$.tipo = ent.tipoDato; $$.lista = ent.es_lista; $$.lexema = $1.lexema;}
                                 | constante {$$.tipo = $1.tipo; $$.lista = $1.lista; $$.lexema = $1.lexema;}
 										  | error ;
@@ -265,7 +260,7 @@ contenido_lista_preced      : contenido_lista_preced CONSTANTE_BASICA COMA {comp
                                 | CONSTANTE_BASICA COMA {$$.tipo = $1.tipo;};
 
 
-llamada_subprograma         : ID PARENTESIS_ABRE lista_variables_constantes PARENTESIS_CIERRA { $$.tipo =  comprobarLlamadaFuncion($1); $$.lexema = $1.lexema + "( " + $2.lexema + " )";} ;
+llamada_subprograma         : ID PARENTESIS_ABRE lista_variables_constantes PARENTESIS_CIERRA { $$.tipo =  comprobarLlamadaFuncion($1); $$.lexema = $1.lexema + "( " + $3.lexema + " )"; $$.codigo = ""; } ;
 
 
 
@@ -273,9 +268,9 @@ declar_subprogramas         : declar_subprogramas declar_subp
                                 | ;
 
 declar_subp                 : cabecera_subp {subprog += 1; fichero_salida = dec_fun;}
-									 	bloque  {subprog -= 1; if(subprog == 0) { fichero_salida = principal; };} ;
+									 	bloque  {subprog -= 1; $$.codigo = ""; if(subprog == 0) { codigoFunc = $1.codigo + codigoFunc; fichero_salida = principal; } else { $$.codigo = $1.codigo + $3.codigo;  }; } ;
 
-cabecera_subp               : tipo ID PARENTESIS_ABRE parametros PARENTESIS_CIERRA {tipoSubprog = $1.tipo; traducirDeclarSubprog($1, $2); TS_InsertaSUBPROG($2);  }
+cabecera_subp               : tipo ID PARENTESIS_ABRE parametros PARENTESIS_CIERRA {tipoSubprog = $1.tipo; $$.codigo = traducirDeclarSubprog($1, $2); TS_InsertaSUBPROG($2);  }
 									 | error;
 
 tipo                        : TIPO_BASICO {listaTmp = false; tipoTmp = $1.tipo; $$.lexema = $1.lexema; }
@@ -304,24 +299,24 @@ sentencia                   : bloque {$$.codigo = $1.codigo; }
                                 | ID AVANZAR PYC		{ comprobarEsLista($1); }
                                 | ID RETROCEDER PYC { comprobarEsLista($1); }
                                 | DOLAR ID PYC { comprobarEsLista($2); }
-                                | ENTRADA lista_variables PYC
-										  | llamada_subprograma PYC
-                                | SALIDA lista_expresiones_o_cadena PYC ;
+                                | ENTRADA lista_variables PYC { $$.codigo = "scanf(\" "  + $2.codigo + "\"," + parametros_scanf + ");\n"; parametros_scanf = ""; }
+										  | llamada_subprograma PYC { $$.codigo += $1.lexema + ";\n"; }
+                                | SALIDA lista_expresiones_o_cadena PYC { $$.codigo = "printf(\"" + $2.codigo + "\"" + parametros_printf + ");\n" ; parametros_printf = ""; } ;
 
-lista_variables             : lista_variables COMA ID {comprobarEsVarOParamametroFormal($3);}
-                                | ID {comprobarEsVarOParamametroFormal($1);} ;
+lista_variables             : lista_variables COMA ID {comprobarEsVarOParamametroFormal($3); parametros_scanf = ", &" + $3.lexema; $$.codigo = $1.codigo + tipoAprintf($3.tipo);}
+                                | ID {comprobarEsVarOParamametroFormal($1); parametros_scanf = "&" + $1.lexema; $$.codigo =  tipoAprintf($1.tipo) + $$.codigo; } ;
 
 
 lista_variables_constantes  : lista_variables_constantes COMA ID { TS_subprog_inserta($3); $$.lexema = $1.lexema + ", " + $3.lexema;}
                                 | lista_variables_constantes COMA constante { TS_subprog_inserta($3); $$.lexema = $1.lexema + ", " + $3.lexema;}
-                                | constante { TS_subprog_inserta($1); $$.lexema = $1.lexema;}
+                                | constante { TS_subprog_inserta($1); $$.lexema = $1.lexema; }
                                 | ID { TS_subprog_inserta($1); $$.lexema = $1.lexema;}
 										  | ;
 
-lista_expresiones_o_cadena  : lista_expresiones_o_cadena COMA CADENA
-									 	  | lista_expresiones_o_cadena COMA expresion
-                                | CADENA
-                                | expresion ;
+lista_expresiones_o_cadena  : lista_expresiones_o_cadena COMA CADENA {$$.codigo += $3.lexema ;}
+									 	  | lista_expresiones_o_cadena COMA ID {  $$.codigo = $1.codigo + tipoAprintf($3.tipo); parametros_printf += ", " + $3.lexema; }
+                                | CADENA 		{ $$.codigo = $1.lexema + $$.codigo; }
+                                | ID { $$.codigo =  tipoAprintf($1.tipo) + $$.codigo; parametros_printf = $1.lexema;  };
 
 %%
 
@@ -333,6 +328,7 @@ lista_expresiones_o_cadena  : lista_expresiones_o_cadena COMA CADENA
 void yyerror(const char *msg)
 {
     fprintf(stderr,"[Linea %d]: %s\n", num_linea, msg) ;
+	 num_errores++;
 }
 
 
@@ -384,6 +380,7 @@ void TS_InsertaIDENT(atributos atributo){
 		// si se ha declarado antes, mostramos un error
 		// como los parametros de funciones son añadidos tras la marca de bloque, se tendrá en cuenta sus redeclaraciones
 		printf("Error semantico en la linea %d: Redeclaración de '%s'\n", num_linea, atributo.lexema.c_str());
+	 	num_errores++;
 	}
 
 
@@ -469,6 +466,7 @@ void TS_InsertaSUBPROG(atributos atributo){
 		// si lo ha encontrado en la tabla de simbolos, imprime un error por la
 		// redefinicion
 		printf("\nError semantico en la linea %d. Redefinición de '%s'\n", num_linea, atributo.lexema.c_str());
+	 	num_errores++;
 	}
 
 
@@ -526,6 +524,7 @@ void TS_InsertaPARAMF(atributos atributo){
 	} else {
 		// si existe lo añadimos
 		printf("Error semantico en la linea %d: El parámetro %s ya existe\n", num_linea, atributo.lexema.c_str());
+	 	num_errores++;
 	}
 
 }
@@ -551,6 +550,7 @@ entradaTS encontrarEntrada(string nombre, bool quiero_que_este) {
 		entrada = TS[pos_actual];
 	} else if (quiero_que_este) {
 		printf("\nError semantico en la linea %d. Identificador '%s' no declarado\n", num_linea, nombre.c_str());
+	 	num_errores++;
 	}
 
 	return entrada;
@@ -564,6 +564,7 @@ int incrementaTOPE(){
 
 	if (TOPE == MAX_TS) {
 		printf("ERROR: Tope de la pila alcanzado. Demasiadas entradas en la tabla de símbolos. Abortando compilación");
+	 	num_errores++;
 
 		salida = 0;
 
@@ -603,6 +604,7 @@ void comprobarEsVarOParamametroFormal(atributos atrib) {
 	// y si es desconocido, no asignado, o una funcion, damos el error
 	if ( t == desconocido || t == no_asignado || esFuncion(atrib.lexema) ){
 		printf("Error semantico en la linea %d: Esperado variables, parametro formal o constante.\n", num_linea);
+	 	num_errores++;
 	}
 }
 
@@ -613,6 +615,7 @@ void comprobarEsTipo(dtipo tipo, dtipo tipo2){
 	if (tipo != tipo2) {
 
 		printf("Error semantico en la linea %d: Esperado tipo %s, encontrado tipo %s\n", num_linea, tipoAstring(tipo).c_str(), tipoAstring(tipo2).c_str());
+	 	num_errores++;
 	}
 }
 
@@ -642,6 +645,7 @@ void comprobarEsLista(atributos atrib) {
 
 	if ( !entrada.es_lista ) {
 		printf("Error semantico en la linea %d: Operación solo aplicable a una lista.\n", num_linea);
+	 	num_errores++;
 	}
 
 }
@@ -658,6 +662,7 @@ dtipo comprobarLlamadaFuncion(atributos atrib) {
 	// si existe la entrada, y no es una funcion, sacamos un error de llamada
 	if ( existe != desconocido && entrada_funcion.entrada != funcion ){
 		printf("Error semantico en la linea %d: %s no es una funcion\n", num_linea, entrada_funcion.nombre.c_str());
+	 	num_errores++;
 
 	} else if ( existe != desconocido ) {
 
@@ -678,6 +683,7 @@ dtipo comprobarLlamadaFuncion(atributos atrib) {
 		// de parametros dados en la llamada
 		if (TS[pos_funcion].parametros != TOPE_SUBPROG){
 			printf("Error semantico en la linea %d: La funcion %s necesita %d parámetros y se han proporcionado %d\n", num_linea, entrada_funcion.nombre.c_str(), entrada_funcion.parametros, TOPE_SUBPROG);
+	 		num_errores++;
 		} else {
 
 			// pasamos al primer parámetro
@@ -706,6 +712,7 @@ dtipo comprobarLlamadaFuncion(atributos atrib) {
 					string tipo_encontrado = tipoAstring(parametro_en_TS.tipoDato);
 
 					printf("Error semantico en la linea %d: El parámetro %d es de tipo %s pero se espera un tipo %s en la llamada a %s\n", num_linea , num_parametros + 1, tipo_encontrado.c_str(), tipo_esperado.c_str(), entrada_funcion.nombre.c_str());
+	 				num_errores++;
 				}
 
 				// seguimos al siguiente parametro
@@ -731,6 +738,7 @@ void TS_subprog_inserta(atributos atrib) {
 
 	if ( TOPE_SUBPROG == MAX_TS ) {
 		printf("ERROR: Tope de la pila alcanzado. Demasiadas entradas en la tabla de símbolos. Abortando compilación");
+	 	num_errores++;
 	} else {
 		TS_llamadas_subprog[TOPE_SUBPROG] = atrib;
 
@@ -760,6 +768,7 @@ void comprobarDevuelveSubprog(atributos atrib) {
 
 	if ( entrada == 0 ){
 		printf("Error semantico en la linea %d: No se puede devolver un valor en la seccion principal\n", num_linea);
+	 	num_errores++;
 	} else {
 		comprobarEsTipo(TS[entrada].tipoDato, atrib.tipo);
 	}
@@ -781,20 +790,24 @@ dtipo comprobarOpBinario(atributos izq, atributos operador, atributos der) {
 		if ( izq.lista ) {
 			if ( der.lista ) {
 				printf("Error semantico en la linea %d: No se puede aplicar el operador entre dos listas\n", num_linea);
+	 			num_errores++;
 			} if ( der.tipo != entero && der.tipo != real) {
 				printf("Error semantico en la linea %d: Operador solo aplicable a enteros o reales, encontrados tipos lista de %s y %s\n", num_linea, t_izq.c_str(), t_der.c_str());
+	 			num_errores++;
 			}
 
 		} else if ( der.lista ){
 
 			 if ( izq.tipo != entero && izq.tipo != real ) {
 				printf("Error semantico en la linea %d: Operador solo aplicable a enteros o reales, encontrados tipos %s y lista de %s\n", num_linea, t_izq.c_str(), t_der.c_str());
+	 			num_errores++;
 			}
 
 		} else {
 			// tiene que ser entero o real y del mismo tipo
 			if ( (izq.tipo != entero && izq.tipo != real) || (der.tipo != entero && der.tipo != real) ) {
 				printf("Error semantico en la linea %d: Operador solo aplicable a enteros o reales, encontrados tipos %s y %s\n", num_linea, t_izq.c_str(), t_der.c_str());
+	 			num_errores++;
 			} else {
 				// comprobamos que izq y der son del mismo tipo
 				comprobarEsTipo(izq.tipo, der.tipo);
@@ -808,6 +821,7 @@ dtipo comprobarOpBinario(atributos izq, atributos operador, atributos der) {
 	} else if ( operador.atrib >= 3 && operador.atrib <= 5 ) {
 		if ( izq.tipo != booleano && der.tipo != booleano ){
 			printf("Error semantico en la linea %d: Operador solo aplicable a booleanos, encontrados tipos %s y %s\n", num_linea, t_izq.c_str(), t_der.c_str());
+	 		num_errores++;
 		} else {
 			// comprobamos que izq y der son del mismo tipo
 			comprobarEsTipo(izq.tipo, der.tipo);
@@ -839,6 +853,7 @@ dtipo comprobarOpBinarioMenos(atributos izq, atributos der) {
 		string t_izq = tipoAstring(izq.tipo);
 		string t_der = tipoAstring(der.tipo);
 		printf("Error semantico en la linea %d: Operador solo aplicable a enteros o reales, encontrados tipos %s y %s\n", num_linea, t_izq.c_str(), t_der.c_str());
+	 	num_errores++;
 	} else {
 		// comprobamos que izq y der son del mismo tipo
 		comprobarEsTipo(izq.tipo, der.tipo);
@@ -852,6 +867,7 @@ dtipo comprobarEsEnteroReal (atributos atrib){
 	if ( atrib.tipo != entero && atrib.tipo != real){
 		string t = tipoAstring(atrib.tipo);
 		printf("Error semantico en la linea %d: Operador solo aplicable a enteros o reales, encontrado tipo %s\n", num_linea, t.c_str());
+	 	num_errores++;
 	}
 	return atrib.tipo;
 }
@@ -885,8 +901,10 @@ void comprobarAsignacionListas(atributos id, atributos exp){
 
 	if ( entrada_id.es_lista && !exp.lista ){
 		printf("Error semantico en la linea %d: Asignando tipo basico a una lista\n", num_linea);
+	 	num_errores++;
 	} else if ( !entrada_id.es_lista && exp.lista ){
 		printf("Error semantico en la linea %d: Asignando lista a un tipo basico\n", num_linea);
+	 	num_errores++;
 	}
 
 }
@@ -914,7 +932,6 @@ void abrirFicherosTraduccion() {
 	fputs("#include <string.h>\n", principal);
 	fputs("#include <stdbool.h>\n", principal);
 	fputs("\n", principal);
-	fputs("#include \"dec_fun.c\"\n\n\n", principal);
 
 
 	fputs("#ifndef FUNCIONES\n", dec_fun);
@@ -966,24 +983,10 @@ string generarVariableTemporal() {
 	return resultado;
 }
 
-void introducirTabs(string & resultado) {
-	int num_tabs = 0;
-
-	if (subprog == 0){
-		num_tabs = num_llaves;
-	} else {
-		num_tabs = num_llaves_subprog;
-	}
-
-	for ( int i = 0; i < num_tabs; i++ ) {
-		resultado += "\t";
-	}
-}
 
 string generarCodigoVariable(atributos tipo, atributos identificador) {
 	string resultado = "";
 
-	introducirTabs(resultado);
 
 	resultado += tipoAtipoC(tipo.tipo);
 
@@ -996,11 +999,10 @@ string generarCodigoVariable(atributos tipo, atributos identificador) {
 }
 
 
-void traducirDeclarSubprog(atributos tipo, atributos identificador){
+string traducirDeclarSubprog(atributos tipo, atributos identificador){
 
 	string resultado = "\n";
 
-	introducirTabs(resultado);
 
 	resultado += tipoAtipoC(tipo.tipo);
 
@@ -1018,7 +1020,7 @@ void traducirDeclarSubprog(atributos tipo, atributos identificador){
 
 	resultado += ") ";
 
-	fputs(resultado.c_str(), dec_fun);
+	return resultado;
 
 }
 
@@ -1104,15 +1106,21 @@ string generarCodigoIfElse(atributos expresion, atributos sentencia, atributos s
 
 }
 
-void incrementarTopeIC() {
 
-	if (TOPE_IC == MAX_IC) {
-		printf("ERROR: Tope de la pila alcanzado. Demasiadas entradas en la tabla de símbolos. Abortando compilación");
+string tipoAprintf(dtipo tipo) {
+	string resultado;
 
-
-	} else {
-		TOPE_IC++;
+	if ( tipo == entero ) {
+		resultado = "%d";
+	} else if ( tipo == real ) {
+		resultado = "%f";
+	} else if ( tipo == booleano ) {
+		resultado = "%d";
+	} else if ( tipo == caracter ) {
+		resultado = "%c";
 	}
+
+	return resultado;
 
 }
 

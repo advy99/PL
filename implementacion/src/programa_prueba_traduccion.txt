@@ -6,6 +6,10 @@ principal(){
 	entero funcionA( booleano re ) {
 		variable caracter p;
 
+		booleano funcionB() {
+			x = falso;
+		}
+
 		p = 'a';
 
 		si ( p == 'z' ) {
