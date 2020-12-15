@@ -1,0 +1,46 @@
+principal() {
+	variable entero n, curr = 2, ultim = 0, cuenta = 0, primero = 1;
+
+	salida 'Introduce un numero: ';
+	entrada n;
+
+	salida n, ' == ';
+	curr = 2;
+	mientras ( curr <= n ) {
+		variable entero d = n/curr;
+
+		si ( d * curr == n ) {
+			si ( curr != ultim ) {
+				ultim = curr;
+				cuenta = 1;
+			} sino
+				cuenta = cuenta + 1;
+
+			n = n/curr;
+
+		} sino {
+			si ( cuenta > 0 ) {
+				si ( primero == 0 )
+					salida ' * ';
+				primero = 0;
+				salida curr;
+				si ( cuenta > 1 ) salida ' ^ ', cuenta;
+			}
+
+			curr = curr + 1;
+			cuenta = 0;
+		}
+
+	}
+
+	si ( cuenta > 0 ) {
+		si ( primero == 0 )
+			salida ' * ';
+		primero = 0;
+		salida curr;
+		si ( cuenta > 1 ) salida cuenta;
+	}
+
+	salida '\n';
+
+}

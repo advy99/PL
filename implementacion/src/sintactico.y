@@ -233,7 +233,7 @@ cuerpo_declar_var			: VAR tipo ident_variables PYC {
 									};
 
 ident_variables             : ident_variables COMA ID { TS_InsertaIDENT($3); $$.lexema = $1.lexema + ", " + $3.lexema; }
-                                | ident_variables COMA ID ASIGNACION expresion { TS_InsertaIDENT($3); $$.lexema = $1.lexema + ", " + $3.lexema; codigoTmp += $5.codigo + "\n" +  $1.lexema + " = " + $5.lexema + ";\n";  }
+                                | ident_variables COMA ID ASIGNACION expresion { TS_InsertaIDENT($3); $$.lexema = $1.lexema + ", " + $3.lexema; codigoTmp += $5.codigo + "\n" +  $3.lexema + " = " + $5.lexema + ";\n";  }
                                 | ID { TS_InsertaIDENT($1); $$.lexema = $1.lexema; }
 										  | ID ASIGNACION expresion {  TS_InsertaIDENT($1); comprobarEsTipo($1.tipo, $3.tipo); comprobarAsignacionListas($1, $3); $$.lexema = $1.lexema; codigoTmp += $3.codigo + "\n" + $1.lexema + " = " + $3.lexema + ";\n"; }
 										  | error ;
@@ -1036,7 +1036,7 @@ string generarCodigoOPBinarios(atributos * izq, atributos operador, atributos de
 		tipo_resultado = "bool ";
 	}
 
-	izq->codigo += der.codigo;
+	izq->codigo = der.codigo;
 	izq->codigo += tipo_resultado + " " + resultado + "; \n";
 	izq->codigo += resultado + " = " + izq->lexema + " " + operador.lexema + " " + der.lexema + " ; \n";
 
