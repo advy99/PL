@@ -4,6 +4,7 @@ principal() {
 	salida 'Introduce un numero ';
 	entrada n;
 
+	salida n, ' == ';
 	curr = 2;
 
 	mientras ( curr <= n ) {
