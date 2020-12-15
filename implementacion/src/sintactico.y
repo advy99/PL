@@ -1036,7 +1036,7 @@ string generarCodigoOPBinarios(atributos * izq, atributos operador, atributos de
 		tipo_resultado = "bool ";
 	}
 
-	izq->codigo += der.codigo;
+	izq->codigo = der.codigo;
 	izq->codigo += tipo_resultado + " " + resultado + "; \n";
 	izq->codigo += resultado + " = " + izq->lexema + " " + operador.lexema + " " + der.lexema + " ; \n";
 
