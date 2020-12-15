@@ -38,7 +38,7 @@ principal() {
 			salida ' * ';
 		primero = 0;
 		salida curr;
-		si ( cuenta > 1 ) salida cuenta;
+		si ( cuenta > 1 ) salida ' ^ ', cuenta;
 	}
 
 	salida '\n';

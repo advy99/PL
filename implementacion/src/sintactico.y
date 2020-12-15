@@ -12,7 +12,6 @@ FILE * fichero_salida;
 
 FILE * principal = NULL;
 FILE * dec_fun = NULL;
-FILE * dec_data = NULL;
 
 int num_etiqueta = 0;
 int num_var_temporal = 0;
@@ -923,7 +922,6 @@ void abrirFicherosTraduccion() {
 	// abrimos la cabecera
 	principal = fopen("salida/principal.c", "w");
 	dec_fun = fopen("salida/dec_fun.c", "w");
-	dec_data = fopen("salida/dec_data.c", "w");
 
 	fichero_salida = principal;
 
@@ -932,6 +930,7 @@ void abrirFicherosTraduccion() {
 	fputs("#include <stdlib.h>\n", principal);
 	fputs("#include <string.h>\n", principal);
 	fputs("#include <stdbool.h>\n", principal);
+	fputs("#include \"dec_data.c\"\n", principal);
 	fputs("\n", principal);
 
 
@@ -944,11 +943,9 @@ void abrirFicherosTraduccion() {
 void cerrarFicherosTraduccion() {
 	fputs("\n", principal);
 	fputs("#endif\n", dec_fun);
-	fputs("\n", dec_data);
 
 	fclose(principal);
 	fclose(dec_fun);
-	fclose(dec_data);
 }
 
 string tipoAtipoC( dtipo tipo ) {
