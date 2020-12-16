@@ -986,7 +986,11 @@ string generarCodigoVariable(atributos tipo, atributos identificador) {
 	string resultado = "";
 
 
-	resultado += tipoAtipoC(tipo.tipo);
+	if ( listaTmp ) {
+		resultado += "Lista ";
+	} else {
+		resultado += tipoAtipoC(tipo.tipo);
+	}
 
 
 	resultado += identificador.lexema;
