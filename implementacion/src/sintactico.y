@@ -129,6 +129,9 @@ string generarCodigoIf(atributos expresion, atributos sentencia);
 string generarCodigoIfElse(atributos expresion, atributos sentencia, atributos sentencia_sino);
 string tipoAprintf(dtipo tipo);
 
+string generarEtiqueta();
+
+
 %}
 %error-verbose
 
@@ -239,17 +242,17 @@ ident_variables             : ident_variables COMA ID { TS_InsertaIDENT($3); $$.
 
 
 expresion                   : PARENTESIS_ABRE expresion PARENTESIS_CIERRA {$$.tipo = $2.tipo; $$.lista = $2.lista; $$.lexema = "( " + $2.lexema + " )"; $$.codigo += $2.codigo;}
-                                | OP_EXC_UN expresion {$$.tipo = comprobarOpUnarios($2); $$.lista = false; $$.lexema = generarCodigoOPUnarios($1, &$2); $$.codigo += $2.codigo;}
+                                | OP_EXC_UN expresion {$$.tipo = comprobarOpUnarios($2); $$.lista = false; $$.lexema = generarCodigoOPUnarios($1, &$2); $$.codigo += $2.codigo; $2.codigo = "";}
                                 | expresion OP_EXC_BIN expresion	{$$.tipo = comprobarOpBinario($1, $2, $3); $$.lista = $1.lista || $3.lista; $$.lexema = generarCodigoOPBinarios(&$1, $2, $3); $$.codigo += $1.codigo;}
                                 | expresion MENOS expresion {$$.tipo = comprobarOpBinarioMenos($1, $3); $$.lista = $1.lista || $3.lista;$$.lexema = generarCodigoOPBinarios(&$1, $2, $3); $$.codigo += $1.codigo; }
-                                | expresion MASMAS expresion ARROBA expresion {comprobarEsLista($1); comprobarEsTipo($1.tipo, $3.tipo); comprobarEsTipo(entero, $5.tipo); $$.tipo = $1.tipo; $$.lista = $1.lista; /*FALTA TRADUCIR LISTA*/ }
+                                | expresion MASMAS expresion ARROBA expresion {comprobarEsLista($1); comprobarEsTipo($1.tipo, $3.tipo); comprobarEsTipo(entero, $5.tipo); $$.tipo = $1.tipo; $$.lista = $1.lista;$$.lexema = generarEtiqueta();$$.codigo += $1.codigo + $3.codigo + $5.codigo +  "\nLista " + $$.lexema + " = inserta(&" + $1.lexema + ", " + $3.lexema + ", " + $5.lexema + ");\n"; }
                                 | MENOS expresion { comprobarEsEnteroReal($2); $$.tipo = $2.tipo; $$.lexema = "-" + $2.lexema; $$.codigo += $2.codigo;}
                                 | llamada_subprograma {$$.tipo = $1.tipo; $$.codigo += ""; }
                                 | ID							{entradaTS ent = encontrarEntrada($1.lexema, true); $$.tipo = ent.tipoDato; $$.lista = ent.es_lista; $$.lexema = $1.lexema;}
                                 | constante {$$.tipo = $1.tipo; $$.lista = $1.lista; $$.lexema = $1.lexema;}
 										  | error ;
 
-constante                   : CONSTANTE_BASICA {tipoTmp = $1.tipo; $$.tipo = $1.tipo; $$.lista = false; $$.lexema = $1.lexema;}
+constante                   : CONSTANTE_BASICA {tipoTmp = $1.tipo; $$.tipo = $1.tipo; $$.lista = false; $$.lexema = $1.lexema; $$.codigo = "";}
                                 | CORCHETE_ABRE contenido_lista CORCHETE_CIERRA {tipoTmp = $2.tipo; $$.tipo = $2.tipo; $$.lista = true;} ;
 
 contenido_lista             : contenido_lista_preced CONSTANTE_BASICA {comprobarEsTipo($2.tipo, $1.tipo); $$.tipo = $1.tipo;}
@@ -296,9 +299,9 @@ sentencia                   : bloque {$$.codigo = $1.codigo; }
                                 | MIENTRAS PARENTESIS_ABRE expresion PARENTESIS_CIERRA sentencia {comprobarEsTipo(booleano, $3.tipo); $$.codigo += generarCodigoMientrasRepetir($3, $5); }
                                 | REPETIR sentencia MIENTRAS PARENTESIS_ABRE expresion PARENTESIS_CIERRA PYC {comprobarEsTipo(booleano, $5.tipo); $$.codigo += generarCodigoRepetirMientras($2, $5); }
                                 | DEVUELVE expresion PYC {comprobarDevuelveSubprog($2); $$.codigo += $2.codigo + "\nreturn " + $2.lexema + ";\n "; }
-                                | ID AVANZAR PYC		{ comprobarEsLista($1); }
-                                | ID RETROCEDER PYC { comprobarEsLista($1); }
-                                | DOLAR ID PYC { comprobarEsLista($2); }
+                                | ID AVANZAR PYC		{ comprobarEsLista($1); $$.codigo += "avanzarLista(&" + $2.lexema + "); \n"; }
+                                | ID RETROCEDER PYC { comprobarEsLista($1); $$.codigo += "retrocederLista(&" + $2.lexema + "); \n"; }
+                                | DOLAR ID PYC { comprobarEsLista($2); $$.codigo += "irAPosicion(&" + $2.lexema + ", 0); \n"; }
                                 | ENTRADA lista_variables PYC { $$.codigo = "scanf(\" "  + $2.codigo + "\"," + parametros_scanf + ");\n"; parametros_scanf = ""; }
 										  | llamada_subprograma PYC { $$.codigo += $1.lexema + ";\n"; }
                                 | SALIDA lista_expresiones_o_cadena PYC { $$.codigo = "printf(\"" + $2.codigo + "\" " + parametros_printf + ");\n" ; parametros_printf = ""; } ;
@@ -314,9 +317,9 @@ lista_variables_constantes  : lista_variables_constantes COMA ID { TS_subprog_in
 										  | ;
 
 lista_expresiones_o_cadena  : lista_expresiones_o_cadena COMA CADENA {$$.codigo += $3.lexema ;}
-									 	  | lista_expresiones_o_cadena COMA ID {  $$.codigo = $1.codigo + tipoAprintf($3.tipo); parametros_printf += ", " + $3.lexema; }
+									 	  | lista_expresiones_o_cadena COMA expresion {  $$.codigo = $1.codigo + tipoAprintf($3.tipo); parametros_printf += ", " + $3.lexema; }
                                 | CADENA 		{ $$.codigo = $1.lexema; }
-                                | ID { $$.codigo =  tipoAprintf($1.tipo); parametros_printf = ", " +  $1.lexema;  };
+                                | expresion { $$.codigo =  tipoAprintf($1.tipo); parametros_printf = ", " +  $1.lexema;  };
 
 %%
 
@@ -986,7 +989,11 @@ string generarCodigoVariable(atributos tipo, atributos identificador) {
 	string resultado = "";
 
 
-	resultado += tipoAtipoC(tipo.tipo);
+	if ( listaTmp ) {
+		resultado += "Lista ";
+	} else {
+		resultado += tipoAtipoC(tipo.tipo);
+	}
 
 
 	resultado += identificador.lexema;
@@ -1048,10 +1055,19 @@ string generarCodigoOPUnarios( atributos operador, atributos * der) {
 
 	if( operador.atrib == 0  ) {
 		tipo_resultado = "bool ";
+		der->codigo = tipo_resultado + " " + resultado + ";\n";
+		der->codigo += resultado + " = " + operador.lexema + " " + der->lexema + " ; \n";
+	} else if ( operador.atrib == 1 ) {
+		tipo_resultado = "int ";
+		der->codigo = tipo_resultado + " " + resultado + ";\n";
+		der->codigo += resultado +  " = " + "longitudLista(&" + der->lexema + ");\n";
+
+	} else if ( operador.atrib == 2 ) {
+		tipo_resultado = tipoAtipoC(der->tipo);
+		der->codigo = tipo_resultado + " " + resultado + ";\n";
+		der->codigo += resultado + " = elementoActual(&" + der->lexema + ");\n";
 	}
 
-	der->codigo += tipo_resultado + " " + resultado + ";\n";
-	der->codigo += resultado + " = " + operador.lexema + " " + der->lexema + " ; \n";
 
 	return resultado;
 

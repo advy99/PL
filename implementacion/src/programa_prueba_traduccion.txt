@@ -1,10 +1,7 @@
 principal(){
 
-	variable entero a = 10;
+	variable listade entero a;
 
-	mientras ( a > 0 ) {
-		salida a, '\n';
-		a = a - 1;
-	}
+	a = a++3@0;
 
 }
