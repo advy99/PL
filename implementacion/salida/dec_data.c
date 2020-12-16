@@ -16,29 +16,6 @@ struct lista_h {
 typedef struct lista_h Lista;
 typedef struct nodo Nodo;
 
-void sumaLista(Lista * lista, float valor) {
-	for ( unsigned int i = 0; i < lista->longitud; i++ ){
-		lista->elementos->elemento += valor;
-	}
-}
-
-void restaLista(Lista * lista, float valor) {
-	for ( unsigned int i = 0; i < lista->longitud; i++ ){
-		lista->elementos->elemento -= valor;
-	}
-}
-
-void multiplicaLista(Lista * lista, float valor) {
-	for ( unsigned int i = 0; i < lista->longitud; i++ ){
-		lista->elementos->elemento *= valor;
-	}
-}
-
-void divideLista(Lista * lista, float valor) {
-	for ( unsigned int i = 0; i < lista->longitud; i++ ){
-		lista->elementos->elemento /= valor;
-	}
-}
 
 void irAPosicion(Lista * lista, unsigned int posicion) {
 
@@ -84,6 +61,8 @@ void insertarElemento(Lista * lista, float elemento, unsigned int posicion) {
 	// reservamos memoria para el nuevo nodo
 	Nodo * nuevo_nodo = (Nodo *) malloc(sizeof(Nodo));
 
+	nuevo_nodo->anterior = NULL;
+	nuevo_nodo->siguiente = NULL;
 	nuevo_nodo->elemento = elemento;
 
 	// es el primero que insertamos
@@ -111,48 +90,92 @@ void insertarElemento(Lista * lista, float elemento, unsigned int posicion) {
 
 }
 
+Lista sumaLista(Lista * lista, float valor) {
+	Lista resultado;
 
-void eliminarElemento(Lista * lista, unsigned int posicion) {
-	unsigned int pos_actual = lista->posicion_actual;
-	irAPosicion(lista, posicion);
-
-	Nodo * actual = lista->elementos;
-
-	actual->anterior->siguiente = actual->siguiente;
-	actual->siguiente->anterior = actual->anterior;
-
-
-	lista->longitud--;
-
-	// si estabamos en el ultimo elementos, nos quedamos en el nuevo ultimo
-	if ( lista->longitud <= pos_actual ) {
-		pos_actual = lista->longitud - 1;
-		lista->elementos = actual->anterior;
-	} else {
-		irAPosicion(lista, pos_actual);
+	for ( unsigned int i = 0; i < lista->longitud; i++ ){
+		insertarElemento(&resultado, elementoPosicion(lista, i) + valor, i);
 	}
 
-	free(actual);
+	return resultado;
+}
 
+Lista restaLista(Lista * lista, float valor) {
+	Lista resultado;
+
+	for ( unsigned int i = 0; i < lista->longitud; i++ ){
+		insertarElemento(&resultado, elementoPosicion(lista, i) - valor, i);
+	}
+
+	return resultado;
+}
+
+
+Lista multiplicaLista(Lista * lista, float valor) {
+	Lista resultado;
+
+	for ( unsigned int i = 0; i < lista->longitud; i++ ){
+		insertarElemento(&resultado, elementoPosicion(lista, i) * valor, i);
+	}
+
+	return resultado;
+}
+
+Lista divideLista(Lista * lista, float valor) {
+	Lista resultado;
+
+	for ( unsigned int i = 0; i < lista->longitud; i++ ){
+		insertarElemento(&resultado, elementoPosicion(lista, i) / valor, i);
+	}
+
+	return resultado;
+}
+
+Lista eliminarElemento(Lista * lista, unsigned int posicion) {
+
+	Lista resultado;
+
+	for ( unsigned int i = 0; i < posicion; i++ ){
+		insertarElemento(&resultado, elementoPosicion(lista, i), i);
+	}
+
+	for ( unsigned int i = posicion + 1; i < lista->longitud; i++){
+		insertarElemento(&resultado, elementoPosicion(lista, i), i);
+	}
+
+	return resultado;
 
 }
 
 
-void concatenaListas(Lista * l1, Lista * l2, Lista * resultado) {
+Lista concatenaListas(Lista * l1, Lista * l2) {
+	Lista resultado;
 
 	for ( unsigned int i = 0; i < l1->longitud; i++ ) {
-		insertarElemento(resultado, elementoPosicion(l1, i), resultado->longitud);
+		insertarElemento(&resultado, elementoPosicion(l1, i), resultado.longitud);
 	}
 
 	for ( unsigned int i = 0; i < l2->longitud; i++ ) {
-		insertarElemento(resultado, elementoPosicion(l2, i), resultado->longitud);
+		insertarElemento(&resultado, elementoPosicion(l2, i), resultado.longitud);
 	}
 
-	resultado->longitud = l1->longitud + l2->longitud;
+	resultado.longitud = l1->longitud + l2->longitud;
 
-	irAPosicion(resultado, 0);
+	irAPosicion(&resultado, 0);
 	irAPosicion(l1, l1->posicion_actual);
 	irAPosicion(l2, l2->posicion_actual);
+
+	return resultado;
+}
+
+Lista sublista(Lista * lista, unsigned int posicion){
+	Lista resultado;
+
+	for ( unsigned int i = 0; i < posicion; i++ ) {
+		insertarElemento(&resultado, elementoPosicion(lista, i), resultado.longitud);
+	}
+
+	return resultado;
 
 }
 
@@ -181,4 +204,11 @@ void retrocederLista(Lista * lista) {
 	lista->elementos = lista->elementos->anterior;
 }
 
+unsigned int longitudLista(Lista * l){
+	return l->longitud;
+}
+
+float elementoActual(Lista * l ){
+	return elementoPosicion(l, l->posicion_actual);
+}
 
