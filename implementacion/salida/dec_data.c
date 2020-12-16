@@ -17,35 +17,42 @@ typedef struct lista_h Lista;
 typedef struct nodo Nodo;
 
 
-void irAPosicion(Lista * lista, unsigned int posicion) {
+void irAPosicion(Lista * lista, int posicion) {
 
-	while (lista->elementos->anterior != NULL) {
-		lista->elementos = lista->elementos->anterior;
+	if ( lista->elementos != NULL ){
+		while (lista->elementos->anterior != NULL) {
+			lista->elementos = lista->elementos->anterior;
+		}
+
+		for (  int i = 0; i < posicion; i++ ){
+			lista->elementos = lista->elementos->siguiente;
+		}
+
+		lista->posicion_actual = posicion;
+
 	}
-
-	for ( unsigned int i = 0; i < posicion; i++ ){
-		lista->elementos = lista->elementos->siguiente;
-	}
-
-	lista->posicion_actual = posicion;
 
 }
 
 float elementoPosicion(Lista * lista, unsigned int posicion) {
 
 	unsigned int pos_actual = lista->posicion_actual;
-	float resultado;
+	float resultado = 0;
 
-	while (lista->elementos->anterior != NULL) {
-		lista->elementos = lista->elementos->anterior;
+	if ( lista->elementos != NULL ){
+		while (lista->elementos->anterior != NULL) {
+			lista->elementos = lista->elementos->anterior;
+
+		}
+		for ( unsigned int i = 0; i < posicion; i++ ){
+			lista->elementos = lista->elementos->siguiente;
+		}
+
+		resultado = lista->elementos->elemento;
+
 
 	}
 
-	for ( unsigned int i = 0; i < posicion; i++ ){
-		lista->elementos = lista->elementos->siguiente;
-	}
-
-	resultado = lista->elementos->elemento;
 
 	irAPosicion(lista, pos_actual);
 
@@ -56,7 +63,7 @@ float elementoPosicion(Lista * lista, unsigned int posicion) {
 void insertarElemento(Lista * lista, float elemento, unsigned int posicion) {
 
 	unsigned int pos_actual = lista->posicion_actual;
-	irAPosicion(lista, posicion);
+	irAPosicion(lista, posicion - 1);
 
 	// reservamos memoria para el nuevo nodo
 	Nodo * nuevo_nodo = (Nodo *) malloc(sizeof(Nodo));
@@ -69,17 +76,15 @@ void insertarElemento(Lista * lista, float elemento, unsigned int posicion) {
 	if ( lista->elementos == NULL ){
 		lista->elementos = nuevo_nodo;
 	} else {
-		Nodo * anterior = lista->elementos->anterior;
-		anterior->siguiente = nuevo_nodo;
-		nuevo_nodo->anterior = anterior;
-
 		Nodo * siguiente = lista->elementos->siguiente;
 
-		// si no lo insertamos al final
 		if ( siguiente != NULL ) {
-			nuevo_nodo->siguiente = siguiente;
 			siguiente->anterior = nuevo_nodo;
+			nuevo_nodo->siguiente = siguiente;
 		}
+
+		nuevo_nodo->anterior = lista->elementos;
+		lista->elementos->siguiente = nuevo_nodo;
 
 	}
 
@@ -179,29 +184,33 @@ Lista sublista(Lista * lista, unsigned int posicion){
 
 }
 
-void liberarMemoria(Lista * l1, unsigned int posicion) {
+void liberarMemoria(Lista * l1) {
 
-	irAPosicion(l1, posicion);
+	irAPosicion(l1, 0);
 
-	while ( l1->elementos->siguiente != NULL ){
+	while ( l1->elementos != NULL ){
 		Nodo * actual = l1->elementos;
 		l1->elementos = l1->elementos->siguiente;
 		free(actual);
+
 	}
 
-	// si liberamos toda la lista
-	if ( posicion == 0 ){
-		free(l1->elementos);
-	}
+	l1->elementos = NULL;
+	l1->longitud = 0;
+	l1->posicion_actual = 0;
+
+
 
 }
 
 void avanzarLista(Lista * lista) {
 	lista->elementos = lista->elementos->siguiente;
+	lista->posicion_actual++;
 }
 
 void retrocederLista(Lista * lista) {
 	lista->elementos = lista->elementos->anterior;
+	lista->posicion_actual--;
 }
 
 unsigned int longitudLista(Lista * l){
@@ -211,4 +220,27 @@ unsigned int longitudLista(Lista * l){
 float elementoActual(Lista * l ){
 	return elementoPosicion(l, l->posicion_actual);
 }
+
+void copiarLista(Lista * origen, Lista * destino){
+	liberarMemoria(destino);
+
+	for ( unsigned int i = 0; i < origen->longitud; i++ ){
+		insertarElemento(destino, elementoPosicion(origen, i), i);
+	}
+
+}
+
+Lista inserta(Lista * lista, float elemento, unsigned int posicion){
+	Lista resultado = {NULL, 0, 0};
+
+	copiarLista(lista, &resultado);
+
+	insertarElemento(&resultado, elemento, posicion);
+
+	return resultado;
+
+}
+
+
+
 
