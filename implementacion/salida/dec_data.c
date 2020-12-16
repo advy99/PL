@@ -173,3 +173,12 @@ void liberarMemoria(Lista * l1, unsigned int posicion) {
 
 }
 
+void avanzarLista(Lista * lista) {
+	lista->elementos = lista->elementos->siguiente;
+}
+
+void retrocederLista(Lista * lista) {
+	lista->elementos = lista->elementos->anterior;
+}
+
+
