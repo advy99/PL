@@ -3,7 +3,12 @@ principal() {
 	variable entero n, sol;
 
 	entero f( entero x ) {
-		si ( x == 1 ) {
+
+		booleano esUno( entero z ) {
+			devuelve z == 1;
+		}
+
+		si ( esUno (x) ) {
 			devuelve 1;
 		} sino {
 			variable entero siguiente = x - 1;
