@@ -1034,15 +1034,48 @@ string generarCodigoOPBinarios(atributos * izq, atributos operador, atributos de
 	string resultado = generarVariableTemporal();
 
 	string tipo_resultado;
-	if ( (operador.atrib >= 0 && operador.atrib <= 2) || operador.lexema == "-" ) {
-		tipo_resultado = tipoAtipoC(izq->tipo);
-	} else if( operador.atrib >= 3 && operador.atrib <= 11  ) {
-		tipo_resultado = "bool ";
+
+	if ( izq->lista || der.lista ) {
+
+		izq->codigo = der.codigo;
+		izq->codigo += "Lista " + resultado + "; \n";
+
+		string operacion;
+
+		if ( operador.atrib == 0 ){
+			operacion = "sumaLista";
+		} else if ( operador.atrib == 1 ) {
+			operacion = "multiplicaLista";
+		} else if (operador.atrib == 2) {
+			operacion = "divideLista";
+		} else {
+			operacion = "restaLista";
+		}
+
+
+		if ( izq->lista ) {
+			izq->codigo += resultado + " = " + operacion + "(&" + izq->lexema + ", &" + der.lexema + ") ; \n";
+		} else {
+			izq->codigo += resultado + " = " + operacion + "(&" + der.lexema + ", &" + izq->lexema + ") ; \n";
+
+		}
+
+
+	} else {
+		if ( (operador.atrib >= 0 && operador.atrib <= 2) || operador.lexema == "-" ) {
+			tipo_resultado = tipoAtipoC(izq->tipo);
+		} else if( operador.atrib >= 3 && operador.atrib <= 11  ) {
+			tipo_resultado = "bool ";
+		}
+
+		izq->codigo = der.codigo;
+		izq->codigo += tipo_resultado + " " + resultado + "; \n";
+		izq->codigo += resultado + " = " + izq->lexema + " " + operador.lexema + " " + der.lexema + " ; \n";
+
+
 	}
 
-	izq->codigo = der.codigo;
-	izq->codigo += tipo_resultado + " " + resultado + "; \n";
-	izq->codigo += resultado + " = " + izq->lexema + " " + operador.lexema + " " + der.lexema + " ; \n";
+
 
 	return resultado;
 
