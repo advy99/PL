@@ -56,7 +56,7 @@ typedef struct {
 	string lexema = "";
 	bool lista = false;
 	dtipo tipo = desconocido;
-	bool es_constante = false;
+;	bool es_constante = false;
 	string codigo = "";
 } atributos;
 
@@ -437,8 +437,8 @@ void TS_VaciarENTRADAS(){
 		TOPE--;
 	}
 
-	// tambien eliminamos la marca
-	TOPE--;
+	// tambien eliminamos la marca y la cambiamos por el fin de funcion
+	TS[TOPE - 1].entrada = fin_bloque;
 
 }
 
@@ -757,9 +757,12 @@ void comprobarDevuelveSubprog(atributos atrib) {
 
 	int entrada = TOPE - 1;
 
+	bool parar = TS[entrada].entrada == marca && (TS[entrada - 1].entrada == parametro_formal || TS[entrada - 1].entrada == funcion);
+
 	// nos vamos hasta la ultima marca
-	while ( entrada > 0 && TS[entrada].entrada != marca) {
+	while ( entrada > 0 && !parar )  {
 		entrada--;
+		parar = TS[entrada].entrada == marca && (TS[entrada - 1].entrada == parametro_formal || TS[entrada - 1].entrada == funcion);
 	}
 
 	// nos vamos a la funcion de justo antes la marca

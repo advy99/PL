@@ -13,7 +13,9 @@ typedef enum {
 	// si es variable
 	variable,
 	// si es un parametro formal
-	parametro_formal
+	parametro_formal,
+	// fin funcion
+	fin_bloque
 } tipoEntrada;
 
 
